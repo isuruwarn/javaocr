@@ -2,11 +2,14 @@ package com.ocr.core;
 
 import java.util.ArrayList;
 
+
+/**
+ * Is the rectangular bounds of a character. Also holds the bitmap representation of the character.
+ * 
+ * @author isuru
+ *
+ */
 public class Char extends Item {
-	
-	/*
-	Is the rectangular bounds of a character. Also holds the bitmap representation of the character. 
-	*/
 	
 	private int charNumber;
 	private boolean whiteSpace;

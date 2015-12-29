@@ -6,55 +6,53 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 
-
-/*
-
-Quick overview:
-
-1. Create bitmap of image, where black parts are represented using 1 and white parts using 0
-2. Scan image horizontally to determine the lines in image
-3. Scan each line vertically to determine the characters contained in it
-4. Break down each character into a grid (block representation) of 1s and 0s
-5. Identify character by looking up the block representations saved in file for any matches
-
-
-
-
-Steps:
-
-1. Create bitmap of image
-	1a. Read image using javax.imageio.ImageIO.read().
-	1b. Find height and width and use 2 nested for() loops to read RGB value of each pixel.
-	1c. Calculate average RGB of each pixel.
-	1d. Each pixels will be represented in a binary format using a 2D int array. Dark colored 
-		pixels (avgRGB < BW_THREASHOLD) will be saved as 1, and white pixels will be saved as 0.
-		
-2. While carrying out step 1, we will try to separate out the lines in the image
-	2a. Since we are scanning the image horizontally, if the value representing a pixel 
-		is 1, we have come across a line. If so, we add it to an ArrayList.
-	2b. When number of lines exceed MIN_BLANKLINE_HEIGHT, we mark it as a blank line.
-	
-3. Scan each line vertically to determine the characters contained in it.
-
-4. Break down each character into a grid (block representation) of 1s and 0s, which contains a fixed 
-	number of blocks vertically (BLOCKS_PER_CHAR), and a variable number of blocks horizontally.
-
-5. Identify character by looking up the block representations saved in file for any matches
-
-6. Update StringBuilder object accordingly
-
-7. Display result
-
-
-
-Constraints: 
-
-* Letters need to be oriented perfectly horizontally
-* Minimum character height is 15 pixels
-* Letters have to be in dark colors
-
-
-*/
+/**
+ * Quick overview:
+ * 
+ * 1. Create bitmap of image, where black parts are represented using 1 and white parts using 0
+ * 2. Scan image horizontally to determine the lines in image
+ * 3. Scan each line vertically to determine the characters contained in it
+ * 4. Break down each character into a grid (block representation) of 1s and 0s
+ * 5. Identify character by looking up the block representations saved in file for any matches
+ * 
+ * 
+ * Steps:
+ * 
+ * 1. Create bitmap of image
+ * 	1a. Read image using javax.imageio.ImageIO.read().
+ * 	1b. Find height and width and use 2 nested for() loops to read RGB value of each pixel.
+ * 	1c. Calculate average RGB of each pixel.
+ * 	1d. Each pixels will be represented in a binary format using a 2D int array. Dark colored 
+ * 		pixels (avgRGB < BW_THREASHOLD) will be saved as 1, and white pixels will be saved as 0.
+ * 		
+ * 2. While carrying out step 1, we will try to separate out the lines in the image
+ * 	2a. Since we are scanning the image horizontally, if the value representing a pixel 
+ * 		is 1, we have come across a line. If so, we add it to an ArrayList.
+ * 	2b. When number of lines exceed MIN_BLANKLINE_HEIGHT, we mark it as a blank line.
+ * 	
+ * 3. Scan each line vertically to determine the characters contained in it.
+ * 
+ * 4. Break down each character into a grid (block representation) of 1s and 0s, which contains a fixed 
+ * 	number of blocks vertically (BLOCKS_PER_CHAR), and a variable number of blocks horizontally.
+ * 
+ * 5. Identify character by looking up the block representations saved in file for any matches
+ * 
+ * 6. Update StringBuilder object accordingly
+ * 
+ * 7. Display result
+ * 
+ * 
+ * 
+ * Constraints:
+ * 1. Letters need to be oriented perfectly horizontally
+ * 2. Minimum character height is 15 pixels
+ * 3. Letters have to be in dark colors
+ * 
+ *  
+ * 
+ * @author isuru
+ *
+ */
 
 public class Scanner {
 	

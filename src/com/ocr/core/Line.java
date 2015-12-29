@@ -2,11 +2,14 @@ package com.ocr.core;
 
 import java.util.ArrayList;
 
+
+/**
+ * Is the rectangular bounds of a line. Also holds a list of chars contained in the line
+ * 
+ * @author isuru
+ *
+ */
 public class Line extends Item {
-	
-	/*
-	Is the rectangular bounds of a line. Also holds a list of chars contained in the line
-	*/
 	
 	private int lineNumber;
 	private boolean blankLine;

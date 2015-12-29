@@ -1,15 +1,17 @@
 package com.ocr.core;
 
+/**
+ * Represents an item in the image
+ * 
+ * @author isuru
+ *
+ */
 public abstract class Item {
 	
 	private int x;
 	private int y;
 	private int w;
 	private int h;
-	private int startI;
-	private int startJ;
-	private int endI;
-	private int endJ;
 	
 	public int getX() {
 		return x;
@@ -34,30 +36,6 @@ public abstract class Item {
 	}
 	public void setH(int h) {
 		this.h = h;
-	}
-	public int getStartI() {
-		return startI;
-	}
-	public void setStartI(int startI) {
-		this.startI = startI;
-	}
-	public int getStartJ() {
-		return startJ;
-	}
-	public void setStartJ(int startJ) {
-		this.startJ = startJ;
-	}
-	public int getEndI() {
-		return endI;
-	}
-	public void setEndI(int endI) {
-		this.endI = endI;
-	}
-	public int getEndJ() {
-		return endJ;
-	}
-	public void setEndJ(int endJ) {
-		this.endJ = endJ;
 	}
 	
 }
