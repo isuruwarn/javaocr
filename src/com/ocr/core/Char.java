@@ -14,7 +14,7 @@ public class Char extends Item {
 	private int charNumber;
 	private boolean whiteSpace;
 	private String name;
-	private ArrayList<Integer> sequence = new ArrayList<Integer>();
+	private ArrayList<Byte> sequence = new ArrayList<Byte>();
 	
 
 	public Char() {
@@ -48,21 +48,35 @@ public class Char extends Item {
 		this.whiteSpace = whiteSpace;
 	}
 
-	public ArrayList<Integer> getSequence() {
+	public ArrayList<Byte> getSequence() {
 		return sequence;
 	}
 
-	public void setSequence(ArrayList<Integer> sequence) {
+	public void setSequence(ArrayList<Byte> sequence) {
 		this.sequence = sequence;
 	}
 	
 	// for debugging only
+	/*
 	public void printSequence( int noOfHBlocks ) {
 		for( int i=0; i<sequence.size(); i++ ) {
 			System.out.print( sequence.get(i) + " ");
 			if( i % noOfHBlocks == 0 ) {
 				System.out.println();
 			}
+		}
+	}
+	*/
+	
+	public void printSequence() {
+		String [] sb = new String [Scanner.BLOCKS_PER_CHAR];
+		for( int i=0; i<sequence.size(); i++ ) {
+			int j = i % Scanner.BLOCKS_PER_CHAR;
+			if( sb[j] == null ) sb[j] = "";
+			sb[j] += sequence.get(i) + " ";
+		}
+		for(String s : sb) {
+			System.out.println(s);
 		}
 	}
 	

@@ -1,9 +1,11 @@
 package com.ocr.core;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+
 
 
 /**
@@ -53,13 +55,12 @@ import javax.imageio.ImageIO;
  * @author isuru
  *
  */
-
 public class Scanner {
 	
-	private static final int BW_THREASHOLD = -11200000;
-	private static final int MIN_BLANKLINE_HEIGHT = 30;
-	private static final int MIN_WHITESPACE_WIDTH = 10;
-	private static final int BLOCKS_PER_CHAR = 15;
+	public static final int BW_THREASHOLD = -11200000;
+	public static final int MIN_BLANKLINE_HEIGHT = 30;
+	public static final int MIN_WHITESPACE_WIDTH = 10;
+	public static final int BLOCKS_PER_CHAR = 15;
 	
 	private int [][] bitmap;
 	private BufferedImage image;
@@ -114,7 +115,7 @@ public class Scanner {
 			        }
 			        image.setRGB( j, i, avgRGB ); // reset pixel color
 			        
-			        // represent each pixel as 0 or 1, where 0 is white space and 1 is black (or part of character)
+			        // Step 1: represent each pixel as 0 or 1, where 0 is white space and 1 is black (or part of character)
 					int b = getBinaryPixelValue( image.getRGB( j, i ) );
 			        bitmap[i][j] = b;
 			        
@@ -124,6 +125,7 @@ public class Scanner {
 			        }
 				}
 				
+				// Step 2: Scan image horizontally to determine the lines in image
 				if(insideLine) {
 					
 					lineHeight++;
@@ -155,8 +157,11 @@ public class Scanner {
 		        		l.setH(lineHeight);
 		        		lines.add( lineNumber, l );
 		        		
+		        		// Step 3: Scan each line vertically to determine the characters
 		        		processLine(l);
+		        		
 		        		//writeCharImages( l, imgFilePath ); // for debugging
+		        		
 		        		lineNumber++;
 					}
 					lineHeight = 0;
@@ -174,7 +179,11 @@ public class Scanner {
 	
 	
 	
-	// capture the characters found on a single line, including spaces, and add to Char array of line
+	/**
+	 * Capture the characters found on a single line, including spaces, and add to Char array of line
+	 * 
+	 * @param l
+	 */
 	private void processLine( Line l ) {
 		
 		int charWidth = 0;
@@ -238,7 +247,9 @@ public class Scanner {
 	
 	
 	
-	
+	/**
+	 * 
+	 */
 	private void process() {
 		
 		for( Line l: lines ) {
@@ -261,49 +272,130 @@ public class Scanner {
 					continue;
 				}
 				
-				// map each character into a grid, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR), 
-				// and a variable number of blocks horizontally
-				processChar(c);
+				// Step 4: map each character into a grid of 1s and 0s
+				mapToGrid(c);
 			}
 			
 		}
 		
-		/*
 		// for debugging
-		Char c = lines.get(1).getChars().get(11);
-		printBitmap( c.getY(), c.getY()+c.getH(), c.getX(), c.getX()+c.getW() ); // for debugging
-		processChar(c);
-		*/
+		Char c = lines.get(1).getChars().get(1);
+		//printBitmap( c.getY(), c.getY()+c.getH(), c.getX(), c.getX()+c.getW() ); // for debugging
+		c.printSequence();
+	
 	}
 	
 	
 	
-	private void processChar( Char c ) {
+	
+	
+	/**
+	 * Map each character into a grid, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR),
+	 * and a variable number of blocks horizontally. For example, A might be represented as:
+	 * 
+	 * 	0 0 0 0 0 0 0 0 
+	 *	0 0 0 1 1 0 0 0 
+	 *	0 0 0 1 1 1 0 0 
+	 *	0 0 0 1 0 1 0 0 
+	 *	0 0 1 1 0 1 1 0 
+	 *	0 0 1 1 0 1 1 0 
+	 *	0 1 1 1 1 1 1 0 
+	 *	0 1 1 1 1 1 1 1 
+	 *	0 1 0 0 0 0 1 1 
+	 *	1 1 0 0 0 0 0 1 
+	 *	1 1 0 0 0 0 0 1 
+	 *	0 0 0 0 0 0 0 0 
+	 *	0 0 0 0 0 0 0 0 
+	 *	0 0 0 0 0 0 0 0 
+	 *	0 0 0 0 0 0 0 0
+	 * 
+	 * @param c
+	 */
+	private void mapToGrid( Char c ) {
 		
 		int blockNumber = 0;
 		int blockLength = (int) Math.round( (double) c.getH() / BLOCKS_PER_CHAR );
 		int noOfHBlocks = c.getW() / blockLength;
 		int noOfVBlocks = BLOCKS_PER_CHAR;
 		
+		// for debugging only
+		//String [] str = new String [BLOCKS_PER_CHAR];
 		//System.out.format("charX=%d, charY=%d, charWidth=%d, charHeight=%d, blockLength=%d, noOfHBlocks=%d \n", c.getX(), c.getY(), c.getW(), c.getH(), blockLength, noOfHBlocks );
 		
 		int blockStartX = c.getX();
 		int blockStartY = c.getY();
-		int blockEndX = 0;
-		if( ( blockEndX + blockLength ) <= ( c.getX() + c.getW() ) ) {
-			blockEndX = blockEndX + blockLength;
-		} else {
+		int blockEndX = c.getX() + blockLength;
+		if( blockEndX > c.getX() + c.getW() ) {
 			blockEndX = c.getX() + c.getW();
 		}
 		int blockEndY = c.getY() + blockLength;
 		
+		// move through grid vertically
+		for( int h=0; h<noOfHBlocks; h++ ) {
+			
+			for( int v=0; v<noOfVBlocks; v++ ) {
+				
+				// for debugging only
+				//if( str[v] == null ) str[v] = "";
+				//str[v] += String.format("%d (%d,%d),(%d,%d) ", blockNumber, blockStartY, blockStartX, blockEndY, blockEndX );
+				
+				boolean whiteSpace = true;
+				for( int x=blockStartX; x<blockEndX; x++ ) {
+					for( int y=blockStartY; y<blockEndY; y++ ) {					
+						int b = bitmap[y][x];
+						if( b != 0 ) {
+							whiteSpace = false;
+							break;
+						}
+					}
+					if(!whiteSpace) break;
+				}
+				if(whiteSpace) {
+					c.getSequence().add( blockNumber, (byte) 0 );
+				} else {
+					c.getSequence().add( blockNumber, (byte) 1 );
+				}
+				
+				// update vertical pointers
+				blockStartY = blockStartY + blockLength;
+				if( ( blockEndY + blockLength ) <= ( c.getY() + c.getH() ) ) {
+					blockEndY = blockEndY + blockLength;
+				} else {
+					blockEndY = c.getY() + c.getH();
+				}
+				blockNumber++;
+			}
+			
+			// reset vertical pointers
+			blockStartY = c.getY();
+			blockEndY = c.getY() + blockLength;
+			
+			// update horizontal pointers
+			blockStartX = blockStartX + blockLength;
+			if( ( blockEndX + blockLength ) <= ( c.getX() + c.getW() ) ) {
+				blockEndX = blockEndX + blockLength;
+			} else {
+				blockEndX = c.getX() + c.getW();
+			}
+			
+		}
+		
+		// for debugging
+		/*
+		for(String s : str) {
+			System.out.println(s);
+		}
+		*/
+		
+		
+		/*
+		// move through grid horizontally
 		for( int v=0; v<noOfVBlocks; v++ ) {
 			
 			for( int h=0; h<noOfHBlocks; h++ ) {
 				
 				//System.out.format("%d (%d,%d),(%d,%d) ", blockNumber, blockStartY, blockStartX, blockEndY, blockEndX );
 				
-				// do processing
 				boolean whiteSpace = true;
 				for( int y=blockStartY; y<blockEndY; y++ ) {
 					for( int x=blockStartX; x<blockEndX; x++ ) {
@@ -346,6 +438,7 @@ public class Scanner {
 		}
 		
 		//c.printSequence(noOfHBlocks);
+		*/
 		
 	}
 	
@@ -353,6 +446,7 @@ public class Scanner {
 	
 	/**
 	 * Takes RGB value of pixel and returns 0 for whitespace, 1 for any other color
+	 * 
 	 * @param pixelValue
 	 * @return 0 or 1
 	 */
@@ -370,9 +464,10 @@ public class Scanner {
 	
 	
 	/**
-	 * Thanks to http://www.dyclassroom.com/image-processing-project/how-to-convert-a-color-image-into-grayscale-image-in-java
-	 * 
 	 * Takes RGB value of a pixel and returns an average value
+	 * 
+	 * Thanks to - http://www.dyclassroom.com/image-processing-project/how-to-convert-a-color-image-into-grayscale-image-in-java
+	 * 
 	 * @param pixelValue
 	 * @return int representing average RGB value
 	 */
@@ -389,6 +484,14 @@ public class Scanner {
 	
 	
 	
+	/**
+	 * Prints a subset of the main bitmap[][]
+	 * 
+	 * @param startY
+	 * @param endY
+	 * @param startX
+	 * @param endX
+	 */
 	public void printBitmap( int startY, int endY, int startX, int endX ) {
 		for( int i=startY; i<endY; i++ ) {
 			for(int j=startX; j<endX; j++ ) {
@@ -400,6 +503,12 @@ public class Scanner {
 	
 	
 	
+	/**
+	 * Outputs all <Line> objects held lines arrayList as image files. 
+	 * Useful for debugging.
+	 * 
+	 * @param imgFilePath
+	 */
 	public void writeLineImages( String imgFilePath ) {
 		try {
 			for(Line l: lines) {			
@@ -414,7 +523,13 @@ public class Scanner {
 	}
 	
 	
-	
+	/**
+	 * Outputs all <Char> objects held in the given <Line> object as image files.
+	 * Useful for debugging.
+	 * 
+	 * @param line
+	 * @param imgFilePath
+	 */
 	public void writeCharImages( Line line, String imgFilePath ) {
 		try {
 			for(Char c: line.getChars() ) {
