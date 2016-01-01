@@ -56,17 +56,6 @@ public class Char extends Item {
 		this.sequence = sequence;
 	}
 	
-	// for debugging only
-	/*
-	public void printSequence( int noOfHBlocks ) {
-		for( int i=0; i<sequence.size(); i++ ) {
-			System.out.print( sequence.get(i) + " ");
-			if( i % noOfHBlocks == 0 ) {
-				System.out.println();
-			}
-		}
-	}
-	*/
 	
 	public void printSequence() {
 		String [] sb = new String [Scanner.BLOCKS_PER_CHAR];
@@ -78,6 +67,23 @@ public class Char extends Item {
 		for(String s : sb) {
 			System.out.println(s);
 		}
+	}
+	
+	
+	
+	
+	public String getCharCode() {
+		String s = "";
+		String charCode = "";
+		for( int i=0; i<sequence.size(); i++ ) {
+			s += sequence.get(i);
+			if( (i+1) % Scanner.BLOCKS_PER_CHAR == 0 ) {
+				int n = Integer.parseInt( s, 2 );
+				charCode += n;
+				s = "";
+			}
+		}
+		return charCode;
 	}
 	
 }

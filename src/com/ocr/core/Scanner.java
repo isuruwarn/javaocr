@@ -1,8 +1,19 @@
 package com.ocr.core;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
@@ -10,12 +21,12 @@ import javax.imageio.ImageIO;
 
 /**
  * Quick overview:
- * 
  * 1. Create bitmap of image, where black parts are represented using 1 and white parts using 0
  * 2. Scan image horizontally to determine the lines in image
  * 3. Scan each line vertically to determine the characters contained in it
  * 4. Break down each character into a grid (block representation) of 1s and 0s
  * 5. Identify character by looking up the block representations saved in file for any matches
+ * 
  * 
  * 
  * Steps:
@@ -47,15 +58,18 @@ import javax.imageio.ImageIO;
  * 
  * Constraints:
  * 1. Letters need to be oriented perfectly horizontally
- * 2. Minimum character height is 15 pixels
- * 3. Letters have to be in dark colors
+ * 2. Recognition algorithm is dependent on font type. New font types will have to be mapped.
+ * 3. Unusually tall letters might mislead recognition algorithm
+ * 4. Minimum character height is 15 pixels
+ * 5. Letters have to be in dark colors
  * 
- *  
+ * 
  * 
  * @author isuru
  *
  */
 public class Scanner {
+	
 	
 	public static final int BW_THREASHOLD = -11200000;
 	public static final int MIN_BLANKLINE_HEIGHT = 30;
@@ -63,29 +77,37 @@ public class Scanner {
 	public static final int BLOCKS_PER_CHAR = 15;
 	
 	private int [][] bitmap;
-	private BufferedImage image;
-	private ArrayList<Line> lines  = new ArrayList<Line>();
-	private StringBuilder sb = new StringBuilder();
+	private Properties charMap;
 	
 	
 	
 	public static void main(String[] args) {
-
-		String imgFilePath = "files/";
-		String imgFileName = "img9.png";
+		
+		String imgFile = "files/img9.png";
+		String mapFile = "files/eng15.map";
 		
 		Scanner scn = new Scanner();
-		scn.init( imgFilePath, imgFileName );
-		scn.process();
+		BufferedImage image = scn.loadImage( imgFile );
+		ArrayList<Line> lines = scn.init( image );
+		StringBuilder sb = scn.readCharacters( lines, mapFile ); 
+		System.out.println(sb);
+		
 	}
 	
-
-
-	public void init( String imgFilePath, String imgFileName ) {
+	
+	
+	
+	/**
+	 * Steps 1, 2 and 3
+	 * 
+	 * @param image
+	 * @return
+	 */
+	public ArrayList<Line> init( BufferedImage image ) {
+		
+		ArrayList<Line> lines  = new ArrayList<Line>();
 		
 		try {
-			File input = new File( imgFilePath + imgFileName );
-			image = ImageIO.read(input);
 			int height = image.getHeight();
 			int width = image.getWidth();
 			bitmap = new int [height] [width];
@@ -139,7 +161,7 @@ public class Scanner {
 		        		l.setBlankLine(true);
 		        		lines.add( lineNumber, l );
 		        		
-		        		//writeCharImages( l, imgFilePath ); // for debugging only
+		        		//writeCharImages( lines, l, "test/" ); // for debugging only
 		        		lineNumber++;
 					}
 					blankLineHeight = 0;
@@ -160,7 +182,7 @@ public class Scanner {
 		        		// Step 3: Scan each line vertically to determine the characters
 		        		processLine(l);
 		        		
-		        		//writeCharImages( l, imgFilePath ); // for debugging
+		        		//writeCharImages( lines, l, "test/" ); // for debugging
 		        		
 		        		lineNumber++;
 					}
@@ -168,11 +190,13 @@ public class Scanner {
 				}
 			}
 			
-			//writeLineImages( imgFilePath ); // for debugging
+			//writeLineImages( image, lines, "test/" ); // for debugging
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return lines;
 		
 	}
 	
@@ -249,8 +273,14 @@ public class Scanner {
 	
 	/**
 	 * 
+	 * 
+	 * @param lines
+	 * @param mapFile
+	 * @return
 	 */
-	private void process() {
+	public StringBuilder readCharacters( ArrayList<Line> lines, String mapFile ) {
+		
+		StringBuilder sb = new StringBuilder();
 		
 		for( Line l: lines ) {
 			
@@ -274,15 +304,32 @@ public class Scanner {
 				
 				// Step 4: map each character into a grid of 1s and 0s
 				mapToGrid(c);
+				String s = getChar( mapFile, c.getCharCode() );
+				if( s == null ) { // unrecognized char
+					sb.append("?");
+				} else {
+					sb.append(s);
+				}
+				
 			}
 			
+			sb.append("\n");
+			//writeCharImages( l, "test/" ); // for debugging
 		}
 		
+		//writeCharCodesToFile( lines, mapFile );
+		
 		// for debugging
-		Char c = lines.get(1).getChars().get(1);
+		/*
+		Char c = lines.get(1).getChars().get(48);
+		//mapToGrid(c);
 		//printBitmap( c.getY(), c.getY()+c.getH(), c.getX(), c.getX()+c.getW() ); // for debugging
-		c.printSequence();
-	
+		//c.printSequence();
+		//String charCode = c.getCharCode();
+		//System.out.println(charCode);
+		*/
+		
+		return sb;
 	}
 	
 	
@@ -316,6 +363,9 @@ public class Scanner {
 		int blockNumber = 0;
 		int blockLength = (int) Math.round( (double) c.getH() / BLOCKS_PER_CHAR );
 		int noOfHBlocks = c.getW() / blockLength;
+		if( noOfHBlocks == 0 ) {
+			noOfHBlocks = 1;
+		}
 		int noOfVBlocks = BLOCKS_PER_CHAR;
 		
 		// for debugging only
@@ -341,7 +391,7 @@ public class Scanner {
 				
 				boolean whiteSpace = true;
 				for( int x=blockStartX; x<blockEndX; x++ ) {
-					for( int y=blockStartY; y<blockEndY; y++ ) {					
+					for( int y=blockStartY; y<blockEndY; y++ ) {
 						int b = bitmap[y][x];
 						if( b != 0 ) {
 							whiteSpace = false;
@@ -387,59 +437,25 @@ public class Scanner {
 		}
 		*/
 		
-		
-		/*
-		// move through grid horizontally
-		for( int v=0; v<noOfVBlocks; v++ ) {
-			
-			for( int h=0; h<noOfHBlocks; h++ ) {
-				
-				//System.out.format("%d (%d,%d),(%d,%d) ", blockNumber, blockStartY, blockStartX, blockEndY, blockEndX );
-				
-				boolean whiteSpace = true;
-				for( int y=blockStartY; y<blockEndY; y++ ) {
-					for( int x=blockStartX; x<blockEndX; x++ ) {
-						int b = bitmap[y][x];
-						if( b != 0 ) {
-							whiteSpace = false;
-							break;
-						}
-					}
-					if(!whiteSpace) break;
-				}
-				if(whiteSpace) {
-					c.getSequence().add( blockNumber, 0 );
-				} else {
-					c.getSequence().add( blockNumber, 1 );
-				}
-				
-				// update horizontal pointers
-				blockStartX = blockStartX + blockLength;
-				if( ( blockEndX + blockLength ) <= ( c.getX() + c.getW() ) ) {
-					blockEndX = blockEndX + blockLength;
-				} else {
-					blockEndX = c.getX() + c.getW();
-				}
-				blockNumber++;
-			}
-			
-			// reset horizontal pointers
-			blockStartX = c.getX();
-			blockEndX = c.getX() + blockLength;
-			
-			// update vertical pointers
-			blockStartY = blockStartY + blockLength;
-			if( ( blockEndY + blockLength ) <= ( c.getY() + c.getH() ) ) {
-				blockEndY = blockEndY + blockLength;
-			} else {
-				blockEndY = c.getY() + c.getH();
-			}
-			//System.out.println();
+	}
+	
+	
+	
+	
+	/**
+	 * 
+	 * @param imgFile
+	 * @return
+	 */
+	public BufferedImage loadImage( String imgFile ) {
+		BufferedImage image = null;
+		try {
+			File input = new File( imgFile );
+			image = ImageIO.read(input);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		
-		//c.printSequence(noOfHBlocks);
-		*/
-		
+		return image;
 	}
 	
 	
@@ -503,24 +519,28 @@ public class Scanner {
 	
 	
 	
+	
 	/**
 	 * Outputs all <Line> objects held lines arrayList as image files. 
 	 * Useful for debugging.
 	 * 
+	 * @param lines
 	 * @param imgFilePath
 	 */
-	public void writeLineImages( String imgFilePath ) {
+	public void writeLineImages( BufferedImage image, ArrayList<Line> lines, String imgFilePath ) {
 		try {
 			for(Line l: lines) {			
-				System.out.println( "charLine" + l.getLineNumber() + " - (" + l.getX() + "," + l.getY() + "), w=" + l.getW() + ", h=" + l.getH() );
+				//System.out.println( "charLine" + l.getLineNumber() + " - (" + l.getX() + "," + l.getY() + "), w=" + l.getW() + ", h=" + l.getH() );
 				BufferedImage lineImg = image.getSubimage( l.getX(), l.getY(), l.getW(), l.getH() );
-				File output = new File( imgFilePath + "test/charLine" + l.getLineNumber() + ".png" );
+				File output = new File( imgFilePath + "charLine" + l.getLineNumber() + ".png" );
 				ImageIO.write(lineImg, "png", output );
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	
 	
 	
 	/**
@@ -530,12 +550,17 @@ public class Scanner {
 	 * @param line
 	 * @param imgFilePath
 	 */
-	public void writeCharImages( Line line, String imgFilePath ) {
+	public void writeCharImages( BufferedImage image, Line line, String imgFilePath ) {
 		try {
-			for(Char c: line.getChars() ) {
-				System.out.println( c.getName() + " - (" + c.getX() + "," + c.getY() + "), w=" + c.getW() + ", h=" + c.getH() );
+			for( Char c: line.getChars() ) {
+				String name = c.getName();
+				if( c.getCharCode()!=null && c.getCharCode().length()>0 ) {
+					name += "-" + c.getCharCode();
+					//name = c.getCharCode();
+				}
+				//System.out.println( name + " - (" + c.getX() + "," + c.getY() + "), w=" + c.getW() + ", h=" + c.getH() );
 				BufferedImage charImg = image.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
-				File output = new File( imgFilePath + "test/" + c.getName() + ".png" );
+				File output = new File( imgFilePath + name + ".png" );
 				ImageIO.write(charImg, "png", output );
 			}
 		} catch (Exception e) {
@@ -543,5 +568,89 @@ public class Scanner {
 		}
 	}
 	
+	
+	
+	
+	/**
+	 * 
+	 * 
+	 * @param lines
+	 * @param mapFile
+	 */
+	public void writeCharCodesToFile( ArrayList<Line> lines, String mapFile ) {
+		StringBuilder s = new StringBuilder();
+		for(Line l: lines) {
+			for( Char c: l.getChars() ) {
+				if( c.getCharCode() != null && 
+					c.getCharCode().length() > 0 && 
+					s.indexOf( c.getCharCode() + "=" ) == -1 ) {
+					s.append( c.getCharCode() + "=\n" );
+				}
+			}
+		}
+		byte data[] = s.toString().getBytes();
+	    Path p = Paths.get(mapFile);
+	    try ( OutputStream out = new BufferedOutputStream(
+	    		Files.newOutputStream( p, CREATE, APPEND ) 
+	    		)
+	    ) {
+	    	out.write( data, 0, data.length );
+	    } catch (IOException e) {
+	    	e.printStackTrace();
+	    }
+	}
+	
+	
+	
+	/**
+	 * 
+	 * 
+	 * @param mapFile
+	 * @param charCode
+	 * @return
+	 */
+	public String getChar( String mapFile, String charCode ) {
+		String c = null;
+		try {
+			if( charMap == null ) {
+				charMap = new Properties();
+				FileInputStream in = new FileInputStream(mapFile);
+				charMap.load(in);
+			}
+			c = charMap.getProperty(charCode);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return c;
+	}
+	
+	
+	
+	
+	/*
+	public void writeCharCodesToPropFile( String mapFile ) {
+		Properties charMap = null;
+		FileInputStream in = null;
+		FileOutputStream out = null;
+		try {
+			charMap = new Properties();
+			in = new FileInputStream(mapFile);
+			charMap.load(in);
+			for(Line l: lines) {
+				for( Char c: l.getChars() ) {
+					if( c.getCharCode()!=null && c.getCharCode().length()>0 ) {
+						String code = c.getName() + "-" + c.getCharCode();
+						charMap.setProperty(code, "");
+					}
+				}
+			}
+			out = new FileOutputStream(mapFile);
+			charMap.store(out, "--- CharCode Mappings ---");
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	*/
 	
 }
