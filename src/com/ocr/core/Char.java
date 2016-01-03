@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author isuru
  *
  */
-public class Char extends Item {
+public class Char extends ScanItem {
 	
 	private int charNumber;
 	private boolean whiteSpace;
@@ -58,9 +58,9 @@ public class Char extends Item {
 	
 	
 	public void printSequence() {
-		String [] sb = new String [Scanner.BLOCKS_PER_CHAR];
+		String [] sb = new String [Scanner.VERTICAL_BLOCKS_PER_CHAR];
 		for( int i=0; i<sequence.size(); i++ ) {
-			int j = i % Scanner.BLOCKS_PER_CHAR;
+			int j = i % Scanner.VERTICAL_BLOCKS_PER_CHAR;
 			if( sb[j] == null ) sb[j] = "";
 			sb[j] += sequence.get(i) + " ";
 		}
@@ -77,7 +77,7 @@ public class Char extends Item {
 		String charCode = "";
 		for( int i=0; i<sequence.size(); i++ ) {
 			s += sequence.get(i);
-			if( (i+1) % Scanner.BLOCKS_PER_CHAR == 0 ) {
+			if( (i+1) % Scanner.VERTICAL_BLOCKS_PER_CHAR == 0 ) {
 				int n = Integer.parseInt( s, 2 );
 				charCode += n;
 				s = "";
