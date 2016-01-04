@@ -1,8 +1,8 @@
 package com.ocr.util;
 
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;

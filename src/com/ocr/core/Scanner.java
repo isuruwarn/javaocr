@@ -70,11 +70,11 @@ public class Scanner {
 	
 	private int [][] bitmap; // holds black and white (1s and 0s) representation of entire image
 	private Properties charMap; // holds the character mappings read from file
+	private ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
 	
 	
-		
 	
-	
+
 	/**
 	 * Steps 1, 2 and 3
 	 * 
@@ -276,8 +276,11 @@ public class Scanner {
 				
 				// Step 5: try and identify the character by looking up the saved in file for any matches
 				String s = getChar( mapFile, c.getCharCode() );
+				
 				if( s == null ) { // unrecognized char
 					sb.append("?");
+					unrecognizedChars.add(c);
+					
 				} else {
 					sb.append(s);
 				}
@@ -494,5 +497,25 @@ public class Scanner {
         
 	}
 	
+	
+	
+	
+	/**
+	 * 
+	 * @return unrecognized characters
+	 */
+	public ArrayList<Char> getUnrecognizedChars() {
+		return unrecognizedChars;
+	}
+
+	
+	
+	public StringBuilder readCharacters( BufferedImage inputImage, String mapFile ) {
+		ArrayList<Line> lines = this.init( inputImage );
+		StringBuilder sb = this.readCharacters( lines, mapFile );
+		return sb;
+	}
+
+
 	
 }
