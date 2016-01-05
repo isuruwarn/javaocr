@@ -165,8 +165,8 @@ public class UIContainer {
 		// frame for holding everything
 		mainFrame = new JFrame( GlobalConstants.TITLE );
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.setPreferredSize( new Dimension( GlobalConstants.PREF_FRAME_WIDTH, GlobalConstants.PREF_FRAME_HEIGHT ) );
-		mainFrame.setMinimumSize( new Dimension( GlobalConstants.MIN_FRAME_WIDTH, GlobalConstants.MIN_FRAME_HEIGHT ) );
+		mainFrame.setPreferredSize( new Dimension( GlobalConstants.FRAME_WIDTH, GlobalConstants.FRAME_HEIGHT ) );
+		mainFrame.setMinimumSize( new Dimension( GlobalConstants.FRAME_WIDTH, GlobalConstants.FRAME_HEIGHT ) );
 		mainFrame.getContentPane().add(mainPanel);
 		mainFrame.pack();
 		mainFrame.setVisible(true);
@@ -263,7 +263,7 @@ public class UIContainer {
 	
 	private int navIndex = 0;
 	private JLabel charImgLbl;
-	private JTextField charMappingTxt;
+	private JTextComponent charMappingTxt;
 	private ArrayList<Char> unrecognizedChars;
 	private String [] charMappings;
 	
@@ -277,22 +277,23 @@ public class UIContainer {
 		charImgLbl.setPreferredSize( new Dimension( 100, 100 ) );
 		charImgLbl.setMinimumSize( new Dimension( 100, 100 ) );
 		
-		charMappingTxt = new JTextField();
+		charMappingTxt = new JTextArea();
 		charMappingTxt.setEditable(false);
-		
-		charMappingTxt.setPreferredSize( new Dimension( 50, 50 ) );
-		charMappingTxt.setMinimumSize( new Dimension( 50, 50 ) );
-		charMappingTxt.setHorizontalAlignment(JTextField.CENTER);
+		charMappingTxt.setPreferredSize( new Dimension( 60, 60 ) );
+		charMappingTxt.setMinimumSize( new Dimension( 60, 60 ) );
+		//charMappingTxt.setHorizontalAlignment(JTextField.CENTER);
 		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
 			charMappingTxt.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, 30 ) );
 		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.BOLD, 40 ) );
+			//charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.BOLD, 25 ) );
 		}
 		
 		JPanel imgPanel = new JPanel();
 		imgPanel.add(charImgLbl);
 		imgPanel.add(charMappingTxt);
 		imgPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
+		imgPanel.setPreferredSize( new Dimension( 300, 100 ) );
+		imgPanel.setMinimumSize( new Dimension( 300, 100 ) );
 		
 		JButton prevBtn = new JButton( GlobalConstants.PREV_MAPPING_ACTION);
 		JButton nextBtn = new JButton( GlobalConstants.NEXT_MAPPING_ACTION);
@@ -364,12 +365,12 @@ public class UIContainer {
 			resolvePanel.setPreferredSize( new Dimension(500, 430) );
 			resolvePanel.setMinimumSize( new Dimension(500, 430) );
 		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			resolvePanel.setPreferredSize( new Dimension(500, 600) );
-			resolvePanel.setMinimumSize( new Dimension(500, 600) );
+			resolvePanel.setPreferredSize( new Dimension(500, 820) );
+			resolvePanel.setMinimumSize( new Dimension(500, 820) );
 		}
 		
 		
-		JOptionPane.showConfirmDialog( mainFrame, resolvePanel, GlobalConstants.RESOLVE_TITLE, JOptionPane.OK_CANCEL_OPTION );
+		JOptionPane.showConfirmDialog( mainFrame, resolvePanel, GlobalConstants.RESOLVE_TITLE, JOptionPane.CLOSED_OPTION );
 	}
 	
 	// ******************************
@@ -383,6 +384,8 @@ public class UIContainer {
 		for( int i=0; i<10; i++ ) {
 			JButton numBtn = new JButton( String.valueOf(i) );
 			numBtn.addActionListener(charButtonsListener);
+			numBtn.setPreferredSize( new Dimension(25, 25) );
+			numBtn.setMinimumSize( new Dimension(25, 25) );
 			numericButtonsPanel.add(numBtn);
 		}
 		return numericButtonsPanel;
@@ -391,8 +394,8 @@ public class UIContainer {
 	
 	private JPanel getSpecialCharButtonsPanel( CharButtonsListener charButtonsListener ) {
 		JPanel specialCharButtonsPanel = new JPanel();
-		specialCharButtonsPanel.setPreferredSize( new Dimension(500, 90) );
-		specialCharButtonsPanel.setMinimumSize( new Dimension(500, 90) );
+		specialCharButtonsPanel.setPreferredSize( new Dimension(500, 80) );
+		specialCharButtonsPanel.setMinimumSize( new Dimension(500, 80) );
 		specialCharButtonsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
 		for( int i=33; i<127; i++ ) {
 			if( i>=48 && i < 58 ) {
@@ -404,6 +407,8 @@ public class UIContainer {
 			} else {
 				JButton spCharBtn = new JButton( String.valueOf( (char) i) );
 				spCharBtn.addActionListener(charButtonsListener);
+				spCharBtn.setPreferredSize( new Dimension(25, 25) );
+				spCharBtn.setMinimumSize( new Dimension(25, 25) );
 				specialCharButtonsPanel.add(spCharBtn);
 			}
 		}
@@ -422,10 +427,14 @@ public class UIContainer {
 				
 				JButton upperCaseCharBtn = new JButton( String.valueOf( (char) i) );
 				upperCaseCharBtn.addActionListener(charButtonsListener);
+				upperCaseCharBtn.setPreferredSize( new Dimension(25, 25) );
+				upperCaseCharBtn.setMinimumSize( new Dimension(25, 25) );
 				charButtonsPanel.add(upperCaseCharBtn);
 				
 				JButton lowerCaseCharBtn = new JButton( String.valueOf( (char) ( i + 32 ) ) );
 				lowerCaseCharBtn.addActionListener(charButtonsListener);
+				lowerCaseCharBtn.setPreferredSize( new Dimension(25, 25) );
+				lowerCaseCharBtn.setMinimumSize( new Dimension(25, 25) );
 				charButtonsPanel.add(lowerCaseCharBtn);
 				
 			}
@@ -450,11 +459,13 @@ public class UIContainer {
 				JButton sinhalaCharBtn = new JButton( unicodeVal );
 				sinhalaCharBtn.addActionListener(charButtonsListener);
 				sinhalaCharBtn.setFont(f);
+				sinhalaCharBtn.setPreferredSize( new Dimension(45, 45) );
+				sinhalaCharBtn.setMinimumSize( new Dimension(45, 45) );
 				charButtonsPanel.add(sinhalaCharBtn);
 			}
 			
-			charButtonsPanel.setPreferredSize( new Dimension(500, 300) );
-			charButtonsPanel.setMinimumSize( new Dimension(500, 300) );
+			charButtonsPanel.setPreferredSize( new Dimension(500, 500) );
+			charButtonsPanel.setMinimumSize( new Dimension(500, 500) );
 		}
 		
 		return charButtonsPanel;

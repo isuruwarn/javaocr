@@ -12,8 +12,8 @@ public class GlobalConstants {
 	public static final String TITLE = "Java OCR";
 	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
 	
-	public static final int PREF_FRAME_WIDTH = 600;
-	public static final int PREF_FRAME_HEIGHT = 600;
+	public static final int FRAME_WIDTH = 600;
+	public static final int FRAME_HEIGHT = 600;
 	public static final int MIN_FRAME_WIDTH = 600;
 	public static final int MIN_FRAME_HEIGHT = 600;
 	
@@ -36,10 +36,10 @@ public class GlobalConstants {
 	public static final String VERDANA_FONT_TYPE = "Verdana";
 	public static final String ISKOOLA_POTA_FONT_TYPE = "Iskoola Pota";
 	
-	public static final int SIN_BUTTON_FONT_SIZE = 16;
+	public static final int SIN_BUTTON_FONT_SIZE = 14;
 	
 	// for debugging
-	public static final String SAMPLE_IMG_FILENAME = "img/sampleImg10.png";
+	public static final String SAMPLE_IMG_FILENAME = "img/sampleImg8.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	
 	public static final String ENG_MAP_FILE = "files/eng15.map";
