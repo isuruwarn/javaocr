@@ -76,21 +76,23 @@ public enum Symbol {
 	DIGA_AEDA_PILLA ( "\u0DD1", "&#3537", "}", 125 ),
 	KOMBUVA_HAA_AELA_PILLA ( "\u0DDC", "&#3548", "<", 60 ),
 	KOMBUVA_HAA_DIGA_AELA_PILLA ( "\u0DDD", "&#3549", ">", 62 ),
-	KSHA ( "\u0D9A\u0DCA\u200D\u0DC2", "&#3482;&#3530;&#8205;&#3522;", "1304", -1 ),
-	THALUJA_NASIKAYA ( "\u0DA4", "&#3492;", "1305", -1 ),
-	SANYOGA_NASIKAYA ( "\u0DA5", "&#3493;", "1306", -1 ),
-	KOMBU_DEKA ( "\u0DDB", "&#3547;", "1320", -1 ),
-	KOMBUVA_HAA_GAYANUKITTA ( "\u0DDE", "&#3550;", "1321", -1 ),
-	DIGA_GAETTA_PILLA ( "\u0DF2", "&#3570;", "1322", -1 ),
-	GAYANUKITTA ( "\u0DDF", "&#3551;", "1323", -1 ),
-	DIGA_GAYANUKITTA ( "\u0DF3", "&#3571;", "1324", -1 ),
-	AAYANNA ( "\u0D86", "&#3462;", "1400", -1 ),
-	AEYANNA ( "\u0D87", "&#3463;", "1401", -1 ),
-	AEEYANNA ( "\u0D88", "&#3464;", "1402", -1 ),
-	EEYANNA ( "\u0D92", "&#3474;", "1403", -1 ),
-	AIYANNA ( "\u0D93", "&#3475;", "1404", -1 ),
-	OOYANNA ( "\u0D95", "&#3477;", "1405", -1 ),
-	AUYANNA ( "\u0D96", "&#3478;", "1406", -1 );
+	KSHA ( "\u0D9A\u0DCA\u200D\u0DC2", "&#3482;&#3530;&#8205;&#3522;", "1304", 1304 ),
+	THALUJA_NASIKAYA ( "\u0DA4", "&#3492;", "1305", 1305 ),
+	SANYOGA_NASIKAYA ( "\u0DA5", "&#3493;", "1306", 1306 ),
+	KOMBU_DEKA ( "\u0DDB", "&#3547;", "1320", 1320 ),
+	KOMBUVA_HAA_GAYANUKITTA ( "\u0DDE", "&#3550;", "1321", 1321 ),
+	DIGA_GAETTA_PILLA ( "\u0DF2", "&#3570;", "1322", 1322 ),
+	GAYANUKITTA ( "\u0DDF", "&#3551;", "1323", 1323 ),
+	DIGA_GAYANUKITTA ( "\u0DF3", "&#3571;", "1324", 1324 ),
+	AAYANNA ( "\u0D86", "&#3462;", "1400", 1400 ),
+	AEYANNA ( "\u0D87", "&#3463;", "1401", 1401 ),
+	AEEYANNA ( "\u0D88", "&#3464;", "1402", 1402 ),
+	EEYANNA ( "\u0D92", "&#3474;", "1403", 1403 ),
+	AIYANNA ( "\u0D93", "&#3475;", "1404", 1404 ),
+	OOYANNA ( "\u0D95", "&#3477;", "1405", 1405 ),
+	AUYANNA ( "\u0D96", "&#3478;", "1406", 1406 ),
+	UUYANNA ( "\u0D8C", "&#3468;", "1407", 1407 ),
+	SANYAKA_JAYANNA ( "\u0DA6", "&#3494;", "1408", 1408 );
 	
 	
 	private final String UNICODE; // Unicode value of the symbol
@@ -122,6 +124,16 @@ public enum Symbol {
 	
 	public int getAsciiCode() {
 		return ASCIICODE;
+	}
+	
+	
+	public static String getSymbol( int asciiCode ) {
+		for(Symbol symbol: Symbol.values() ) {
+			if( symbol.getAsciiCode() == asciiCode ) {
+				return symbol.getUnicodeValue();
+			}
+		}
+		return null;
 	}
 
 }
