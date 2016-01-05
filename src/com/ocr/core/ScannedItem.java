@@ -6,7 +6,7 @@ package com.ocr.core;
  * @author isuru
  *
  */
-public abstract class ScanItem {
+public abstract class ScannedItem {
 	
 	private int x;
 	private int y;

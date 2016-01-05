@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author isuru
  *
  */
-public class Line extends ScanItem {
+public class Line extends ScannedItem {
 	
 	private int lineNumber;
 	private boolean blankLine;

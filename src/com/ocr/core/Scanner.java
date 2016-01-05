@@ -70,6 +70,7 @@ public class Scanner {
 	
 	private int [][] bitmap; // holds black and white (1s and 0s) representation of entire image
 	private Properties charMap; // holds the character mappings read from file
+	private ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
 	private ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
 	
 	
@@ -279,7 +280,10 @@ public class Scanner {
 				
 				if( s == null ) { // unrecognized char
 					sb.append("?");
-					unrecognizedChars.add(c);
+					if( unrecognizedCharCodes.indexOf( c.getCharCode() ) == -1 ) { // eliminate duplicates
+						unrecognizedCharCodes.add( c.getCharCode() );
+						unrecognizedChars.add(c);
+					}
 					
 				} else {
 					sb.append(s);

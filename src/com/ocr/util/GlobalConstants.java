@@ -26,12 +26,20 @@ public class GlobalConstants {
 	public static final String NEXT_MAPPING_ACTION = "Next";
 	public static final String SAVE_MAPPING_ACTION = "Save";
 	public static final String SAVEALL_MAPPING_ACTION = "Save All";
+	public static final String CLEAR_MAPPING_ACTION = "Clear";
+	public static final String CLEARALL_MAPPING_ACTION = "Clear All";
 	
 	public static final String ENGLISH = "English";
 	public static final String SINHALA = "Sinhala";
 	
+	public static final String SANSSERIF_FONT_TYPE = "SansSerif";
+	public static final String VERDANA_FONT_TYPE = "Verdana";
+	public static final String ISKOOLA_POTA_FONT_TYPE = "Iskoola Pota";
+	
+	public static final int SIN_BUTTON_FONT_SIZE = 16;
+	
 	// for debugging
-	public static final String SAMPLE_IMG_FILENAME = "/Users/isuru/Programming/Eclipse workspaces/isuru/JavaOCR/img/sampleImg10.png";
+	public static final String SAMPLE_IMG_FILENAME = "img/sampleImg10.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	
 	public static final String ENG_MAP_FILE = "files/eng15.map";

@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author isuru
  *
  */
-public class Char extends ScanItem {
+public class Char extends ScannedItem {
 	
 	private int charNumber;
 	private boolean whiteSpace;
