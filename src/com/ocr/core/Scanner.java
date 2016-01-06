@@ -68,10 +68,13 @@ public class Scanner {
 	public static final int MIN_WHITESPACE_WIDTH = 10;
 	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; 
 	
+	private int linesRead = 0;
+	private int charsRead = 0;
 	private int [][] bitmap; // holds black and white (1s and 0s) representation of entire image
 	private Properties charMap; // holds the character mappings read from file
-	private ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
-	private ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
+	private ArrayList<Line> lines;
+	private ArrayList<String> unrecognizedCharCodes;
+	private ArrayList<Char> unrecognizedChars;
 	
 	
 	
@@ -84,7 +87,11 @@ public class Scanner {
 	 */
 	public ArrayList<Line> init( BufferedImage image ) {
 		
-		ArrayList<Line> lines  = new ArrayList<Line>();
+		linesRead = 0;
+		charsRead = 0;
+		unrecognizedCharCodes = new ArrayList<String>();
+		unrecognizedChars = new ArrayList<Char>();
+		lines  = new ArrayList<Line>();
 		
 		try {
 			int height = image.getHeight();
@@ -160,6 +167,7 @@ public class Scanner {
 				}
 			}
 			
+			linesRead += lineNumber;
 			//writeLineImages( image, lines, "test/" ); // for debugging
 			
 		} catch (Exception e) {
@@ -237,6 +245,8 @@ public class Scanner {
     		
 		}
 		
+		charsRead += charNumber;
+		
 	}
 	
 	
@@ -276,13 +286,14 @@ public class Scanner {
 				mapToGrid(c);
 				
 				// Step 5: try and identify the character by looking up the saved in file for any matches
-				String s = getChar( mapFile, c.getCharCode() );
+				String s = getCharValueFromMap( mapFile, c.getCharCode() );
 				
 				if( s == null ) { // unrecognized char
 					sb.append("?");
 					if( unrecognizedCharCodes.indexOf( c.getCharCode() ) == -1 ) { // eliminate duplicates
 						unrecognizedCharCodes.add( c.getCharCode() );
 						unrecognizedChars.add(c);
+						System.out.println(c.getCharCode());
 					}
 					
 				} else {
@@ -420,7 +431,7 @@ public class Scanner {
 	 * @param pixelValue
 	 * @return 0 or 1
 	 */
-	public int getBinaryPixelValue( int pixelValue ) {
+	private int getBinaryPixelValue( int pixelValue ) {
 		pixelValue = getAvgRGBValue(pixelValue);
         if( pixelValue < BW_THREASHOLD ) {
         	pixelValue = 1;
@@ -442,7 +453,7 @@ public class Scanner {
 	 * @param pixelValue
 	 * @return int representing average RGB value
 	 */
-	public int getAvgRGBValue( int pixelValue ) {
+	private int getAvgRGBValue( int pixelValue ) {
 		int a = (pixelValue>>24)&0xff;
 		int r = (pixelValue>>16)&0xff;
 		int g = (pixelValue>>8)&0xff;
@@ -462,7 +473,7 @@ public class Scanner {
 	 * @param charCode
 	 * @return
 	 */
-	public String getChar( String mapFile, String charCode ) {
+	public String getCharValueFromMap( String mapFile, String charCode ) {
 		String c = null;
 		try {
 			if( charMap == null ) {
@@ -480,6 +491,17 @@ public class Scanner {
 	
 	
 	
+	public void relaodCharMap( String mapFile, String charCode ) {
+		try {
+			charMap = new Properties();
+			FileInputStream in = new FileInputStream(mapFile);
+			charMap.load(in);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	
 	/**
 	 * 
@@ -488,7 +510,7 @@ public class Scanner {
 	 * @param i
 	 * @param j
 	 */
-	public void convertPixelToBW( BufferedImage image, int i, int j ) {
+	private void convertPixelToBW( BufferedImage image, int i, int j ) {
 		
 		int avgRGB = getAvgRGBValue( image.getRGB( j, i ) );
         
@@ -504,6 +526,15 @@ public class Scanner {
 	
 	
 	
+	public StringBuilder readCharacters( BufferedImage inputImage, String mapFile ) {
+		ArrayList<Line> lines = this.init( inputImage );
+		StringBuilder sb = this.readCharacters( lines, mapFile );
+		return sb;
+	}
+	
+	
+	
+	
 	/**
 	 * 
 	 * @return unrecognized characters
@@ -514,11 +545,20 @@ public class Scanner {
 
 	
 	
-	public StringBuilder readCharacters( BufferedImage inputImage, String mapFile ) {
-		ArrayList<Line> lines = this.init( inputImage );
-		StringBuilder sb = this.readCharacters( lines, mapFile );
-		return sb;
+	
+	
+	public int getLinesRead() {
+		return linesRead;
 	}
+
+
+
+
+	public int getCharsRead() {
+		return charsRead;
+	}
+
+	
 
 
 	

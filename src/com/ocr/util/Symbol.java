@@ -127,10 +127,19 @@ public enum Symbol {
 	}
 	
 	
-	public static String getSymbol( int asciiCode ) {
+	public static String getSymbolForASCII( int asciiCode ) {
 		for(Symbol symbol: Symbol.values() ) {
 			if( symbol.getAsciiCode() == asciiCode ) {
 				return symbol.getUnicodeValue();
+			}
+		}
+		return null;
+	}
+	
+	public static String getSymbolNameForASII( int asciiCode ) {
+		for(Symbol symbol: Symbol.values() ) {
+			if( symbol.getAsciiCode() == asciiCode ) {
+				return symbol.name();
 			}
 		}
 		return null;
