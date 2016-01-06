@@ -130,17 +130,17 @@ public class ScanUtils {
 	 * @param mapFile
 	 */
 	public static void writeCharCodesToFile( ArrayList<Line> lines, String mapFile ) {
-		StringBuilder s = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		for(Line l: lines) {
 			for( Char c: l.getChars() ) {
 				if( c.getCharCode() != null && 
 					c.getCharCode().length() > 0 && 
-					s.indexOf( c.getCharCode() + "=" ) == -1 ) {
-					s.append( c.getCharCode() + "=\n" );
+					sb.indexOf( c.getCharCode() + "=" ) == -1 ) { // check for duplicates
+					sb.append( c.getCharCode() + "=\n" );
 				}
 			}
 		}
-		appendToFile( s, mapFile );
+		appendToFile( sb, mapFile );
 	}
 	
 	
@@ -151,8 +151,8 @@ public class ScanUtils {
 	 * @param s
 	 * @param outputFile
 	 */
-	public static void appendToFile( StringBuilder s, String outputFile ) {
-		byte data[] = s.toString().getBytes();
+	public static void appendToFile( StringBuilder sb, String outputFile ) {
+		byte data[] = sb.toString().getBytes();
 	    Path p = Paths.get(outputFile);
 	    try ( OutputStream out = new BufferedOutputStream(
 	    		Files.newOutputStream( p, CREATE, APPEND ) 

@@ -13,7 +13,7 @@ public class GlobalConstants {
 	public static final String ENGLISH = "English";
 	public static final String SINHALA = "Sinhala";
 	
-	
+	// TODO: read from file
 	public static final String ENG_MAP_FILE = "files/eng15.map";
 	public static final String SIN_MAP_FILE = "files/sin15.map";
 	
@@ -34,7 +34,7 @@ public class GlobalConstants {
 	public static final int ENG_MAPPINGS_PANEL_H = 630;
 	
 	public static final int SIN_MAPPINGS_PANEL_W = 600;
-	public static final int SIN_MAPPINGS_PANEL_H = 850;
+	public static final int SIN_MAPPINGS_PANEL_H = 750;
 	
 	public static final int MAPPINGS_IMG_PANEL_W = 400;
 	public static final int MAPPINGS_IMG_PANEL_H = 150;
@@ -84,6 +84,7 @@ public class GlobalConstants {
 	
 	// action commands
 	public static final String CHOOSE_FILE_ACTION = "Choose File";
+	public static final String COMBOBOX_CHANGED_ACTION = "comboBoxChanged";
 	public static final String SCAN_ACTION = "Scan";
 	public static final String COPY_ACTION = "Copy";
 	public static final String CLEAR_ACTION = "Clear";

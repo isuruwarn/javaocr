@@ -44,6 +44,7 @@ import com.ocr.util.Symbol;
 public class UIContainer {
 
 	
+	private String mappingsFile;
 	private Scanner scn;
 	private BufferedImage inputImage;
 	
@@ -84,10 +85,12 @@ public class UIContainer {
 		//txtOutputFileName = new JTextField();
 		//txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		
+		// TODO: read from file
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectAlphabet = new JComboBox<String>(alphabets);
-		selectAlphabet.setSelectedItem( String.valueOf( GlobalConstants.SINHALA ) );
 		selectAlphabet.addActionListener( mainListener );
+		selectAlphabet.setSelectedItem( String.valueOf( GlobalConstants.SINHALA ) ); // set a default value
+		mappingsFile = GlobalConstants.SIN_MAP_FILE; // set a default value
 		
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
@@ -192,7 +195,11 @@ public class UIContainer {
 				case GlobalConstants.CHOOSE_FILE_ACTION:
 					chooseFile();
 					break;
-					
+				
+				case GlobalConstants.COMBOBOX_CHANGED_ACTION:
+					comboBoxChanged(e);
+					break;
+				
 				case GlobalConstants.SCAN_ACTION:
 					scan();
 					break;
@@ -211,6 +218,7 @@ public class UIContainer {
 				case GlobalConstants.RESOLVE_ACTION:
 					resolve();
 					break;
+					
 			}
 		}
 
@@ -237,15 +245,9 @@ public class UIContainer {
 	private void scan() {
 		
 		String imgFile = txtInputImagePath.getText();
-		String mapFile = GlobalConstants.ENG_MAP_FILE;
-		
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			mapFile = GlobalConstants.SIN_MAP_FILE;
-		}
-		
 		inputImage = ScanUtils.loadImage( imgFile );
 		scn = new Scanner();
-		StringBuilder sb = scn.readCharacters( inputImage, mapFile );
+		StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
 		textpPane.setText( sb.toString() );
 		
 		int linesRead = scn.getLinesRead();
@@ -256,6 +258,19 @@ public class UIContainer {
 		resolveBtn.setEnabled(true);
 	}
 	
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	private void comboBoxChanged( ActionEvent e ) {
+		JComboBox<String> selectBox = (JComboBox<String>) e.getSource();
+		String selection = (String) selectBox.getSelectedItem();
+		if( selection.equals( GlobalConstants.ENGLISH ) ) {
+			mappingsFile = GlobalConstants.ENG_MAP_FILE;
+		} else if( selection.equals( GlobalConstants.SINHALA ) ) {
+			mappingsFile = GlobalConstants.SIN_MAP_FILE;
+		}
+	}
 	
 	
 	private Font sinhalaBtnFont;
@@ -540,27 +555,53 @@ public class UIContainer {
 	}
 	
 	private void save() {
+		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
 		String newCharValue = charMappingTxt.getText();
 		// check if null or empty value
-		// if ( !null and !empty )
-			// check if charcode already exists in mappings file
-			// if (existing mapping)
-				// check if value is the same
-				// if(value is the same)
-					// do nothing
-				// else (value is different)
-					// set new charvalue as property update
-			// else (new mapping)
-				// write charcode and charvalue as new property
-		// else ( null or empty )
-			// show error message
+		if ( newCharValue != null && !newCharValue.isEmpty() ) {
+			String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
+			if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
+				// TODO: add new mapping
+			} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we have a new value
+				// TODO: update existing mapping
+			}
+		} else {
+			// TODO: show error message
+		}
 	}
 	
 	
 	private void saveAll() {
-		// create StringBuilder to hold new or modified char mappings
-		// 
+		
+		StringBuilder newMappings = new StringBuilder(); // holds new or modified char mappings
+		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
+		
+		for( int i=0; i<charMappings.length; i++ ) {
+			
+			String newCharValue = charMappings[i];
+			
+			if ( newCharValue != null && !newCharValue.isEmpty() ) {
+				
+				String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
+				String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
+				
+				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
+					
+					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
+						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+					}
+					
+				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we have a new value
+					
+					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
+						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+						// TODO: remove old mapping from mappings file
+					}
+				}
+			}
+		}
+		ScanUtils.appendToFile( newMappings, mappingsFile );
 	}
 	
 	

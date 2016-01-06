@@ -491,7 +491,7 @@ public class Scanner {
 	
 	
 	
-	public void relaodCharMap( String mapFile, String charCode ) {
+	public void relaodCharMap( String mapFile ) {
 		try {
 			charMap = new Properties();
 			FileInputStream in = new FileInputStream(mapFile);
