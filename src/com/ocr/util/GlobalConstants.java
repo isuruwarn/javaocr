@@ -18,6 +18,10 @@ public class GlobalConstants {
 	public static final String SIN_MAP_FILE = "files/sin15.map";
 	
 	
+	// icon image file
+	public static final String CHAR_SAVED_ICO_FILE = "img/mapping_saved_ico.png";
+	
+	
 	// main application frame
 	public static final int MAIN_FRAME_W = 700;
 	public static final int MAIN_FRAME_H = 850;
@@ -58,8 +62,14 @@ public class GlobalConstants {
 	public static final int STAT_LBL_W = 600;
 	public static final int STAT_LBL_H = 25;
 	
+	public static final int CHAR_IDX_LBL_W = 50;
+	public static final int CHAR_IDX_LBL_H = 100;
+	
 	public static final int CHAR_IMG_LBL_W = 100;
 	public static final int CHAR_IMG_LBL_H = 100;
+	
+	public static final int CHAR_SAVED_IMG_LBL_W = 50;
+	public static final int CHAR_SAVED_IMG_LBL_H = 100;
 	
 
 	// text box dimensions
@@ -69,8 +79,8 @@ public class GlobalConstants {
 	public static final int INPUT_IMG_PATH_TXT_W = 300;
 	public static final int INPUT_IMG_PATH_TXT_H = 25;
 	
-	public static final int CHAR_MAP_TXT_W = 70;
-	public static final int CHAR_MAP_TXT_H = 70;
+	public static final int CHAR_MAP_TXT_W = 100;
+	public static final int CHAR_MAP_TXT_H = 100;
 	
 	public static final int CHAR_CODE_TXT_W = 350;
 	public static final int CHAR_CODE_TXT_H = 25;
@@ -120,9 +130,8 @@ public class GlobalConstants {
 	public static final String CLEAR_ALL_MAPPINGS_CONF_MSG = "Are you sure you want to clear all unsaved mappings in current session?";
 	
 	// for debugging
-	public static final String SAMPLE_IMG_FILENAME = "img/sampleImg10.png";
+	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/sampleImg11.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
-	
 	
 	
 }

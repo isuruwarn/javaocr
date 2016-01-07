@@ -66,7 +66,7 @@ public class Scanner {
 	public static final int BW_THREASHOLD = -11200000; // average RGB values less than this will be saved as black pixels. 
 														// average RGB values greater than this will be saved as white pixels 
 	public static final int MIN_BLANKLINE_HEIGHT = 30;
-	public static final int MIN_WHITESPACE_WIDTH = 10;
+	public static final int MIN_WHITESPACE_WIDTH = 8;
 	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; 
 	
 	private int linesRead = 0;

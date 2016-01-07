@@ -255,7 +255,10 @@ public class UIContainer {
 		int noOfUnrecognizedChars = scn.getUnrecognizedChars().size();
 		statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, linesRead, charsRead, noOfUnrecognizedChars ) );
 		
-		resolveBtn.setEnabled(true);
+		unrecognizedChars = scn.getUnrecognizedChars();
+		if( unrecognizedChars.size() > 0 ) {
+			resolveBtn.setEnabled(true);
+		}
 	}
 	
 	
@@ -276,6 +279,8 @@ public class UIContainer {
 	private Font sinhalaBtnFont;
 	private Font charBtnFont;
 	private JLabel charImgLbl;
+	private JLabel charMappingIndexLbl;
+	private JLabel charMappingSavedLbl;
 	private JTextField charCodeTxt;
 	private JTextField charMappingTxt;
 	private CharButtonsListener charButtonsListener;
@@ -283,15 +288,26 @@ public class UIContainer {
 	private int navIndex = 0;
 	private ArrayList<Char> unrecognizedChars;
 	private String [] charMappings;
+	private boolean [] savedMappingsArr;
 	
 	private void resolve() {
 		
 		unrecognizedChars = scn.getUnrecognizedChars();
 		charMappings = new String[ unrecognizedChars.size() ];
+		savedMappingsArr = new boolean[ unrecognizedChars.size() ];
+		
+		charMappingIndexLbl = new JLabel();
+		charMappingIndexLbl.setHorizontalAlignment(JTextField.LEFT);
+		charMappingIndexLbl.setVerticalAlignment(JTextField.TOP);
+		charMappingIndexLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
+		charMappingIndexLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
+		//charMappingIndexLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		charImgLbl = new JLabel();
+		charImgLbl.setHorizontalAlignment(JTextField.CENTER);
 		charImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
 		charImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
+		//charImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		charCodeTxt = new JTextField();
 		charCodeTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_CODE_TXT_W, GlobalConstants.CHAR_CODE_TXT_H ) );
@@ -299,9 +315,10 @@ public class UIContainer {
 		charCodeTxt.setHorizontalAlignment(JTextField.CENTER);
 		charCodeTxt.setEnabled(true);
 		charCodeTxt.setBorder( BorderFactory.createLineBorder( Color.white ) );
-		setUnrecognizedCharDetails();
 		
-		JLabel mappingIcon = new JLabel("-->");
+		JLabel mappingIcon = new JLabel("--->");
+		mappingIcon.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.MAIN_TEXT_FONT_SIZE ) );
+		//mappingIcon.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		charMappingTxt = new JTextField();
 		charMappingTxt.setEditable(false);
@@ -314,15 +331,25 @@ public class UIContainer {
 			charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.BOLD, GlobalConstants.CHAR_MAPPINGS_SIN_FONT_SIZE ) );
 		}
 		
+		charMappingSavedLbl = new JLabel();
+		charMappingSavedLbl.setHorizontalAlignment(JTextField.CENTER);
+		charMappingSavedLbl.setVerticalAlignment(JTextField.TOP);
+		charMappingSavedLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_SAVED_IMG_LBL_W, GlobalConstants.CHAR_SAVED_IMG_LBL_H ) );
+		charMappingSavedLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_SAVED_IMG_LBL_W, GlobalConstants.CHAR_SAVED_IMG_LBL_H ) );
+		//charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
+		//charMappingSavedLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		
 		JPanel mappingsImgPanel = new JPanel();
+		mappingsImgPanel.add(charMappingIndexLbl);
 		mappingsImgPanel.add(charImgLbl);
 		mappingsImgPanel.add(mappingIcon);
 		mappingsImgPanel.add(charMappingTxt);
-		mappingsImgPanel.add(charCodeTxt);
+		mappingsImgPanel.add(charMappingSavedLbl);
+		//mappingsImgPanel.add(charCodeTxt);
 		mappingsImgPanel.setPreferredSize( new Dimension( GlobalConstants.MAPPINGS_IMG_PANEL_W, GlobalConstants.MAPPINGS_IMG_PANEL_H ) );
 		mappingsImgPanel.setMinimumSize( new Dimension( GlobalConstants.MAPPINGS_IMG_PANEL_W, GlobalConstants.MAPPINGS_IMG_PANEL_H ) );
 		mappingsImgPanel.setBackground( Color.white );
-		mappingsImgPanel.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		//mappingsImgPanel.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		JButton prevBtn = new JButton( GlobalConstants.PREV_MAPPING_ACTION);
 		JButton nextBtn = new JButton( GlobalConstants.NEXT_MAPPING_ACTION);
@@ -400,6 +427,7 @@ public class UIContainer {
 			resolveMappingsPanel.setMinimumSize( new Dimension( GlobalConstants.SIN_MAPPINGS_PANEL_W, GlobalConstants.SIN_MAPPINGS_PANEL_H ) );
 		}
 		
+		setUnrecognizedCharDetails();
 		
 		JOptionPane.showConfirmDialog( mainFrame, resolveMappingsPanel, GlobalConstants.RESOLVE_TITLE, JOptionPane.CLOSED_OPTION );
 		
@@ -550,14 +578,12 @@ public class UIContainer {
 	private void prev() {
 		if( navIndex > 0 ) navIndex--;
 		setUnrecognizedCharDetails();
-		charMappingTxt.setText( charMappings[navIndex] );
 	}
 	
 	
 	private void next() {
 		if( navIndex < unrecognizedChars.size() - 1 ) navIndex++;
 		setUnrecognizedCharDetails();
-		charMappingTxt.setText( charMappings[navIndex] );
 	}
 	
 	
@@ -582,6 +608,9 @@ public class UIContainer {
 				
 				if(success) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
+					savedMappingsArr[navIndex] = true;
+					charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
+					
 				} else {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG1, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
 				}
@@ -613,6 +642,7 @@ public class UIContainer {
 					
 					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
 						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+						savedMappingsArr[i] = true;
 						savedMappings++;
 					}
 					
@@ -621,6 +651,7 @@ public class UIContainer {
 					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
 						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
 						ScanUtils.deleteProperty( mappingsFile, newCharCode ); // remove old mapping from mappings file
+						savedMappingsArr[i] = true;
 						savedMappings++;
 					}
 				}
@@ -640,6 +671,7 @@ public class UIContainer {
 	private void clear() {
 		charMappings[navIndex] = null;
 		charMappingTxt.setText("");
+		charMappingIndexLbl.setText("");
 	}
 	
 	
@@ -648,6 +680,7 @@ public class UIContainer {
 		if( resp == 0 ) { // OK
 			charMappings = new String[ unrecognizedChars.size() ];
 			charMappingTxt.setText("");
+			charMappingIndexLbl.setText("");
 		}
 	}
 	
@@ -666,7 +699,14 @@ public class UIContainer {
 		//BufferedImage charImg2 = new BufferedImage( scaledCharImg.getWidth(null), scaledCharImg.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 		ImageIcon thumbnailIcon = new ImageIcon(charImg);
 		charImgLbl.setIcon(thumbnailIcon);
+		charImgLbl.setToolTipText( c.getCharCode() );
+		charMappingTxt.setText( charMappings[navIndex] );
 		charCodeTxt.setText( c.getCharCode() );
+		charMappingIndexLbl.setText( String.valueOf(navIndex+1) );
+		charMappingSavedLbl.setIcon(null);
+		if( savedMappingsArr[navIndex] ) {
+			charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
+		}
 	}
 	
 	
