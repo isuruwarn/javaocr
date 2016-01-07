@@ -89,8 +89,8 @@ public class UIContainer {
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectAlphabet = new JComboBox<String>(alphabets);
 		selectAlphabet.addActionListener( mainListener );
-		selectAlphabet.setSelectedItem( String.valueOf( GlobalConstants.SINHALA ) ); // set a default value
-		mappingsFile = GlobalConstants.SIN_MAP_FILE; // set a default value
+		selectAlphabet.setSelectedItem( String.valueOf( GlobalConstants.ENGLISH ) ); // set a default value
+		mappingsFile = GlobalConstants.ENG_MAP_FILE; // set a default value
 		
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
@@ -402,7 +402,11 @@ public class UIContainer {
 		
 		
 		JOptionPane.showConfirmDialog( mainFrame, resolveMappingsPanel, GlobalConstants.RESOLVE_TITLE, JOptionPane.CLOSED_OPTION );
+		
+		scan(); // refresh
+		
 	}
+	
 	
 	// ******************************
 	// end MainOCRListener methods 
@@ -542,40 +546,59 @@ public class UIContainer {
 	// start PopupListener methods 
 	// ******************************
 	
+	
 	private void prev() {
 		if( navIndex > 0 ) navIndex--;
 		setUnrecognizedCharDetails();
 		charMappingTxt.setText( charMappings[navIndex] );
 	}
 	
+	
 	private void next() {
-		if( navIndex < unrecognizedChars.size() ) navIndex++;
+		if( navIndex < unrecognizedChars.size() - 1 ) navIndex++;
 		setUnrecognizedCharDetails();
 		charMappingTxt.setText( charMappings[navIndex] );
 	}
 	
+	
 	private void save() {
+		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
 		String newCharValue = charMappingTxt.getText();
+		
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
+			
 			String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
-			if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
-				// TODO: add new mapping
-			} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we have a new value
-				// TODO: update existing mapping
+			
+			if ( existingCharValue != null && !existingCharValue.isEmpty() && newCharValue.equals(existingCharValue) ) { // mapping already exists
+				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.MAPPING_EXISTS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
+			
+			} else {
+				
+				// create new mapping or update existing mapping
+				boolean success = ScanUtils.createOrModifyProperty( mappingsFile, newCharCode, newCharValue );
+				
+				if(success) {
+					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
+				} else {
+					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG1, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
+				}
 			}
+			
 		} else {
-			// TODO: show error message
+			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG2, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
 		}
 	}
 	
 	
 	private void saveAll() {
 		
-		StringBuilder newMappings = new StringBuilder(); // holds new or modified char mappings
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
+		int savedMappings = 0;
+		StringBuilder newMappings = new StringBuilder(); // holds new or modified char mappings
+		
 		
 		for( int i=0; i<charMappings.length; i++ ) {
 			
@@ -583,25 +606,34 @@ public class UIContainer {
 			
 			if ( newCharValue != null && !newCharValue.isEmpty() ) {
 				
-				String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
+				String newCharCode = unrecognizedChars.get(i).getCharCode();
 				String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
 					
 					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
 						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+						savedMappings++;
 					}
 					
-				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we have a new value
+				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
 					
 					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
 						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
-						// TODO: remove old mapping from mappings file
+						ScanUtils.deleteProperty( mappingsFile, newCharCode ); // remove old mapping from mappings file
+						savedMappings++;
 					}
 				}
 			}
 		}
-		ScanUtils.appendToFile( newMappings, mappingsFile );
+		
+		boolean success = ScanUtils.appendToFile( newMappings, mappingsFile );
+		
+		if(success) {
+			JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
+		} else {
+			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.ERROR_MESSAGE );
+		}
 	}
 	
 	
@@ -609,10 +641,14 @@ public class UIContainer {
 		charMappings[navIndex] = null;
 		charMappingTxt.setText("");
 	}
-
+	
+	
 	private void clearAll() {
-		charMappings = new String[ unrecognizedChars.size() ];
-		charMappingTxt.setText("");
+		int resp = JOptionPane.showConfirmDialog( mainFrame, GlobalConstants.CLEAR_ALL_MAPPINGS_CONF_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.CANCEL_OPTION );
+		if( resp == 0 ) { // OK
+			charMappings = new String[ unrecognizedChars.size() ];
+			charMappingTxt.setText("");
+		}
 	}
 	
 	

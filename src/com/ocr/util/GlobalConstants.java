@@ -18,12 +18,6 @@ public class GlobalConstants {
 	public static final String SIN_MAP_FILE = "files/sin15.map";
 	
 	
-	// text strings
-	public static final String TITLE = "Java OCR";
-	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
-	public static final String STAT_LBL_TXT_STR = "Lines: %d     Characters: %d     Unrecognized Characters: %d";
-	
-	
 	// main application frame
 	public static final int MAIN_FRAME_W = 700;
 	public static final int MAIN_FRAME_H = 850;
@@ -111,9 +105,24 @@ public class GlobalConstants {
 	public static final int CHAR_MAPPINGS_SIN_FONT_SIZE = 35;
 	
 	
+	// text strings
+	public static final String TITLE = "Java OCR";
+	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
+	public static final String STAT_LBL_TXT_STR = "Lines: %d     Characters: %d     Unrecognized Characters: %d";
+	public static final String SAVE_MAPPING_TITLE = "Save mapping";
+	public static final String SAVE_MULTIPLE_MAPPPINGS_TITLE = "Save multiple mappings";
+	public static final Object MAPPING_EXISTS_MSG = "Mapping already exists";
+	public static final Object SAVE_MAPPPING_SUCCESS_MSG = "Mapping successfully saved";
+	public static final Object SAVE_MAPPPING_ERROR_MSG1 = "Error while saving mapping. Please try again.";
+	public static final Object SAVE_MAPPPING_ERROR_MSG2 = "Please enter a value";
+	public static final String SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG = "%d mappings were successfully saved";
+	public static final Object SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG = "Error while saving mulitple mappings. Please try again.";
+	public static final String CLEAR_ALL_MAPPINGS_CONF_MSG = "Are you sure you want to clear all unsaved mappings in current session?";
+	
 	// for debugging
-	public static final String SAMPLE_IMG_FILENAME = "img/sampleImg8.png";
+	public static final String SAMPLE_IMG_FILENAME = "img/sampleImg10.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
-		
+	
+	
 	
 }

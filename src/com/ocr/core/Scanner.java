@@ -1,9 +1,10 @@
 package com.ocr.core;
 
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Properties;
+
+import com.ocr.util.ScanUtils;
 
 
 
@@ -293,7 +294,7 @@ public class Scanner {
 					if( unrecognizedCharCodes.indexOf( c.getCharCode() ) == -1 ) { // eliminate duplicates
 						unrecognizedCharCodes.add( c.getCharCode() );
 						unrecognizedChars.add(c);
-						System.out.println(c.getCharCode());
+						//System.out.println(c.getCharCode());
 					}
 					
 				} else {
@@ -475,16 +476,10 @@ public class Scanner {
 	 */
 	public String getCharValueFromMap( String mapFile, String charCode ) {
 		String c = null;
-		try {
-			if( charMap == null ) {
-				charMap = new Properties();
-				FileInputStream in = new FileInputStream(mapFile);
-				charMap.load(in);
-			}
-			c = charMap.getProperty(charCode);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if( charMap == null ) {
+			charMap = ScanUtils.loadPropertiesFile(mapFile);
 		}
+		c = charMap.getProperty(charCode);
 		return c;
 	}
 	
@@ -492,13 +487,7 @@ public class Scanner {
 	
 	
 	public void relaodCharMap( String mapFile ) {
-		try {
-			charMap = new Properties();
-			FileInputStream in = new FileInputStream(mapFile);
-			charMap.load(in);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		charMap = ScanUtils.loadPropertiesFile(mapFile);
 	}
 	
 	

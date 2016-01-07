@@ -7,12 +7,16 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
@@ -147,11 +151,11 @@ public class ScanUtils {
 	
 	/**
 	 * 
-	 * 
-	 * @param s
+	 * @param sb
 	 * @param outputFile
+	 * @return
 	 */
-	public static void appendToFile( StringBuilder sb, String outputFile ) {
+	public static boolean appendToFile( StringBuilder sb, String outputFile ) {
 		byte data[] = sb.toString().getBytes();
 	    Path p = Paths.get(outputFile);
 	    try ( OutputStream out = new BufferedOutputStream(
@@ -159,8 +163,33 @@ public class ScanUtils {
 	    		)
 	    ) {
 	    	out.write( data, 0, data.length );
+	    	return true;
 	    } catch (IOException e) {
 	    	e.printStackTrace();
+	    	return false;
+	    }
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @param s
+	 * @param outputFile
+	 * @return
+	 */
+	public static boolean writeToFile( StringBuilder s, String outputFile ) {
+		byte data[] = s.toString().getBytes();
+	    Path p = Paths.get(outputFile);
+	    try ( OutputStream out = new BufferedOutputStream(
+	    		Files.newOutputStream( p, CREATE, TRUNCATE_EXISTING ) 
+	    		)
+	    ) {
+	    	out.write( data, 0, data.length );
+	    	return true;
+	    } catch (IOException e) {
+	    	e.printStackTrace();
+	    	return false;
 	    }
 	}
 	
@@ -169,24 +198,74 @@ public class ScanUtils {
 	/**
 	 * 
 	 * 
-	 * @param s
-	 * @param outputFile
+	 * @param propFilePath
+	 * @return
 	 */
-	public static void writeToFile( StringBuilder s, String outputFile ) {
-		byte data[] = s.toString().getBytes();
-	    Path p = Paths.get(outputFile);
-	    try ( OutputStream out = new BufferedOutputStream(
-	    		Files.newOutputStream( p, CREATE, TRUNCATE_EXISTING ) 
-	    		)
-	    ) {
-	    	out.write( data, 0, data.length );
-	    } catch (IOException e) {
-	    	e.printStackTrace();
-	    }
+	public static Properties loadPropertiesFile( String propFilePath ) {
+		Properties props = null;
+		try {
+			props = new Properties();
+			FileInputStream in = new FileInputStream(propFilePath);
+			props.load(in);
+			in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return props;
 	}
 	
 	
 	
+	
+	/**
+	 * Creates or modifies a single property of the given properties file
+	 * 
+	 * @param propFilePath
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public static boolean createOrModifyProperty( String propFilePath, String key, String value ) {
+		Properties props = loadPropertiesFile(propFilePath);
+		try {
+			FileOutputStream out = new FileOutputStream(propFilePath);
+			props.setProperty( key, value );
+			props.store(out, null);
+			out.close();
+			return true;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @param propFilePath
+	 * @param key
+	 * @return 
+	 */
+	public static boolean deleteProperty( String propFilePath, String key ) {
+		Properties props = loadPropertiesFile(propFilePath);
+		try {
+			FileOutputStream out = new FileOutputStream(propFilePath);
+			props.remove(key);
+			props.store(out, null);
+			out.close();
+			return true;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 	
 
 }
