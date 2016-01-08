@@ -25,9 +25,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
+import javax.swing.JTextPane;
 
 import com.ocr.core.Char;
 import com.ocr.core.Scanner;
@@ -60,8 +59,8 @@ public class UIContainer {
 	private JButton resolveBtn;
 	private JFileChooser jfc;
 	private JLabel statusLbl;
-	private JTextComponent textPane;
-	//private JEditorPane jEditorPane;
+	//private JTextArea textPane;
+	private JTextPane textPane;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
@@ -168,25 +167,11 @@ public class UIContainer {
 		buttonPanel.add( statusLbl, statusLblGridCons );
 		
 		// main text area
-        textPane = new JTextArea();
+        //textPane = new JTextArea();
+		textPane = new JTextPane();
         textPane.setEditable(true);
         textPane.setFont(mainFont);
-        //textPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
-        //textPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
         
-//		HTMLEditorKit kit = new HTMLEditorKit(); // add a HTMLEditorKit to the editor pane
-//		Document doc = kit.createDefaultDocument();
-//		jEditorPane = new JEditorPane(); // create a JEditorPane
-//		jEditorPane.setEditable(false); // make it read-only
-//		jEditorPane.setEditorKit(kit);
-//		jEditorPane.setDocument(doc);
-//		jEditorPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
-//		jEditorPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
-//		jEditorPane.setText("");
-//		jEditorPane.setFont(mainFont);
-		
-		//JScrollPane mainScrollPane = new JScrollPane(jEditorPane); // now add it to a scroll pane
-		
         JScrollPane mainScrollPane = new JScrollPane(textPane);
         mainScrollPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
         mainScrollPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
@@ -279,25 +264,10 @@ public class UIContainer {
 		inputImage = ScanUtils.loadImage( imgFile );
 		scn = new Scanner();
 		StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
-		//textPane.setText( "<html>" + sb.toString() + "</html>" );
 		textPane.setText(sb.toString());
-		//jEditorPane.setText("<p>hello</p>");
-		/*
-		// output result to file and load textpane using this file
-		String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
-		//ScanUtils.writeToFile( sb, outputFile );
-		File file = new File( outputFile );
-		try {
-            FileReader fr = new FileReader( file.toString() );
-            textPane.read(fr, null);
-            fr.close();
-        }
-        catch (IOException ioe) {
-            System.err.println(ioe);
-        }
-		*/
 		
 		// output result to text file
+		//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
 		String outputFile = txtOutputFileName.getText();
 		ScanUtils.writeToFile( sb, outputFile );
 		
@@ -475,7 +445,6 @@ public class UIContainer {
 		resolveMappingsPanel.add( getNumButtonsPanel(), numBtnPanelGridCons );
 		resolveMappingsPanel.add( getSpecialCharButtonsPanel(), spCharBtnPanelGridCons );
 		resolveMappingsPanel.add( getCharButtonsPanel(), charBtnPanelGridCons );
-		resolveMappingsPanel.addKeyListener( new ResolveMappingsKeyListener() );
 		//resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
 		
 		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
@@ -595,6 +564,7 @@ public class UIContainer {
 		@Override
 		public void keyTyped(KeyEvent e) {
 			String inputKey = String.valueOf( e.getKeyChar() );
+			System.out.println(inputKey);
 		}
 
 		@Override
@@ -670,7 +640,7 @@ public class UIContainer {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
-		String newCharValue = charMappings[navIndex];//charMappingTxt.getText();
+		String newCharValue = charMappings[navIndex];
 		
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
@@ -705,7 +675,6 @@ public class UIContainer {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		int savedMappings = 0;
-		//StringBuilder newMappings = new StringBuilder(); // holds new or modified char mappings
 		HashMap<String,String> newMappings = new HashMap<String,String>(); // holds new or modified char mappings
 		
 		for( int i=0; i<charMappings.length; i++ ) {
@@ -719,27 +688,20 @@ public class UIContainer {
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
 					
-					//if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
-						//newMappings.append( newCharCode + "=" + newCharValue + "\n" );
-						newMappings.put( newCharCode, newCharValue );
-						savedMappingsArr[i] = true;
-						savedMappings++;
-					//}
+					newMappings.put( newCharCode, newCharValue );
+					savedMappingsArr[i] = true;
+					savedMappings++;
 					
 				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
 					
-					//if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
-						//newMappings.append( newCharCode + "=" + newCharValue + "\n" );
-						newMappings.put( newCharCode, newCharValue );
-						ScanUtils.deleteProperty( mappingsFile, newCharCode ); // remove old mapping from mappings file
-						savedMappingsArr[i] = true;
-						savedMappings++;
-					//}
+					newMappings.put( newCharCode, newCharValue );
+					ScanUtils.deleteProperty( mappingsFile, newCharCode ); // remove old mapping from mappings file
+					savedMappingsArr[i] = true;
+					savedMappings++;
 				}
 			}
 		}
 		
-		//boolean success = ScanUtils.appendToFile( newMappings, mappingsFile );
 		boolean success = ScanUtils.setMultipleProperties( mappingsFile, newMappings );
 		
 		if(success) {
