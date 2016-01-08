@@ -24,7 +24,7 @@ public class GlobalConstants {
 	
 	// main application frame
 	public static final int MAIN_FRAME_W = 700;
-	public static final int MAIN_FRAME_H = 850;
+	public static final int MAIN_FRAME_H = 880;
 
 	
 	// panel dimensions
@@ -62,8 +62,8 @@ public class GlobalConstants {
 	public static final int STAT_LBL_W = 600;
 	public static final int STAT_LBL_H = 25;
 	
-	public static final int CHAR_IDX_LBL_W = 50;
-	public static final int CHAR_IDX_LBL_H = 100;
+	public static final int CHAR_IDX_LBL_W = 20;
+	public static final int CHAR_IDX_LBL_H = 25;
 	
 	public static final int CHAR_IMG_LBL_W = 100;
 	public static final int CHAR_IMG_LBL_H = 100;
@@ -73,7 +73,7 @@ public class GlobalConstants {
 	
 
 	// text box dimensions
-	public static final int MAIN_TXT_AREA_W = 600;
+	public static final int MAIN_TXT_AREA_W = 650;
 	public static final int MAIN_TXT_AREA_H = 650;
 	
 	public static final int INPUT_IMG_PATH_TXT_W = 300;
@@ -82,8 +82,8 @@ public class GlobalConstants {
 	public static final int CHAR_MAP_TXT_W = 100;
 	public static final int CHAR_MAP_TXT_H = 100;
 	
-	public static final int CHAR_CODE_TXT_W = 350;
-	public static final int CHAR_CODE_TXT_H = 25;
+	public static final int CHAR_INFO_TXT_W = 360;
+	public static final int CHAR_INFO_TXT_H = 25;
 	
 	
 	// action commands
@@ -108,7 +108,8 @@ public class GlobalConstants {
 	
 	
 	// font sizes
-	public static final int MAIN_TEXT_FONT_SIZE = 12;
+	public static final int MAIN_TEXT_ENG_FONT_SIZE = 12;
+	public static final int MAIN_TEXT_SIN_FONT_SIZE = 20;
 	public static final int SIN_CHAR_BUTTON_FONT_SIZE = 15;
 	public static final int REG_CHAR_BUTTON_FONT_SIZE = 12;
 	public static final int CHAR_MAPPINGS_ENG_FONT_SIZE = 35;
@@ -118,7 +119,7 @@ public class GlobalConstants {
 	// text strings
 	public static final String TITLE = "Java OCR";
 	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
-	public static final String STAT_LBL_TXT_STR = "Lines: %d     Characters: %d     Unrecognized Characters: %d";
+	public static final String STAT_LBL_TXT_STR = "Lines: %d     Characters (with spaces): %d     Unrecognized Characters: %d";
 	public static final String SAVE_MAPPING_TITLE = "Save mapping";
 	public static final String SAVE_MULTIPLE_MAPPPINGS_TITLE = "Save multiple mappings";
 	public static final Object MAPPING_EXISTS_MSG = "Mapping already exists";
@@ -130,7 +131,7 @@ public class GlobalConstants {
 	public static final String CLEAR_ALL_MAPPINGS_CONF_MSG = "Are you sure you want to clear all unsaved mappings in current session?";
 	
 	// for debugging
-	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/sampleImg11.png";
+	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/sampleImg1.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	
 	

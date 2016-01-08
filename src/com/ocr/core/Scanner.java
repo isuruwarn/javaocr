@@ -99,7 +99,7 @@ public class Scanner {
 			int width = image.getWidth();
 			bitmap = new int [height] [width];
 			
-			System.out.println("Width: " + width + ", Height: " + height );
+			//System.out.println("Width: " + width + ", Height: " + height );
 			
 			int lineHeight = 0;
 			int blankLineHeight = 0;

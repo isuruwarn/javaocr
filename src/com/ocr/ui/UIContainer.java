@@ -8,9 +8,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -57,9 +60,10 @@ public class UIContainer {
 	private JButton resolveBtn;
 	private JFileChooser jfc;
 	private JLabel statusLbl;
-	private JTextComponent textpPane;
+	private JTextComponent textPane;
+	//private JEditorPane jEditorPane;
 	private JTextField txtInputImagePath;
-	//private JTextField txtOutputFileName;
+	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
 	
 	
@@ -70,7 +74,6 @@ public class UIContainer {
 	public UIContainer() {
 		
 		MainOCRListener mainListener = new MainOCRListener();
-		mainFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_FONT_SIZE );
 		
 		fileBtn = new JButton( GlobalConstants.CHOOSE_FILE_ACTION );
 		fileBtn.addActionListener(mainListener);
@@ -79,18 +82,19 @@ public class UIContainer {
 		txtInputImagePath = new JTextField();
 		txtInputImagePath.setPreferredSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		txtInputImagePath.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
-		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
 		//txtInputImagePath.setBorder( BorderFactory.createLineBorder( Color.gray ) ); // for debugging
 		
-		//txtOutputFileName = new JTextField();
-		//txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
+		// TODO: file chooser for output file
+		txtOutputFileName = new JTextField();
+		txtOutputFileName.setPreferredSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
+		txtOutputFileName.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
+		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
+		//txtOutputFileName.setBorder( BorderFactory.createLineBorder( Color.gray ) ); // for debugging
 		
 		// TODO: read from file
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectAlphabet = new JComboBox<String>(alphabets);
 		selectAlphabet.addActionListener( mainListener );
-		selectAlphabet.setSelectedItem( String.valueOf( GlobalConstants.ENGLISH ) ); // set a default value
-		mappingsFile = GlobalConstants.ENG_MAP_FILE; // set a default value
 		
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
@@ -123,6 +127,11 @@ public class UIContainer {
 		txtInputImgPathGridCons.gridy = 0;
 		txtInputImgPathGridCons.insets = new Insets(30,0,10,0);
 		
+		GridBagConstraints txtOutputFilePathGridCons = new GridBagConstraints();
+		txtOutputFilePathGridCons.gridx = 1;
+		txtOutputFilePathGridCons.gridy = 1;
+		txtOutputFilePathGridCons.insets = new Insets(0,0,10,0);
+		
 		GridBagConstraints selectDialectGridCons = new GridBagConstraints();
 		selectDialectGridCons.gridx = 2;
 		selectDialectGridCons.gridy = 0;
@@ -130,14 +139,14 @@ public class UIContainer {
 		
 		GridBagConstraints btnToolBarGridCons = new GridBagConstraints();
 		btnToolBarGridCons.gridx = 0;
-		btnToolBarGridCons.gridy = 1;
+		btnToolBarGridCons.gridy = 2;
 		btnToolBarGridCons.gridwidth = 3;
 		btnToolBarGridCons.insets = new Insets(0,10,10,10);
 		btnToolBarGridCons.anchor = GridBagConstraints.CENTER;
 		
 		GridBagConstraints statusLblGridCons = new GridBagConstraints();
 		statusLblGridCons.gridx = 0;
-		statusLblGridCons.gridy = 2;
+		statusLblGridCons.gridy = 3;
 		statusLblGridCons.gridwidth = 3;
 		statusLblGridCons.insets = new Insets(0,0,0,0);
 		statusLblGridCons.anchor = GridBagConstraints.PAGE_END;
@@ -151,20 +160,37 @@ public class UIContainer {
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout( new GridBagLayout() );
-		buttonPanel.add(fileBtn, fileBtnGridCons);
-		buttonPanel.add(txtInputImagePath, txtInputImgPathGridCons);
-		buttonPanel.add(selectAlphabet, selectDialectGridCons);
-		buttonPanel.add(btnToolBar, btnToolBarGridCons);
-		buttonPanel.add(statusLbl, statusLblGridCons);
+		buttonPanel.add( fileBtn, fileBtnGridCons );
+		buttonPanel.add( txtInputImagePath, txtInputImgPathGridCons );
+		buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
+		buttonPanel.add( selectAlphabet, selectDialectGridCons );
+		buttonPanel.add( btnToolBar, btnToolBarGridCons );
+		buttonPanel.add( statusLbl, statusLblGridCons );
 		
 		// main text area
-        textpPane = new JTextArea();
-        textpPane.setEditable(false);
-        textpPane.setFont(mainFont);
-        textpPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
-        textpPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
-		JScrollPane mainScrollPane = new JScrollPane(textpPane);
+        textPane = new JTextArea();
+        textPane.setEditable(true);
+        textPane.setFont(mainFont);
+        //textPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
+        //textPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
+        
+//		HTMLEditorKit kit = new HTMLEditorKit(); // add a HTMLEditorKit to the editor pane
+//		Document doc = kit.createDefaultDocument();
+//		jEditorPane = new JEditorPane(); // create a JEditorPane
+//		jEditorPane.setEditable(false); // make it read-only
+//		jEditorPane.setEditorKit(kit);
+//		jEditorPane.setDocument(doc);
+//		jEditorPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
+//		jEditorPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
+//		jEditorPane.setText("");
+//		jEditorPane.setFont(mainFont);
 		
+		//JScrollPane mainScrollPane = new JScrollPane(jEditorPane); // now add it to a scroll pane
+		
+        JScrollPane mainScrollPane = new JScrollPane(textPane);
+        mainScrollPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
+        mainScrollPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
+        
         JPanel mainPanel = new JPanel();
         mainPanel.add(buttonPanel);
         mainPanel.add(mainScrollPane);
@@ -179,6 +205,11 @@ public class UIContainer {
 		mainFrame.setVisible(true);
 		
 		jfc = new JFileChooser();
+		
+		// set a default values
+		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
+		selectAlphabet.setSelectedItem( GlobalConstants.SINHALA ); 
+		
 	}
 	
 	
@@ -205,12 +236,12 @@ public class UIContainer {
 					break;
 					
 				case GlobalConstants.COPY_ACTION:
-					textpPane.selectAll();
-					textpPane.copy();
+					textPane.selectAll();
+					textPane.copy();
 					break;
 					
 				case GlobalConstants.CLEAR_ACTION:
-					textpPane.setText("");
+					textPane.setText("");
 					statusLbl.setText("");
 					resolveBtn.setEnabled(false);
 					break;
@@ -248,13 +279,35 @@ public class UIContainer {
 		inputImage = ScanUtils.loadImage( imgFile );
 		scn = new Scanner();
 		StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
-		textpPane.setText( sb.toString() );
+		//textPane.setText( "<html>" + sb.toString() + "</html>" );
+		textPane.setText(sb.toString());
+		//jEditorPane.setText("<p>hello</p>");
+		/*
+		// output result to file and load textpane using this file
+		String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
+		//ScanUtils.writeToFile( sb, outputFile );
+		File file = new File( outputFile );
+		try {
+            FileReader fr = new FileReader( file.toString() );
+            textPane.read(fr, null);
+            fr.close();
+        }
+        catch (IOException ioe) {
+            System.err.println(ioe);
+        }
+		*/
 		
+		// output result to text file
+		String outputFile = txtOutputFileName.getText();
+		ScanUtils.writeToFile( sb, outputFile );
+		
+		// update status label
 		int linesRead = scn.getLinesRead();
 		int charsRead = scn.getCharsRead();
 		int noOfUnrecognizedChars = scn.getUnrecognizedChars().size();
 		statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, linesRead, charsRead, noOfUnrecognizedChars ) );
 		
+		// get any unrecognized chars and enable resolve button if needed
 		unrecognizedChars = scn.getUnrecognizedChars();
 		if( unrecognizedChars.size() > 0 ) {
 			resolveBtn.setEnabled(true);
@@ -270,9 +323,12 @@ public class UIContainer {
 		String selection = (String) selectBox.getSelectedItem();
 		if( selection.equals( GlobalConstants.ENGLISH ) ) {
 			mappingsFile = GlobalConstants.ENG_MAP_FILE;
+			mainFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE );
 		} else if( selection.equals( GlobalConstants.SINHALA ) ) {
 			mappingsFile = GlobalConstants.SIN_MAP_FILE;
+			mainFont = new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_SIN_FONT_SIZE );
 		}
+		textPane.setFont(mainFont);
 	}
 	
 	
@@ -281,7 +337,7 @@ public class UIContainer {
 	private JLabel charImgLbl;
 	private JLabel charMappingIndexLbl;
 	private JLabel charMappingSavedLbl;
-	private JTextField charCodeTxt;
+	private JTextField charInfoTxt;
 	private JTextField charMappingTxt;
 	private CharButtonsListener charButtonsListener;
 	
@@ -298,7 +354,7 @@ public class UIContainer {
 		
 		charMappingIndexLbl = new JLabel();
 		charMappingIndexLbl.setHorizontalAlignment(JTextField.LEFT);
-		charMappingIndexLbl.setVerticalAlignment(JTextField.TOP);
+		charMappingIndexLbl.setVerticalAlignment(JTextField.CENTER);
 		charMappingIndexLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
 		charMappingIndexLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
 		//charMappingIndexLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
@@ -309,15 +365,16 @@ public class UIContainer {
 		charImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
 		//charImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
-		charCodeTxt = new JTextField();
-		charCodeTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_CODE_TXT_W, GlobalConstants.CHAR_CODE_TXT_H ) );
-		charCodeTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_CODE_TXT_W, GlobalConstants.CHAR_CODE_TXT_H ) );
-		charCodeTxt.setHorizontalAlignment(JTextField.CENTER);
-		charCodeTxt.setEnabled(true);
-		charCodeTxt.setBorder( BorderFactory.createLineBorder( Color.white ) );
+		charInfoTxt = new JTextField();
+		charInfoTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
+		charInfoTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
+		charInfoTxt.setAlignmentX(JTextField.LEFT);
+		charInfoTxt.setAlignmentY(JTextField.TOP);
+		charInfoTxt.setEnabled(true);
+		charInfoTxt.setBorder( BorderFactory.createLineBorder( Color.white ) );
 		
 		JLabel mappingIcon = new JLabel("--->");
-		mappingIcon.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.MAIN_TEXT_FONT_SIZE ) );
+		mappingIcon.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE ) );
 		//mappingIcon.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		charMappingTxt = new JTextField();
@@ -336,20 +393,20 @@ public class UIContainer {
 		charMappingSavedLbl.setVerticalAlignment(JTextField.TOP);
 		charMappingSavedLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_SAVED_IMG_LBL_W, GlobalConstants.CHAR_SAVED_IMG_LBL_H ) );
 		charMappingSavedLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_SAVED_IMG_LBL_W, GlobalConstants.CHAR_SAVED_IMG_LBL_H ) );
-		//charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
 		//charMappingSavedLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		JPanel mappingsImgPanel = new JPanel();
 		mappingsImgPanel.add(charMappingIndexLbl);
+		mappingsImgPanel.add(charInfoTxt);
 		mappingsImgPanel.add(charImgLbl);
 		mappingsImgPanel.add(mappingIcon);
 		mappingsImgPanel.add(charMappingTxt);
 		mappingsImgPanel.add(charMappingSavedLbl);
-		//mappingsImgPanel.add(charCodeTxt);
+		//mappingsImgPanel.add(charInfoTxt);
 		mappingsImgPanel.setPreferredSize( new Dimension( GlobalConstants.MAPPINGS_IMG_PANEL_W, GlobalConstants.MAPPINGS_IMG_PANEL_H ) );
 		mappingsImgPanel.setMinimumSize( new Dimension( GlobalConstants.MAPPINGS_IMG_PANEL_W, GlobalConstants.MAPPINGS_IMG_PANEL_H ) );
 		mappingsImgPanel.setBackground( Color.white );
-		//mappingsImgPanel.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		mappingsImgPanel.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		JButton prevBtn = new JButton( GlobalConstants.PREV_MAPPING_ACTION);
 		JButton nextBtn = new JButton( GlobalConstants.NEXT_MAPPING_ACTION);
@@ -418,7 +475,9 @@ public class UIContainer {
 		resolveMappingsPanel.add( getNumButtonsPanel(), numBtnPanelGridCons );
 		resolveMappingsPanel.add( getSpecialCharButtonsPanel(), spCharBtnPanelGridCons );
 		resolveMappingsPanel.add( getCharButtonsPanel(), charBtnPanelGridCons );
+		resolveMappingsPanel.addKeyListener( new ResolveMappingsKeyListener() );
 		//resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
+		
 		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
 			resolveMappingsPanel.setPreferredSize( new Dimension( GlobalConstants.ENG_MAPPINGS_PANEL_W, GlobalConstants.ENG_MAPPINGS_PANEL_H ) );
 			resolveMappingsPanel.setMinimumSize( new Dimension( GlobalConstants.ENG_MAPPINGS_PANEL_W, GlobalConstants.ENG_MAPPINGS_PANEL_H ) );
@@ -529,6 +588,26 @@ public class UIContainer {
 		}
 		
 	}
+	
+	
+	class ResolveMappingsKeyListener implements KeyListener {
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+			String inputKey = String.valueOf( e.getKeyChar() );
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			
+		}
+		
+	}
 
 
 	class PopupListener implements ActionListener {
@@ -591,7 +670,7 @@ public class UIContainer {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
-		String newCharValue = charMappingTxt.getText();
+		String newCharValue = charMappings[navIndex];//charMappingTxt.getText();
 		
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
@@ -604,7 +683,7 @@ public class UIContainer {
 			} else {
 				
 				// create new mapping or update existing mapping
-				boolean success = ScanUtils.createOrModifyProperty( mappingsFile, newCharCode, newCharValue );
+				boolean success = ScanUtils.setProperty( mappingsFile, newCharCode, newCharValue );
 				
 				if(success) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -626,8 +705,8 @@ public class UIContainer {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		int savedMappings = 0;
-		StringBuilder newMappings = new StringBuilder(); // holds new or modified char mappings
-		
+		//StringBuilder newMappings = new StringBuilder(); // holds new or modified char mappings
+		HashMap<String,String> newMappings = new HashMap<String,String>(); // holds new or modified char mappings
 		
 		for( int i=0; i<charMappings.length; i++ ) {
 			
@@ -640,25 +719,28 @@ public class UIContainer {
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
 					
-					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
-						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+					//if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
+						//newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+						newMappings.put( newCharCode, newCharValue );
 						savedMappingsArr[i] = true;
 						savedMappings++;
-					}
+					//}
 					
 				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
 					
-					if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
-						newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+					//if( newMappings.indexOf( newCharCode + "=" ) == -1 ) { // check for duplicates
+						//newMappings.append( newCharCode + "=" + newCharValue + "\n" );
+						newMappings.put( newCharCode, newCharValue );
 						ScanUtils.deleteProperty( mappingsFile, newCharCode ); // remove old mapping from mappings file
 						savedMappingsArr[i] = true;
 						savedMappings++;
-					}
+					//}
 				}
 			}
 		}
 		
-		boolean success = ScanUtils.appendToFile( newMappings, mappingsFile );
+		//boolean success = ScanUtils.appendToFile( newMappings, mappingsFile );
+		boolean success = ScanUtils.setMultipleProperties( mappingsFile, newMappings );
 		
 		if(success) {
 			JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -701,7 +783,7 @@ public class UIContainer {
 		charImgLbl.setIcon(thumbnailIcon);
 		charImgLbl.setToolTipText( c.getCharCode() );
 		charMappingTxt.setText( charMappings[navIndex] );
-		charCodeTxt.setText( c.getCharCode() );
+		//charInfoTxt.setText( c.getCharCode() );
 		charMappingIndexLbl.setText( String.valueOf(navIndex+1) );
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
