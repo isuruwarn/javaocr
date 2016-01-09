@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import com.ocr.util.ScanUtils;
+import com.ocr.util.Symbol;
 
 
 
@@ -67,7 +68,7 @@ public class Scanner {
 														// average RGB values greater than this will be saved as white pixels 
 	public static final int MIN_BLANKLINE_HEIGHT = 30;
 	public static final int MIN_WHITESPACE_WIDTH = 8; //TODO add as adjustable value in interface
-	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; 
+	public static final int VERTICAL_BLOCKS_PER_CHAR = 10; 
 	
 	private int linesRead = 0;
 	private int charsRead = 0;
@@ -270,6 +271,8 @@ public class Scanner {
 				continue;
 			}
 			
+			String kombuwa = ""; 
+			
 			for( Char c: l.getChars() ) {
 				
 				if( c.isWhiteSpace() ) {
@@ -298,7 +301,22 @@ public class Scanner {
 					}
 					
 				} else {
-					sb.append(s);
+					
+					if( kombuwa.length() > 0 ) {
+						
+						if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+							kombuwa += s;
+						} else {
+							sb.append( s + kombuwa );
+							kombuwa = "";
+						}
+						
+					} else if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+						kombuwa = s;
+						
+					} else {
+						sb.append(s);
+					}
 				}
 				
 			}
