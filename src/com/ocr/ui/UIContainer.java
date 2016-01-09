@@ -20,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -61,7 +62,6 @@ public class UIContainer {
 	private JButton resolveBtn;
 	private JFileChooser jfc;
 	private JLabel statusLbl;
-	//private JTextArea textPane;
 	private JTextPane textPane;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
@@ -170,7 +170,6 @@ public class UIContainer {
 		buttonPanel.add( statusLbl, statusLblGridCons );
 		
 		// main text area
-        //textPane = new JTextArea();
 		textPane = new JTextPane();
         textPane.setEditable(true);
         textPane.setFont(mainFont);
@@ -194,7 +193,7 @@ public class UIContainer {
 		
 		jfc = new JFileChooser();
 		
-		// set a default values
+		// set default values
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
 		selectAlphabet.setSelectedItem( GlobalConstants.SINHALA ); 
 		
@@ -265,25 +264,31 @@ public class UIContainer {
 		
 		String imgFile = txtInputImagePath.getText();
 		inputImage = ScanUtils.loadImage( imgFile );
-		scn = new Scanner();
-		StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
-		textPane.setText(sb.toString());
 		
-		// output result to text file
-		//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
-		String outputFile = txtOutputFileName.getText();
-		ScanUtils.writeToFile( sb, outputFile );
-		
-		// update status label
-		int linesRead = scn.getLinesRead();
-		int charsRead = scn.getCharsRead();
-		int noOfUnrecognizedChars = scn.getUnrecognizedChars().size();
-		statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, linesRead, charsRead, noOfUnrecognizedChars ) );
-		
-		// get any unrecognized chars and enable resolve button if needed
-		unrecognizedChars = scn.getUnrecognizedChars();
-		if( unrecognizedChars.size() > 0 ) {
-			resolveBtn.setEnabled(true);
+		if( inputImage == null ) {
+			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.ERROR_LOADING_IMG_MSG, GlobalConstants.ERROR_LOADING_IMG_TITLE, JOptionPane.ERROR_MESSAGE );
+			
+		} else {
+			scn = new Scanner();
+			StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
+			textPane.setText(sb.toString());
+			
+			// output result to text file
+			//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
+			String outputFile = txtOutputFileName.getText();
+			ScanUtils.writeToFile( sb, outputFile );
+			
+			// update status label
+			int linesRead = scn.getLinesRead();
+			int charsRead = scn.getCharsRead();
+			int noOfUnrecognizedChars = scn.getUnrecognizedChars().size();
+			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, linesRead, charsRead, noOfUnrecognizedChars ) );
+			
+			// get any unrecognized chars and enable resolve button if needed
+			unrecognizedChars = scn.getUnrecognizedChars();
+			if( unrecognizedChars.size() > 0 ) {
+				resolveBtn.setEnabled(true);
+			}
 		}
 	}
 	
@@ -321,7 +326,7 @@ public class UIContainer {
 	
 	private void resolve() {
 		
-		 
+		navIndex = 0;
 		unrecognizedChars = scn.getUnrecognizedChars();
 		charMappings = new String[ unrecognizedChars.size() ];
 		savedMappingsArr = new boolean[ unrecognizedChars.size() ];
@@ -359,9 +364,9 @@ public class UIContainer {
 		charMappingTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_MAP_TXT_W, GlobalConstants.CHAR_MAP_TXT_H ) );
 		charMappingTxt.setHorizontalAlignment(JTextField.CENTER);
 		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
-			charMappingTxt.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.CHAR_MAPPINGS_ENG_FONT_SIZE ) );
+			charMappingTxt.setFont( new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.CHAR_MAPPINGS_ENG_FONT_SIZE ) );
 		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.BOLD, GlobalConstants.CHAR_MAPPINGS_SIN_FONT_SIZE ) );
+			charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.CHAR_MAPPINGS_SIN_FONT_SIZE ) );
 		}
 		
 		charMappingSavedLbl = new JLabel();
@@ -463,14 +468,6 @@ public class UIContainer {
 		
 		setUnrecognizedCharDetails();
 		
-		/*JDialog dialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
-		//JFrame dialog = new JFrame( GlobalConstants.TITLE );
-		dialog.setName("MappingsDialog");
-		dialog.getContentPane().add(resolveMappingsPanel);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		dialog.pack();
-		dialog.setVisible(true);*/
-		
 		// set key event dispatcher
 		if( mappingsKeyEventDispatcher == null ) {
 			mappingsKeyEventDispatcher = new MappingsKeyEventDispatcher();
@@ -478,9 +475,18 @@ public class UIContainer {
 			manager.addKeyEventDispatcher(mappingsKeyEventDispatcher);
 		}
 		
-		JOptionPane.showConfirmDialog( mainFrame, resolveMappingsPanel, GlobalConstants.RESOLVE_TITLE, JOptionPane.CLOSED_OPTION );
+		JDialog dialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
+		dialog.getContentPane().add(resolveMappingsPanel);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.pack();
+		dialog.setVisible(true);
 		
-		navIndex = 0;
+		// TODO: check for unsaved mappings before close and inform user if needed
+		
+		// reset
+		mappingsKeyEventDispatcher = null;
+		KeyboardFocusManager.setCurrentKeyboardFocusManager(null);
+		
 		scan(); // re-scan to refresh
 		
 	}
@@ -586,46 +592,53 @@ public class UIContainer {
 	}
 	
 	
+	
 	class MappingsKeyEventDispatcher implements KeyEventDispatcher {
-        @Override
+        
+		@Override
         public boolean dispatchKeyEvent(KeyEvent e) {
             
-        	//Object obj = e.getSource();
-        	
-        	//if( obj instanceof JDialog ) {
-        		
-        		//JDialog srcDialog = (JDialog) obj;
-            	//String srcName = srcDialog.getName();
+        	if( e.getID() == KeyEvent.KEY_PRESSED ) {
             	
-	            //if( srcName.equals("MappingsDialog") && e.getID() == KeyEvent.KEY_PRESSED ) {
-        		if( e.getID() == KeyEvent.KEY_PRESSED ) {
-	            	char keyChar = e.getKeyChar();
-	                int keyCode = e.getKeyCode();
-	                System.out.println( "KEY PRESSED - " + keyChar + " " +  keyCode );
-	                
-	                if( keyCode == 37 ) {
-	                	prevMapping();
-	                	
-	                } else if( keyCode == 39 ) {
-	                	nextMapping();
-	                	
-	                } else if( keyCode >= 32 ) {
-	                	
-	                	String newChar = "";
-	                	
-	                	if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
-	                		newChar = String.valueOf(keyChar);
-	                		
-	                	} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-	                		newChar = Symbol.getSymbolForASCII( (int) keyChar );
-	                	}
-	                	setCharMappingText( newChar );
-	                }
-	                
-	            }
-        	//}
+        		char keyChar = e.getKeyChar();
+                int keyCode = e.getKeyCode();
+                //System.out.println( "KEY PRESSED - " + keyChar + " " +  keyCode );
+                
+        		if( keyCode == 8 ) {
+        			String currentStr = charMappings[navIndex] == null ? "" : charMappings[navIndex];
+        			String afterBackSpace = currentStr;
+        			if( currentStr.length() > 0 ) {
+        				afterBackSpace = currentStr.substring( 0, currentStr.length()-1 );
+        			}
+        			charMappings[navIndex] = afterBackSpace;
+        			charMappingTxt.setText( afterBackSpace );
+        			
+        		} else if( keyCode == 37 ) {
+                	prevMapping();
+                	
+                } else if( keyCode == 39 ) {
+                	nextMapping();
+                	
+                } else if( keyCode >= 32 ) {
+                	
+                	String newChar = "";
+                	
+                	if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
+                		newChar = String.valueOf(keyChar);
+                		
+                	} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+                		newChar = Symbol.getSymbolForASCII( (int) keyChar );
+                		if( newChar == null ) {
+                			newChar = String.valueOf(keyChar);
+                		}
+                	}
+                	setCharMappingText( newChar );
+                }
+                
+            }
             return false;
         }
+        
     }
 
 	
