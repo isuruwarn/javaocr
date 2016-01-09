@@ -6,10 +6,11 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -44,10 +45,11 @@ import com.ocr.util.Symbol;
  *
  */
 public class UIContainer {
-
+	
+	
+	private Scanner scn;
 	
 	private String mappingsFile;
-	private Scanner scn;
 	private BufferedImage inputImage;
 	
 	private Font mainFont;
@@ -65,6 +67,7 @@ public class UIContainer {
 	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
 	
+	private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
 	
 	
 	/**
@@ -318,6 +321,7 @@ public class UIContainer {
 	
 	private void resolve() {
 		
+		 
 		unrecognizedChars = scn.getUnrecognizedChars();
 		charMappings = new String[ unrecognizedChars.size() ];
 		savedMappingsArr = new boolean[ unrecognizedChars.size() ];
@@ -340,7 +344,9 @@ public class UIContainer {
 		charInfoTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
 		charInfoTxt.setAlignmentX(JTextField.LEFT);
 		charInfoTxt.setAlignmentY(JTextField.TOP);
-		charInfoTxt.setEnabled(true);
+		charInfoTxt.setEnabled(false);
+		charInfoTxt.setEditable(false);
+		charInfoTxt.setBackground( Color.white );
 		charInfoTxt.setBorder( BorderFactory.createLineBorder( Color.white ) );
 		
 		JLabel mappingIcon = new JLabel("--->");
@@ -457,9 +463,25 @@ public class UIContainer {
 		
 		setUnrecognizedCharDetails();
 		
+		/*JDialog dialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
+		//JFrame dialog = new JFrame( GlobalConstants.TITLE );
+		dialog.setName("MappingsDialog");
+		dialog.getContentPane().add(resolveMappingsPanel);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.pack();
+		dialog.setVisible(true);*/
+		
+		// set key event dispatcher
+		if( mappingsKeyEventDispatcher == null ) {
+			mappingsKeyEventDispatcher = new MappingsKeyEventDispatcher();
+			KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+			manager.addKeyEventDispatcher(mappingsKeyEventDispatcher);
+		}
+		
 		JOptionPane.showConfirmDialog( mainFrame, resolveMappingsPanel, GlobalConstants.RESOLVE_TITLE, JOptionPane.CLOSED_OPTION );
 		
-		scan(); // refresh
+		navIndex = 0;
+		scan(); // re-scan to refresh
 		
 	}
 	
@@ -550,35 +572,63 @@ public class UIContainer {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String command = e.getActionCommand();
-			String currentStr = charMappings[navIndex] == null ? "" : charMappings[navIndex];
-			charMappings[navIndex] = currentStr + command;
-			charMappingTxt.setText( currentStr + command);
+			String charVal = e.getActionCommand();
+			setCharMappingText( charVal );
 		}
 		
 	}
 	
 	
-	class ResolveMappingsKeyListener implements KeyListener {
-
-		@Override
-		public void keyTyped(KeyEvent e) {
-			String inputKey = String.valueOf( e.getKeyChar() );
-			System.out.println(inputKey);
-		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			
-		}
-		
+	private void setCharMappingText( String text ) {
+		String currentStr = charMappings[navIndex] == null ? "" : charMappings[navIndex];
+		charMappings[navIndex] = currentStr + text;
+		charMappingTxt.setText( currentStr + text);
 	}
+	
+	
+	class MappingsKeyEventDispatcher implements KeyEventDispatcher {
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent e) {
+            
+        	//Object obj = e.getSource();
+        	
+        	//if( obj instanceof JDialog ) {
+        		
+        		//JDialog srcDialog = (JDialog) obj;
+            	//String srcName = srcDialog.getName();
+            	
+	            //if( srcName.equals("MappingsDialog") && e.getID() == KeyEvent.KEY_PRESSED ) {
+        		if( e.getID() == KeyEvent.KEY_PRESSED ) {
+	            	char keyChar = e.getKeyChar();
+	                int keyCode = e.getKeyCode();
+	                System.out.println( "KEY PRESSED - " + keyChar + " " +  keyCode );
+	                
+	                if( keyCode == 37 ) {
+	                	prevMapping();
+	                	
+	                } else if( keyCode == 39 ) {
+	                	nextMapping();
+	                	
+	                } else if( keyCode >= 32 ) {
+	                	
+	                	String newChar = "";
+	                	
+	                	if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
+	                		newChar = String.valueOf(keyChar);
+	                		
+	                	} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+	                		newChar = Symbol.getSymbolForASCII( (int) keyChar );
+	                	}
+	                	setCharMappingText( newChar );
+	                }
+	                
+	            }
+        	//}
+            return false;
+        }
+    }
 
+	
 
 	class PopupListener implements ActionListener {
 
@@ -590,19 +640,19 @@ public class UIContainer {
 			switch(command) {
 			
 			case GlobalConstants.PREV_MAPPING_ACTION:
-				prev();
+				prevMapping();
 				break;
 			
 			case GlobalConstants.NEXT_MAPPING_ACTION:
-				next();
+				nextMapping();
 				break;
 				
 			case GlobalConstants.SAVE_MAPPING_ACTION:
-				save();
+				saveMapping();
 				break;
 			
 			case GlobalConstants.SAVEALL_MAPPING_ACTION:
-				saveAll();
+				saveAllMappings();
 				break;
 			
 			case GlobalConstants.CLEAR_MAPPING_ACTION:
@@ -624,19 +674,19 @@ public class UIContainer {
 	// ******************************
 	
 	
-	private void prev() {
+	private void prevMapping() {
 		if( navIndex > 0 ) navIndex--;
 		setUnrecognizedCharDetails();
 	}
 	
 	
-	private void next() {
+	private void nextMapping() {
 		if( navIndex < unrecognizedChars.size() - 1 ) navIndex++;
 		setUnrecognizedCharDetails();
 	}
 	
 	
-	private void save() {
+	private void saveMapping() {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
@@ -671,7 +721,7 @@ public class UIContainer {
 	}
 	
 	
-	private void saveAll() {
+	private void saveAllMappings() {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
 		int savedMappings = 0;
