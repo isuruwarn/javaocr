@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
@@ -54,6 +55,8 @@ public class UIContainer {
 	private BufferedImage inputImage;
 	
 	private Font mainFont;
+	private Font infoFont;
+	
 	private JFrame mainFrame;
 	private JButton fileBtn;
 	private JButton scanBtn;
@@ -61,11 +64,12 @@ public class UIContainer {
 	private JButton clearBtn;
 	private JButton resolveBtn;
 	private JFileChooser jfc;
-	private JLabel statusLbl;
+	private JTextArea statusLbl;
 	private JTextPane textPane;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
+	private JComboBox<String> selectBlockLevel;
 	
 	private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
 	
@@ -97,6 +101,11 @@ public class UIContainer {
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectAlphabet = new JComboBox<String>(alphabets);
 		selectAlphabet.addActionListener( mainListener );
+		
+		// TODO: blocksLevels
+		String [] blocksLevels = { GlobalConstants.BLOCKS_10, GlobalConstants.BLOCKS_15 };
+		selectBlockLevel = new JComboBox<String>(blocksLevels);
+		selectBlockLevel.addActionListener( mainListener );
 		
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
@@ -153,13 +162,6 @@ public class UIContainer {
 		statusLblGridCons.insets = new Insets(0,0,0,0);
 		statusLblGridCons.anchor = GridBagConstraints.PAGE_END;
 		
-		
-		statusLbl = new JLabel();
-		//statusLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) ); // for debugging
-		statusLbl.setHorizontalAlignment(JTextField.LEFT);
-		statusLbl.setPreferredSize( new Dimension( GlobalConstants.STAT_LBL_W, GlobalConstants.STAT_LBL_H ) );
-		statusLbl.setMinimumSize( new Dimension( GlobalConstants.STAT_LBL_W, GlobalConstants.STAT_LBL_H ) );
-		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout( new GridBagLayout() );
 		buttonPanel.add( fileBtn, fileBtnGridCons );
@@ -167,35 +169,46 @@ public class UIContainer {
 		buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
 		buttonPanel.add( selectAlphabet, selectDialectGridCons );
 		buttonPanel.add( btnToolBar, btnToolBarGridCons );
-		buttonPanel.add( statusLbl, statusLblGridCons );
+		//buttonPanel.add( statusLbl, statusLblGridCons );
 		
 		// main text area
 		textPane = new JTextPane();
         textPane.setEditable(true);
         textPane.setFont(mainFont);
-        
         JScrollPane mainScrollPane = new JScrollPane(textPane);
         mainScrollPane.setPreferredSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
         mainScrollPane.setMinimumSize( new Dimension( GlobalConstants.MAIN_TXT_AREA_W, GlobalConstants.MAIN_TXT_AREA_H ) );
         
+        infoFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.CHAR_MAPPING_INFO_FONT_SIZE );
+		
+		statusLbl = new JTextArea();
+		statusLbl.setPreferredSize( new Dimension( GlobalConstants.STAT_LBL_W, GlobalConstants.STAT_LBL_H ) );
+		statusLbl.setMinimumSize( new Dimension( GlobalConstants.STAT_LBL_W, GlobalConstants.STAT_LBL_H ) );
+		statusLbl.setEditable(false);
+		statusLbl.setOpaque(false);
+		statusLbl.setFont( infoFont );
+		statusLbl.setForeground( Color.gray );
+		statusLbl.setBorder(null);
+		
         JPanel mainPanel = new JPanel();
         mainPanel.add(buttonPanel);
         mainPanel.add(mainScrollPane);
+        mainPanel.add(statusLbl);
         
-		// frame for holding everything
 		mainFrame = new JFrame( GlobalConstants.TITLE );
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setPreferredSize( new Dimension( GlobalConstants.MAIN_FRAME_W, GlobalConstants.MAIN_FRAME_H ) );
 		mainFrame.setMinimumSize( new Dimension( GlobalConstants.MAIN_FRAME_W, GlobalConstants.MAIN_FRAME_H ) );
 		mainFrame.getContentPane().add(mainPanel);
 		mainFrame.pack();
+		mainFrame.setLocationRelativeTo(null); // center 
 		mainFrame.setVisible(true);
 		
 		jfc = new JFileChooser();
 		
 		// set default values
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
-		selectAlphabet.setSelectedItem( GlobalConstants.SINHALA ); 
+		selectAlphabet.setSelectedIndex(0);
 		
 	}
 	
@@ -282,7 +295,7 @@ public class UIContainer {
 			int linesRead = scn.getLinesRead();
 			int charsRead = scn.getCharsRead();
 			int noOfUnrecognizedChars = scn.getUnrecognizedChars().size();
-			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, linesRead, charsRead, noOfUnrecognizedChars ) );
+			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, scn.getWidth(), scn.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
 			// get any unrecognized chars and enable resolve button if needed
 			unrecognizedChars = scn.getUnrecognizedChars();
@@ -313,9 +326,10 @@ public class UIContainer {
 	private Font sinhalaBtnFont;
 	private Font charBtnFont;
 	private JLabel charImgLbl;
+	private JLabel charBlockImgLbl;
 	private JLabel charMappingIndexLbl;
 	private JLabel charMappingSavedLbl;
-	private JTextField charInfoTxt;
+	private JTextArea charInfoTxt;
 	private JTextField charMappingTxt;
 	private CharButtonsListener charButtonsListener;
 	
@@ -338,28 +352,33 @@ public class UIContainer {
 		charMappingIndexLbl.setVerticalAlignment(JTextField.CENTER);
 		charMappingIndexLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
 		charMappingIndexLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
-		//charMappingIndexLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		charMappingIndexLbl.setFont(infoFont);
+		charMappingIndexLbl.setForeground (Color.gray);
+		
+		charInfoTxt = new JTextArea();
+		charInfoTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
+		charInfoTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
+		charInfoTxt.setAlignmentX(JTextField.LEFT);
+		charInfoTxt.setAlignmentY(JTextField.TOP);
+		charInfoTxt.setFont(infoFont);
+		charInfoTxt.setForeground (Color.gray);
+		charInfoTxt.setBackground( Color.white );
+		charInfoTxt.setEnabled(true);
 		
 		charImgLbl = new JLabel();
 		charImgLbl.setHorizontalAlignment(JTextField.CENTER);
 		charImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
 		charImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
-		//charImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
-		charInfoTxt = new JTextField();
-		charInfoTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
-		charInfoTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
-		charInfoTxt.setAlignmentX(JTextField.LEFT);
-		charInfoTxt.setAlignmentY(JTextField.TOP);
-		charInfoTxt.setEnabled(false);
-		charInfoTxt.setEditable(false);
-		charInfoTxt.setBackground( Color.white );
-		charInfoTxt.setBorder( BorderFactory.createLineBorder( Color.white ) );
+		charBlockImgLbl = new JLabel();
+		charBlockImgLbl.setHorizontalAlignment(JTextField.CENTER);
+		charBlockImgLbl.setVerticalAlignment(JTextField.CENTER);
+		charBlockImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
+		charBlockImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
 		
-		JLabel mappingIcon = new JLabel("--->");
+		JLabel mappingIcon = new JLabel( GlobalConstants.MAPPING_ARROW_LBL );
 		mappingIcon.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE ) );
-		//mappingIcon.setBorder( BorderFactory.createLineBorder( Color.gray ) );
-		
+				
 		charMappingTxt = new JTextField();
 		charMappingTxt.setEditable(false);
 		charMappingTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_MAP_TXT_W, GlobalConstants.CHAR_MAP_TXT_H ) );
@@ -376,16 +395,16 @@ public class UIContainer {
 		charMappingSavedLbl.setVerticalAlignment(JTextField.TOP);
 		charMappingSavedLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_SAVED_IMG_LBL_W, GlobalConstants.CHAR_SAVED_IMG_LBL_H ) );
 		charMappingSavedLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_SAVED_IMG_LBL_W, GlobalConstants.CHAR_SAVED_IMG_LBL_H ) );
-		//charMappingSavedLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		
 		JPanel mappingsImgPanel = new JPanel();
 		mappingsImgPanel.add(charMappingIndexLbl);
-		mappingsImgPanel.add(charInfoTxt);
+		//mappingsImgPanel.add(charInfoTxt);
 		mappingsImgPanel.add(charImgLbl);
+		mappingsImgPanel.add(charBlockImgLbl);
 		mappingsImgPanel.add(mappingIcon);
 		mappingsImgPanel.add(charMappingTxt);
 		mappingsImgPanel.add(charMappingSavedLbl);
-		//mappingsImgPanel.add(charInfoTxt);
+		mappingsImgPanel.add(charInfoTxt);
 		mappingsImgPanel.setPreferredSize( new Dimension( GlobalConstants.MAPPINGS_IMG_PANEL_W, GlobalConstants.MAPPINGS_IMG_PANEL_H ) );
 		mappingsImgPanel.setMinimumSize( new Dimension( GlobalConstants.MAPPINGS_IMG_PANEL_W, GlobalConstants.MAPPINGS_IMG_PANEL_H ) );
 		mappingsImgPanel.setBackground( Color.white );
@@ -413,7 +432,6 @@ public class UIContainer {
 		mappingsNavPanel.add(saveAllBtn);
 		mappingsNavPanel.add(clearBtn);
 		mappingsNavPanel.add(clearAllBtn);
-		//mappingsNavPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
 		
 		charButtonsListener = new CharButtonsListener();
 		charBtnFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, java.awt.Font.PLAIN, GlobalConstants.REG_CHAR_BUTTON_FONT_SIZE );
@@ -458,7 +476,7 @@ public class UIContainer {
 		resolveMappingsPanel.add( getNumButtonsPanel(), numBtnPanelGridCons );
 		resolveMappingsPanel.add( getSpecialCharButtonsPanel(), spCharBtnPanelGridCons );
 		resolveMappingsPanel.add( getCharButtonsPanel(), charBtnPanelGridCons );
-		//resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
+		
 		
 		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
 			resolveMappingsPanel.setPreferredSize( new Dimension( GlobalConstants.ENG_MAPPINGS_PANEL_W, GlobalConstants.ENG_MAPPINGS_PANEL_H ) );
@@ -477,10 +495,21 @@ public class UIContainer {
 			manager.addKeyEventDispatcher(mappingsKeyEventDispatcher);
 		}
 		
+		// for debugging
+		/*charMappingIndexLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		charImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		charBlockImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) ); 
+		mappingIcon.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		charMappingSavedLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		charInfoTxt.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		mappingsNavPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );*/
+		
 		JDialog dialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
 		dialog.getContentPane().add(resolveMappingsPanel);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.pack();
+		dialog.setLocationRelativeTo(null); // center 
 		dialog.setVisible(true);
 		
 		// TODO: check for unsaved mappings before close and inform user if needed
@@ -801,17 +830,24 @@ public class UIContainer {
 	
 	
 	private void setUnrecognizedCharDetails() {
+		
 		Char c = unrecognizedChars.get( navIndex );
+		//c.printSequence();
+		
 		BufferedImage charImg = inputImage.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
 		// TODO: display character as scaled image
-		//Image scaledCharImg = charImg.getScaledInstance( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H, Image.SCALE_DEFAULT );
-		//BufferedImage charImg2 = new BufferedImage( scaledCharImg.getWidth(null), scaledCharImg.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-		ImageIcon thumbnailIcon = new ImageIcon(charImg);
-		charImgLbl.setIcon(thumbnailIcon);
-		charImgLbl.setToolTipText( c.getCharCode() );
+		ImageIcon charImgIcon = new ImageIcon(charImg);
+		charImgLbl.setIcon(charImgIcon);
+		charImgLbl.setToolTipText( GlobalConstants.MAPPING_IMG_TOOLTIP );
+		
+		ImageIcon blockImgIcon = new ImageIcon( c.getBlockImage() );
+		charBlockImgLbl.setIcon(blockImgIcon);
+		charBlockImgLbl.setToolTipText( GlobalConstants.MAPPING_BLOCK_REP_TOOLTIP );
+		
 		charMappingTxt.setText( charMappings[navIndex] );
-		//charInfoTxt.setText( c.getCharCode() );
-		charMappingIndexLbl.setText( String.valueOf(navIndex+1) );
+		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedChars.size(), c.getCharCode() ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getCharNumber(), c.getCharCode(), c.getW(), c.getH() ) );
+		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
 			charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );

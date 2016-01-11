@@ -156,6 +156,65 @@ public class ScanUtils {
 	
 
 	/**
+	 * Appends to end of file
+	 * 
+	 * @param sb
+	 * @param outputFile
+	 * @return
+	 */
+	public static boolean appendToFile( StringBuilder sb, String outputFile ) {
+		byte data[] = null;
+		try {
+			data = sb.toString().getBytes("UTF8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+	    Path p = Paths.get(outputFile);
+	    try ( OutputStream out = new BufferedOutputStream(
+	    		Files.newOutputStream( p, CREATE, APPEND ) 
+	    		)
+	    ) {
+	    	out.write( data, 0, data.length );
+	    	return true;
+	    } catch (IOException e) {
+	    	e.printStackTrace();
+	    	return false;
+	    }
+	}
+	
+	
+	
+	/**
+	 * Overwrites existing data in file
+	 * 
+	 * @param s
+	 * @param outputFile
+	 * @return
+	 */
+	public static boolean writeToFile( StringBuilder sb, String outputFile ) {
+		byte data[] = null;
+		try {
+			data = sb.toString().getBytes("UTF8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+	    Path p = Paths.get(outputFile);
+	    try ( BufferedOutputStream out = new BufferedOutputStream(
+	    		Files.newOutputStream( p, CREATE, TRUNCATE_EXISTING ) 
+	    		)
+	    ) {
+	    	out.write( data, 0, data.length );
+	    	return true;
+	    } catch (IOException e) {
+	    	e.printStackTrace();
+	    	return false;
+	    }
+	}
+	
+	
+	
+
+	/**
 	 * Prints a subset of the main bitmap[][]
 	 * 
 	 * @param startY
@@ -244,64 +303,6 @@ public class ScanUtils {
 			}
 		}
 		appendToFile( sb, mapFile );
-	}
-	
-	
-	
-	/**
-	 * Appends to end of file
-	 * 
-	 * @param sb
-	 * @param outputFile
-	 * @return
-	 */
-	public static boolean appendToFile( StringBuilder sb, String outputFile ) {
-		byte data[] = null;
-		try {
-			data = sb.toString().getBytes("UTF8");
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
-	    Path p = Paths.get(outputFile);
-	    try ( OutputStream out = new BufferedOutputStream(
-	    		Files.newOutputStream( p, CREATE, APPEND ) 
-	    		)
-	    ) {
-	    	out.write( data, 0, data.length );
-	    	return true;
-	    } catch (IOException e) {
-	    	e.printStackTrace();
-	    	return false;
-	    }
-	}
-	
-	
-	
-	/**
-	 * Overwrites existing data in file
-	 * 
-	 * @param s
-	 * @param outputFile
-	 * @return
-	 */
-	public static boolean writeToFile( StringBuilder sb, String outputFile ) {
-		byte data[] = null;
-		try {
-			data = sb.toString().getBytes("UTF8");
-		} catch (UnsupportedEncodingException e1) {
-			e1.printStackTrace();
-		}
-	    Path p = Paths.get(outputFile);
-	    try ( BufferedOutputStream out = new BufferedOutputStream(
-	    		Files.newOutputStream( p, CREATE, TRUNCATE_EXISTING ) 
-	    		)
-	    ) {
-	    	out.write( data, 0, data.length );
-	    	return true;
-	    } catch (IOException e) {
-	    	e.printStackTrace();
-	    	return false;
-	    }
 	}
 	
 	

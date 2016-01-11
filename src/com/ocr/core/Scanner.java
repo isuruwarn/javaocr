@@ -64,12 +64,14 @@ import com.ocr.util.Symbol;
 public class Scanner {
 	
 	
-	public static final int BW_THREASHOLD = -11200000; // average RGB values less than this will be saved as black pixels. 
+	public static final int BW_THREASHOLD = -10800000; // average RGB values less than this will be saved as black pixels. 
 														// average RGB values greater than this will be saved as white pixels 
 	public static final int MIN_BLANKLINE_HEIGHT = 30;
 	public static final int MIN_WHITESPACE_WIDTH = 8; //TODO add as adjustable value in interface
-	public static final int VERTICAL_BLOCKS_PER_CHAR = 10; 
+	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; 
 	
+	private int height = 0;
+	private int width = 0;
 	private int linesRead = 0;
 	private int charsRead = 0;
 	private int [][] bitmap; // holds black and white (1s and 0s) representation of entire image
@@ -96,10 +98,9 @@ public class Scanner {
 		lines  = new ArrayList<Line>();
 		
 		try {
-			int height = image.getHeight();
-			int width = image.getWidth();
+			height = image.getHeight();
+			width = image.getWidth();
 			bitmap = new int [height] [width];
-			
 			//System.out.println("Width: " + width + ", Height: " + height );
 			
 			int lineHeight = 0;
@@ -161,7 +162,7 @@ public class Scanner {
 		        		// Step 3: Scan each line vertically to determine the characters
 		        		processLine(l);
 		        		
-		        		//writeCharImages( lines, l, "test/" ); // for debugging
+		        		//ScanUtils.writeCharImages( lines, l, "test/" ); // for debugging
 		        		
 		        		lineNumber++;
 					}
@@ -170,7 +171,7 @@ public class Scanner {
 			}
 			
 			linesRead += lineNumber;
-			//writeLineImages( image, lines, "test/" ); // for debugging
+			//ScanUtils.writeLineImages( image, lines, "test/" ); // for debugging
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -293,11 +294,12 @@ public class Scanner {
 				String s = getCharValueFromMap( mapFile, c.getCharCode() );
 				
 				if( s == null ) { // unrecognized char
+					
 					sb.append("?");
+					
 					if( unrecognizedCharCodes.indexOf( c.getCharCode() ) == -1 ) { // eliminate duplicates
 						unrecognizedCharCodes.add( c.getCharCode() );
 						unrecognizedChars.add(c);
-						//System.out.println(c.getCharCode());
 					}
 					
 				} else {
@@ -325,17 +327,7 @@ public class Scanner {
 			//writeCharImages( l, "test/" ); // for debugging
 		}
 		
-		//writeCharCodesToFile( lines, mapFile );
-		
-		// for debugging
-		/*
-		Char c = lines.get(1).getChars().get(48);
-		//mapToGrid(c);
-		//printBitmap( c.getY(), c.getY()+c.getH(), c.getX(), c.getX()+c.getW() ); // for debugging
-		//c.printSequence();
-		//String charCode = c.getCharCode();
-		//System.out.println(charCode);
-		*/
+		//writeCharCodesToFile( lines, mapFile ); // for debugging
 		
 		return sb;
 	}
@@ -523,11 +515,13 @@ public class Scanner {
         
         if( avgRGB < BW_THREASHOLD ) { // colored pixel
         	avgRGB = -99999999; // set any color (other than white) as black
+        	//avgRGB = 0;
         } else { // white pixel
         	avgRGB = -000001;
+        	//avgRGB = 0xFFFFFF;
         }
         image.setRGB( j, i, avgRGB ); // reset pixel color
-        
+        // TODO: find out why hex ints dont work
 	}
 	
 	
@@ -540,8 +534,6 @@ public class Scanner {
 	}
 	
 	
-	
-	
 	/**
 	 * 
 	 * @return unrecognized characters
@@ -549,24 +541,25 @@ public class Scanner {
 	public ArrayList<Char> getUnrecognizedChars() {
 		return unrecognizedChars;
 	}
-
-	
-	
 	
 	
 	public int getLinesRead() {
 		return linesRead;
 	}
-
-
-
-
+	
+	
 	public int getCharsRead() {
 		return charsRead;
 	}
-
 	
-
-
+	public int getHeight() {
+		return height;
+	}
+	
+	
+	public int getWidth() {
+		return width;
+	}
+	
 	
 }

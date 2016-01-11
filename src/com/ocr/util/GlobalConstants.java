@@ -13,9 +13,12 @@ public class GlobalConstants {
 	public static final String ENGLISH = "English";
 	public static final String SINHALA = "Sinhala";
 	
+	public static final String BLOCKS_10 = "10 blocks/char";
+	public static final String BLOCKS_15 = "15 blocks/char";
+	
 	// TODO: read from file
-	public static final String ENG_MAP_FILE = "files/eng10.map";
-	public static final String SIN_MAP_FILE = "files/sin10.map";
+	public static final String ENG_MAP_FILE = "files/eng15.map";
+	public static final String SIN_MAP_FILE = "files/sin15.map";
 	
 	
 	// icon image file
@@ -29,13 +32,13 @@ public class GlobalConstants {
 	
 	// panel dimensions
 	public static final int ENG_MAPPINGS_PANEL_W = 600;
-	public static final int ENG_MAPPINGS_PANEL_H = 630;
+	public static final int ENG_MAPPINGS_PANEL_H = 650;
 	
 	public static final int SIN_MAPPINGS_PANEL_W = 600;
-	public static final int SIN_MAPPINGS_PANEL_H = 750;
+	public static final int SIN_MAPPINGS_PANEL_H = 800;
 	
 	public static final int MAPPINGS_IMG_PANEL_W = 400;
-	public static final int MAPPINGS_IMG_PANEL_H = 150;
+	public static final int MAPPINGS_IMG_PANEL_H = 200;
 	
 	public static final int NUM_BTNS_PANEL_W = 600;
 	public static final int NUM_BTNS_PANEL_H = 50;
@@ -47,7 +50,7 @@ public class GlobalConstants {
 	public static final int ENG_CHAR_BTNS_PANEL_H = 210;
 	
 	public static final int SIN_CHAR_BTNS_PANEL_W = 600;
-	public static final int SIN_CHAR_BTNS_PANEL_H = 380;
+	public static final int SIN_CHAR_BTNS_PANEL_H = 370;
 	
 	
 	// button dimensions
@@ -59,14 +62,17 @@ public class GlobalConstants {
 
 	
 	// label dimensions
-	public static final int STAT_LBL_W = 600;
-	public static final int STAT_LBL_H = 25;
+	public static final int STAT_LBL_W = 650;
+	public static final int STAT_LBL_H = 55;
 	
-	public static final int CHAR_IDX_LBL_W = 25;
+	public static final int CHAR_IDX_LBL_W = 375;
 	public static final int CHAR_IDX_LBL_H = 25;
 	
 	public static final int CHAR_IMG_LBL_W = 100;
 	public static final int CHAR_IMG_LBL_H = 100;
+	
+	public static final int CHAR_BLOCK_IMG_LBL_W = 75;
+	public static final int CHAR_BLOCK_IMG_LBL_H = 100;
 	
 	public static final int CHAR_SAVED_IMG_LBL_W = 50;
 	public static final int CHAR_SAVED_IMG_LBL_H = 100;
@@ -82,8 +88,8 @@ public class GlobalConstants {
 	public static final int CHAR_MAP_TXT_W = 100;
 	public static final int CHAR_MAP_TXT_H = 100;
 	
-	public static final int CHAR_INFO_TXT_W = 360;
-	public static final int CHAR_INFO_TXT_H = 25;
+	public static final int CHAR_INFO_TXT_W = 375;
+	public static final int CHAR_INFO_TXT_H = 55;
 	
 	
 	// action commands
@@ -114,12 +120,14 @@ public class GlobalConstants {
 	public static final int REG_CHAR_BUTTON_FONT_SIZE = 12;
 	public static final int CHAR_MAPPINGS_ENG_FONT_SIZE = 35;
 	public static final int CHAR_MAPPINGS_SIN_FONT_SIZE = 35;
+	public static final int CHAR_MAPPING_INFO_FONT_SIZE = 10;
 	
 	
 	// text strings
 	public static final String TITLE = "Java OCR";
 	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
-	public static final String STAT_LBL_TXT_STR = "Lines: %d     Characters (with spaces): %d     Unrecognized Characters: %d";
+	public static final String STAT_LBL_TXT_STR = "Image Width: %d \t Height: %d \n" +
+												"Lines: %d \nCharacters (with spaces): %d \nUnrecognized Characters: %d \n";
 	public static final String ERROR_LOADING_IMG_TITLE = "Scan error";
 	public static final String ERROR_LOADING_IMG_MSG = "Error while loading image. Please check if file is valid.";
 	public static final String SAVE_MAPPING_TITLE = "Save mapping";
@@ -131,10 +139,17 @@ public class GlobalConstants {
 	public static final String SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG = "%d mappings were successfully saved";
 	public static final Object SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG = "Error while saving mulitple mappings. Please try again.";
 	public static final String CLEAR_ALL_MAPPINGS_CONF_MSG = "Are you sure you want to clear all unsaved mappings in current session?";
+	public static final String MAPPING_ARROW_LBL = "--->";
+	public static final String MAPPING_IMG_TOOLTIP = "Actual character";
+	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
+	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
+	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nCharCode: %s \nWidth: %d \nHeight: %d \n";
+	
 	
 	// for debugging
-	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img1.png";
+	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
+	
 	
 	
 }

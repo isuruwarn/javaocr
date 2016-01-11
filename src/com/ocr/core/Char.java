@@ -1,5 +1,6 @@
 package com.ocr.core;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 
@@ -11,18 +12,23 @@ import java.util.ArrayList;
  */
 public class Char extends ScannedItem {
 	
+	
 	private int charNumber;
 	private boolean whiteSpace;
 	private String name;
 	private ArrayList<Byte> sequence = new ArrayList<Byte>();
 	
-
+	
+	
 	public Char() {
+		
 	}
 	
 	public Char(String name) {
 		this.name = name;
 	}
+	
+	
 	
 	public String getName() {
 		return name;
@@ -57,6 +63,7 @@ public class Char extends ScannedItem {
 	}
 	
 	
+	
 	public void printSequence() {
 		String [] sb = new String [Scanner.VERTICAL_BLOCKS_PER_CHAR];
 		for( int i=0; i<sequence.size(); i++ ) {
@@ -68,7 +75,6 @@ public class Char extends ScannedItem {
 			System.out.println(s);
 		}
 	}
-	
 	
 	
 	
@@ -85,5 +91,54 @@ public class Char extends ScannedItem {
 		}
 		return charCode;
 	}
+	
+	
+	
+	public BufferedImage getBlockImage() {
+		
+		//int x = 0;
+		//int y = 0;
+		int pixelsPerBlock = 3;
+		int blockStartX = 0;
+		int blockStartY = 0;
+		int verticalBlocks = Scanner.VERTICAL_BLOCKS_PER_CHAR;
+		int horizontalBlocks = sequence.size()/Scanner.VERTICAL_BLOCKS_PER_CHAR;
+		BufferedImage blockImg = new BufferedImage( horizontalBlocks*pixelsPerBlock, verticalBlocks*pixelsPerBlock, BufferedImage.TYPE_INT_RGB );
+		
+		for( int i=0; i<sequence.size(); i++ ) {
+			
+			//y = i % Scanner.VERTICAL_BLOCKS_PER_CHAR;
+			
+			//int rgb = 0xFFFFFF; // white
+			int rgb = 0xEEEEEE;
+			if( sequence.get(i) == 1 ) {
+				rgb = 0; // black
+			}
+			
+			try {
+				int blockEndX = blockStartX + pixelsPerBlock;
+				int blockEndY = blockStartY + pixelsPerBlock;
+				for( int y=blockStartY; y<blockEndY; y++ ) {
+					for( int x=blockStartX; x<blockEndX; x++ ) {
+						blockImg.setRGB( x, y, rgb );
+					}
+				}
+				
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			blockStartY += pixelsPerBlock;
+			if( (i+1) % Scanner.VERTICAL_BLOCKS_PER_CHAR == 0 ) {
+				//x++;
+				blockStartX += pixelsPerBlock;
+				blockStartY = 0;
+			}
+			
+		}
+		
+		return blockImg;
+	}
+	
 	
 }
