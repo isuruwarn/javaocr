@@ -142,7 +142,7 @@ public class GlobalConstants {
 	public static final String MAPPING_IMG_TOOLTIP = "Actual character";
 	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
 	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
-	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nCharCode: %s \nWidth: %d \t\tHeight: %d \nBlockLength: %d \tHBlocks: %d";
+	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nWidth: %d \t\tHeight: %d \nBlockLength: %d \tHBlocks: %d \nCharCode: %s";
 	
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";

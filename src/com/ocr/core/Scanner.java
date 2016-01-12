@@ -65,10 +65,12 @@ public class Scanner {
 	
 	
 	public static final int BW_THREASHOLD = -10800000; // average RGB values less than this will be saved as black pixels. 
-														// average RGB values greater than this will be saved as white pixels 
-	public static final int MIN_BLANKLINE_HEIGHT = 30; //TODO add as adjustable value in interface
-	public static final int MIN_WHITESPACE_WIDTH = 8; //TODO add as adjustable value in interface
-	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; //TODO add as adjustable value in interface
+														// average RGB values greater than this will be saved as white pixels
+	
+	// TODO Handle thread safety. perhaps use as instance variables?
+	public static int minBlanklineHeight = 30;
+	public static int minWhitespaceWidth = 8;
+	public static int verticalBlocksPerChar = 15;
 	
 	private int height = 0;
 	private int width = 0;
@@ -101,7 +103,6 @@ public class Scanner {
 			height = image.getHeight();
 			width = image.getWidth();
 			bitmap = new int [height] [width];
-			//System.out.println("Width: " + width + ", Height: " + height );
 			
 			int lineHeight = 0;
 			int blankLineHeight = 0;
@@ -131,7 +132,7 @@ public class Scanner {
 				if(insideLine) {
 					
 					lineHeight++;
-					if( blankLineHeight > MIN_BLANKLINE_HEIGHT ) { // keep track of blank lines in image
+					if( blankLineHeight > minBlanklineHeight ) { // keep track of blank lines in image
 						Line l = new Line();
 						l.setLineNumber(lineNumber);
 						l.setX(0);
@@ -140,8 +141,6 @@ public class Scanner {
 		        		l.setH(blankLineHeight);
 		        		l.setBlankLine(true);
 		        		lines.add( lineNumber, l );
-		        		
-		        		//writeCharImages( lines, l, "test/" ); // for debugging only
 		        		lineNumber++;
 					}
 					blankLineHeight = 0;
@@ -216,7 +215,7 @@ public class Scanner {
     			
     			charWidth++;
     			// keep track of whitespace
-    			if( whitespaceWidth > MIN_WHITESPACE_WIDTH ) {
+    			if( whitespaceWidth > minWhitespaceWidth ) {
     				Char c = new Char("char" + l.getLineNumber() + "-" + charNumber);
     				c.setCharNumber(charNumber);
     				c.setX( x - whitespaceWidth  );
@@ -282,7 +281,7 @@ public class Scanner {
 				}
 				
 				// a character needs to be a minimum of 15 pixels, otherwise we cannot identify it
-				if( c.getH() < VERTICAL_BLOCKS_PER_CHAR ) {
+				if( c.getH() < verticalBlocksPerChar ) {
 					sb.append("?");
 					continue;
 				}
@@ -362,41 +361,51 @@ public class Scanner {
 	private void mapToGrid( Char c ) {
 		
 		int blockNumber = 0;
-		//int blockLength = (int) Math.floor( (double) c.getH() / VERTICAL_BLOCKS_PER_CHAR );
-		int blockLength = c.getH() / VERTICAL_BLOCKS_PER_CHAR;
+		int blockLength = c.getH() / verticalBlocksPerChar;
+		int noOfVBlocks = verticalBlocksPerChar;
 		int noOfHBlocks = c.getW() / blockLength;
 		if( noOfHBlocks == 0 ) {
 			noOfHBlocks = 1;
 		}
-		int noOfVBlocks = VERTICAL_BLOCKS_PER_CHAR;
 		
 		c.setBlockLength(blockLength);
 		c.setNoOfHBlocks(noOfHBlocks);
 		
-		// for debugging only
-		//String [] str = new String [BLOCKS_PER_CHAR];
-		//System.out.format("charX=%d, charY=%d, charWidth=%d, charHeight=%d, blockLength=%d, noOfHBlocks=%d \n", c.getX(), c.getY(), c.getW(), c.getH(), blockLength, noOfHBlocks );
+		/* 
+		Logic to capture pixel block left out after blockLength calculation. 
+		Eg: If Char height is 37, blockLength is 2, then the total height covered by the block representation 
+		is 15 * 2 = 30. Therefore 7 pixels are left out. To counter this, we distribute the remainder, 
+		1 pixel at a time, across the first few blocks, until remainder is 0. In above example, we will add 
+		an additional pixel to each of the first 7 vertical blocks. So they will have a blockLength of 3, 
+		where as the next 8 will revert back to the original blockLength of 2. 
+		*/
+		int vBlockRemainder = c.getH() % verticalBlocksPerChar;
+		int hBlockRemainder = c.getW() % noOfHBlocks;
+		int vBlockLength = blockLength;
+		int hBlockLength = blockLength;
+		
+		if( vBlockRemainder > 0 ) { vBlockLength++; vBlockRemainder--; }
+		if( hBlockRemainder > 0 ) { hBlockLength++; hBlockRemainder--; }
 		
 		int blockStartX = c.getX();
 		int blockStartY = c.getY();
-		int blockEndX = c.getX() + blockLength;
+		int blockEndX = c.getX() + hBlockLength;
 		if( blockEndX > c.getX() + c.getW() ) {
 			blockEndX = c.getX() + c.getW();
 		}
-		int blockEndY = c.getY() + blockLength;
+		int blockEndY = c.getY() + vBlockLength;
 		
 		// move through grid vertically
 		for( int h=0; h<noOfHBlocks; h++ ) {
 			
 			for( int v=0; v<noOfVBlocks; v++ ) {
 				
-				// for debugging only
-				//if( str[v] == null ) str[v] = "";
-				//str[v] += String.format("%d (%d,%d),(%d,%d) ", blockNumber, blockStartY, blockStartX, blockEndY, blockEndX );
-				
 				boolean whiteSpace = true;
+				
 				for( int x=blockStartX; x<blockEndX; x++ ) {
+					
 					for( int y=blockStartY; y<blockEndY; y++ ) {
+						
 						int b = bitmap[y][x];
 						if( b != 0 ) {
 							whiteSpace = false;
@@ -405,6 +414,7 @@ public class Scanner {
 					}
 					if(!whiteSpace) break;
 				}
+				
 				if(whiteSpace) {
 					c.getSequence().add( blockNumber, (byte) 0 );
 				} else {
@@ -412,24 +422,35 @@ public class Scanner {
 				}
 				
 				// update vertical pointers
-				blockStartY = blockStartY + blockLength;
-				if( ( blockEndY + blockLength ) <= ( c.getY() + c.getH() ) ) {
-					blockEndY = blockEndY + blockLength;
-				} else {
+				blockStartY = blockStartY + vBlockLength;
+				
+				vBlockLength = blockLength;
+				if( vBlockRemainder > 0 ) { vBlockLength++; vBlockRemainder--; }
+				
+				blockEndY = blockEndY + vBlockLength;
+				if( blockEndY > c.getY() + c.getH() ) {
 					blockEndY = c.getY() + c.getH();
 				}
+				
 				blockNumber++;
 			}
 			
+			vBlockLength = blockLength;
+			vBlockRemainder = c.getH() % verticalBlocksPerChar;
+			if( vBlockRemainder > 0 ) { vBlockLength++; vBlockRemainder--; }
+			
 			// reset vertical pointers
 			blockStartY = c.getY();
-			blockEndY = c.getY() + blockLength;
+			blockEndY = c.getY() + vBlockLength;
 			
 			// update horizontal pointers
-			blockStartX = blockStartX + blockLength;
-			if( ( blockEndX + blockLength ) <= ( c.getX() + c.getW() ) ) {
-				blockEndX = blockEndX + blockLength;
-			} else {
+			blockStartX = blockStartX + hBlockLength;
+			
+			hBlockLength = blockLength;
+			if( hBlockRemainder > 0 ) { hBlockLength++; hBlockRemainder--; }
+			
+			blockEndX = blockEndX + hBlockLength;
+			if( blockEndX > c.getX() + c.getW() ) {
 				blockEndX = c.getX() + c.getW();
 			}
 			
@@ -566,5 +587,30 @@ public class Scanner {
 		return width;
 	}
 	
+	/*
+	public static int getMinBlanklineHeight() {
+		return minBlanklineHeight;
+	}
+	
+	public static void setMinBlanklineHeight(int minBlanklineHeight) {
+		Scanner.minBlanklineHeight = minBlanklineHeight;
+	}
+	
+	public static int getMinWhitespaceWidth() {
+		return minWhitespaceWidth;
+	}
+
+	public static void setMinWhitespaceWidth(int minWhitespaceWidth) {
+		Scanner.minWhitespaceWidth = minWhitespaceWidth;
+	}
+	
+	public static int getVerticalBlocksPerChar() {
+		return verticalBlocksPerChar;
+	}
+
+	public static void setVerticalBlocksPerChar(int verticalBlocksPerChar) {
+		Scanner.verticalBlocksPerChar = verticalBlocksPerChar;
+	}
+	*/
 	
 }

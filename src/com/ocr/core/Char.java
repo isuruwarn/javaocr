@@ -83,9 +83,9 @@ public class Char extends ScannedItem {
 	
 	
 	public void printSequence() {
-		String [] sb = new String [Scanner.VERTICAL_BLOCKS_PER_CHAR];
+		String [] sb = new String [Scanner.verticalBlocksPerChar];
 		for( int i=0; i<sequence.size(); i++ ) {
-			int j = i % Scanner.VERTICAL_BLOCKS_PER_CHAR;
+			int j = i % Scanner.verticalBlocksPerChar;
 			if( sb[j] == null ) sb[j] = "";
 			sb[j] += sequence.get(i) + " ";
 		}
@@ -101,7 +101,7 @@ public class Char extends ScannedItem {
 		String charCode = "";
 		for( int i=0; i<sequence.size(); i++ ) {
 			s += sequence.get(i);
-			if( (i+1) % Scanner.VERTICAL_BLOCKS_PER_CHAR == 0 ) {
+			if( (i+1) % Scanner.verticalBlocksPerChar == 0 ) {
 				int n = Integer.parseInt( s, 2 );
 				charCode += n;
 				s = "";
@@ -119,13 +119,11 @@ public class Char extends ScannedItem {
 		int pixelsPerBlock = 3;
 		int blockStartX = 0;
 		int blockStartY = 0;
-		int verticalBlocks = Scanner.VERTICAL_BLOCKS_PER_CHAR;
-		int horizontalBlocks = sequence.size()/Scanner.VERTICAL_BLOCKS_PER_CHAR;
+		int verticalBlocks = Scanner.verticalBlocksPerChar;
+		int horizontalBlocks = sequence.size()/Scanner.verticalBlocksPerChar;
 		BufferedImage blockImg = new BufferedImage( horizontalBlocks*pixelsPerBlock, verticalBlocks*pixelsPerBlock, BufferedImage.TYPE_INT_RGB );
 		
 		for( int i=0; i<sequence.size(); i++ ) {
-			
-			//y = i % Scanner.VERTICAL_BLOCKS_PER_CHAR;
 			
 			//int rgb = 0xFFFFFF; // white
 			int rgb = 0xEEEEEE;
@@ -147,8 +145,7 @@ public class Char extends ScannedItem {
 			}
 			
 			blockStartY += pixelsPerBlock;
-			if( (i+1) % Scanner.VERTICAL_BLOCKS_PER_CHAR == 0 ) {
-				//x++;
+			if( (i+1) % Scanner.verticalBlocksPerChar == 0 ) {
 				blockStartX += pixelsPerBlock;
 				blockStartY = 0;
 			}

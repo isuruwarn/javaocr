@@ -57,6 +57,9 @@ public class UIContainer {
 	private Font mainFont;
 	private Font infoFont;
 	
+	private JLabel lblVBlocksPerChar;
+	private JLabel lblWhitespaceWidth;
+	private JLabel lblBlanklineHeight;
 	private JFrame mainFrame;
 	private JButton inputFileBtn;
 	private JButton outputFileBtn;
@@ -68,7 +71,9 @@ public class UIContainer {
 	private JFileChooser outputFileChooser;
 	private JTextArea statusLbl;
 	private JTextPane textPane;
-	private JTextField txtBlocks;
+	private JTextField txtVBlocksPerChar;
+	private JTextField txtWhitespaceWidth;
+	private JTextField txtBlanklineHeight;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
@@ -80,7 +85,10 @@ public class UIContainer {
 	 * Constructor
 	 */
 	public UIContainer() {
-		
+
+		scn = new Scanner();
+		inputImgFileChooser = new JFileChooser(GlobalConstants.SAMPLE_IMG_FILENAME);
+		outputFileChooser = new JFileChooser(GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		MainOCRListener mainListener = new MainOCRListener();
 		
 		inputFileBtn = new JButton( GlobalConstants.CHOOSE_INPUT_FILE_ACTION );
@@ -98,7 +106,6 @@ public class UIContainer {
 		txtOutputFileName = new JTextField();
 		txtOutputFileName.setPreferredSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		txtOutputFileName.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
-		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		
 		// TODO: read from file
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
@@ -106,7 +113,7 @@ public class UIContainer {
 		selectAlphabet.addActionListener( mainListener );
 		
 		// TODO: blocks
-		txtBlocks = new JTextField(); 
+		txtVBlocksPerChar = new JTextField(); 
 				
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
@@ -192,9 +199,9 @@ public class UIContainer {
 		statusLbl.setPreferredSize( new Dimension( GlobalConstants.STAT_LBL_W, GlobalConstants.STAT_LBL_H ) );
 		statusLbl.setMinimumSize( new Dimension( GlobalConstants.STAT_LBL_W, GlobalConstants.STAT_LBL_H ) );
 		statusLbl.setEditable(false);
-		statusLbl.setOpaque(false);
+		statusLbl.setOpaque(false); // set background color to frame color
 		statusLbl.setFont( infoFont );
-		statusLbl.setForeground( Color.gray );
+		statusLbl.setForeground( Color.gray ); // set text color
 		statusLbl.setBorder(null);
 		
         JPanel mainPanel = new JPanel();
@@ -208,13 +215,12 @@ public class UIContainer {
 		mainFrame.setMinimumSize( new Dimension( GlobalConstants.MAIN_FRAME_W, GlobalConstants.MAIN_FRAME_H ) );
 		mainFrame.getContentPane().add(mainPanel);
 		mainFrame.pack();
-		mainFrame.setLocationRelativeTo(null); // center 
+		mainFrame.setLocationRelativeTo(null); // position to center of screen 
 		mainFrame.setVisible(true);
 		
 		// set default values
-		inputImgFileChooser = new JFileChooser(GlobalConstants.SAMPLE_IMG_FILENAME);
-		outputFileChooser = new JFileChooser(GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
+		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		selectAlphabet.setSelectedIndex(0);
 		
 	}
@@ -293,7 +299,6 @@ public class UIContainer {
 			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.ERROR_LOADING_IMG_MSG, GlobalConstants.ERROR_LOADING_IMG_TITLE, JOptionPane.ERROR_MESSAGE );
 			
 		} else {
-			scn = new Scanner();
 			StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
 			textPane.setText(sb.toString());
 			
@@ -364,7 +369,7 @@ public class UIContainer {
 		charMappingIndexLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
 		charMappingIndexLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IDX_LBL_W, GlobalConstants.CHAR_IDX_LBL_H ) );
 		charMappingIndexLbl.setFont(infoFont);
-		charMappingIndexLbl.setForeground (Color.gray);
+		charMappingIndexLbl.setForeground (Color.gray); // set text color
 		
 		charInfoTxt = new JTextArea();
 		charInfoTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
@@ -372,7 +377,7 @@ public class UIContainer {
 		charInfoTxt.setAlignmentX(JTextField.LEFT);
 		charInfoTxt.setAlignmentY(JTextField.TOP);
 		charInfoTxt.setFont(infoFont);
-		charInfoTxt.setForeground (Color.gray);
+		charInfoTxt.setForeground (Color.gray); // set text color
 		charInfoTxt.setBackground( Color.white );
 		charInfoTxt.setEnabled(true);
 		
@@ -520,12 +525,13 @@ public class UIContainer {
 		dialog.getContentPane().add(resolveMappingsPanel);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.pack();
-		dialog.setLocationRelativeTo(null); // center 
+		dialog.setLocationRelativeTo(null); // position to center of screen
 		dialog.setVisible(true);
 		
 		// TODO: check for unsaved mappings before close and inform user if needed
 		
-		// reset
+		// reset key event stuff, otherwise a new object is created each time the popup is opened,
+		// which will result in multiple outputs for each key stroke.
 		mappingsKeyEventDispatcher = null;
 		KeyboardFocusManager.setCurrentKeyboardFocusManager(null);
 		
@@ -591,14 +597,14 @@ public class UIContainer {
 			
 		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			
-			int [] alphabet = { 97, 1400, 1401, 1402, 105, 73, 117, 1407, 79, 85, 
-				             101, 1403, 1404, 111, 1405, 1406, 107, 75, 103, 71, 70, 
-				             86, 99, 67, 106, 74, 113, 81, 1408, 83, 
-				             116, 84, 100, 68, 110, 78, 122, 90, 119, 87, 
-				             112, 80, 98, 66, 109, 77, 121, 114, 108, 118, 
-				             120, 88, 115, 104, 76, 102, 72, 1304, 89, 82,
-				             92, 124, 96, 126, 64, 94, 60, 62, 91, 123,
-				             93, 125, 1320, 95, 1322, 1323, 1324, 1321, 65, 69 };
+			int [] alphabet = {  97, 1400, 1401, 1402, 105, 73, 117, 1407, 79, 85, 
+					             101, 1403, 1404, 111, 1405, 1406, 107, 75, 103, 71, 70, 
+					             86, 99, 67, 106, 74, 113, 81, 1408, 83, 
+					             116, 84, 100, 68, 110, 78, 122, 90, 119, 87, 
+					             112, 80, 98, 66, 109, 77, 121, 114, 108, 118, 
+					             120, 88, 115, 104, 76, 102, 72, 1304, 89, 82,
+					             92, 124, 96, 126, 64, 94, 60, 62, 91, 123,
+					             93, 125, 1320, 95, 1322, 1323, 1324, 1321, 65, 69 };
 			
 			for( int code: alphabet ) {
 				String unicodeVal = Symbol.getSymbolForASCII(code);
@@ -857,7 +863,7 @@ public class UIContainer {
 		
 		charMappingTxt.setText( charMappings[navIndex] );
 		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedChars.size(), c.getCharCode() ) );
-		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getCharNumber(), c.getCharCode(), c.getW(), c.getH(), c.getBlockLength(), c.getNoOfHBlocks() ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getCharNumber(), c.getW(), c.getH(), c.getBlockLength(), c.getNoOfHBlocks(), c.getCharCode() ) );
 		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
@@ -870,7 +876,6 @@ public class UIContainer {
 	private JButton createCharButton( String text, ActionListener listener, int w, int h, Font font ) {
 		JButton charBtn = new JButton();
 		charBtn.setText(text);
-		//charBtn.setActionCommand(text);
 		charBtn.addActionListener(listener);
 		charBtn.setPreferredSize( new Dimension( w, h ) );
 		charBtn.setMinimumSize( new Dimension( w, h ) );
