@@ -13,8 +13,6 @@ public class GlobalConstants {
 	public static final String ENGLISH = "English";
 	public static final String SINHALA = "Sinhala";
 	
-	public static final String BLOCKS_10 = "10 blocks/char";
-	public static final String BLOCKS_15 = "15 blocks/char";
 	
 	// TODO: read from file
 	public static final String ENG_MAP_FILE = "files/eng15.map";
@@ -27,7 +25,7 @@ public class GlobalConstants {
 	
 	// main application frame
 	public static final int MAIN_FRAME_W = 700;
-	public static final int MAIN_FRAME_H = 850;
+	public static final int MAIN_FRAME_H = 860;
 
 	
 	// panel dimensions
@@ -35,10 +33,10 @@ public class GlobalConstants {
 	public static final int ENG_MAPPINGS_PANEL_H = 650;
 	
 	public static final int SIN_MAPPINGS_PANEL_W = 600;
-	public static final int SIN_MAPPINGS_PANEL_H = 800;
+	public static final int SIN_MAPPINGS_PANEL_H = 810;
 	
 	public static final int MAPPINGS_IMG_PANEL_W = 400;
-	public static final int MAPPINGS_IMG_PANEL_H = 200;
+	public static final int MAPPINGS_IMG_PANEL_H = 210;
 	
 	public static final int NUM_BTNS_PANEL_W = 600;
 	public static final int NUM_BTNS_PANEL_H = 50;
@@ -89,11 +87,12 @@ public class GlobalConstants {
 	public static final int CHAR_MAP_TXT_H = 100;
 	
 	public static final int CHAR_INFO_TXT_W = 375;
-	public static final int CHAR_INFO_TXT_H = 55;
+	public static final int CHAR_INFO_TXT_H = 60;
 	
 	
 	// action commands
-	public static final String CHOOSE_FILE_ACTION = "Choose File";
+	public static final String CHOOSE_INPUT_FILE_ACTION = "Choose Image File";
+	public static final String CHOOSE_OUTPUT_FILE_ACTION = "Choose Output File";
 	public static final String COMBOBOX_CHANGED_ACTION = "comboBoxChanged";
 	public static final String SCAN_ACTION = "Scan";
 	public static final String COPY_ACTION = "Copy";
@@ -143,10 +142,9 @@ public class GlobalConstants {
 	public static final String MAPPING_IMG_TOOLTIP = "Actual character";
 	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
 	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
-	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nCharCode: %s \nWidth: %d \nHeight: %d \n";
+	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nCharCode: %s \nWidth: %d \t\tHeight: %d \nBlockLength: %d \tHBlocks: %d";
 	
 	
-	// for debugging
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	

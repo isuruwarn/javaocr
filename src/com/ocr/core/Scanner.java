@@ -66,9 +66,9 @@ public class Scanner {
 	
 	public static final int BW_THREASHOLD = -10800000; // average RGB values less than this will be saved as black pixels. 
 														// average RGB values greater than this will be saved as white pixels 
-	public static final int MIN_BLANKLINE_HEIGHT = 30;
+	public static final int MIN_BLANKLINE_HEIGHT = 30; //TODO add as adjustable value in interface
 	public static final int MIN_WHITESPACE_WIDTH = 8; //TODO add as adjustable value in interface
-	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; 
+	public static final int VERTICAL_BLOCKS_PER_CHAR = 15; //TODO add as adjustable value in interface
 	
 	private int height = 0;
 	private int width = 0;
@@ -337,7 +337,8 @@ public class Scanner {
 	
 	
 	/**
-	 * Map each character into a grid, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR),
+	 * Contains the main character recognition algorithm.
+	 * Maps each character into a grid, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR),
 	 * and a variable number of blocks horizontally. For example, A might be represented as:
 	 * 
 	 * 	0 0 0 0 0 0 0 0 
@@ -361,12 +362,16 @@ public class Scanner {
 	private void mapToGrid( Char c ) {
 		
 		int blockNumber = 0;
-		int blockLength = (int) Math.round( (double) c.getH() / VERTICAL_BLOCKS_PER_CHAR );
+		//int blockLength = (int) Math.floor( (double) c.getH() / VERTICAL_BLOCKS_PER_CHAR );
+		int blockLength = c.getH() / VERTICAL_BLOCKS_PER_CHAR;
 		int noOfHBlocks = c.getW() / blockLength;
 		if( noOfHBlocks == 0 ) {
 			noOfHBlocks = 1;
 		}
 		int noOfVBlocks = VERTICAL_BLOCKS_PER_CHAR;
+		
+		c.setBlockLength(blockLength);
+		c.setNoOfHBlocks(noOfHBlocks);
 		
 		// for debugging only
 		//String [] str = new String [BLOCKS_PER_CHAR];

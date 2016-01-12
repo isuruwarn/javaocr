@@ -14,6 +14,8 @@ public class Char extends ScannedItem {
 	
 	
 	private int charNumber;
+	private int blockLength;
+	private int noOfHBlocks;
 	private boolean whiteSpace;
 	private String name;
 	private ArrayList<Byte> sequence = new ArrayList<Byte>();
@@ -62,6 +64,22 @@ public class Char extends ScannedItem {
 		this.sequence = sequence;
 	}
 	
+	
+	public int getBlockLength() {
+		return blockLength;
+	}
+
+	public void setBlockLength(int blockLength) {
+		this.blockLength = blockLength;
+	}
+	
+	public int getNoOfHBlocks() {
+		return noOfHBlocks;
+	}
+
+	public void setNoOfHBlocks(int noOfHBlocks) {
+		this.noOfHBlocks = noOfHBlocks;
+	}
 	
 	
 	public void printSequence() {

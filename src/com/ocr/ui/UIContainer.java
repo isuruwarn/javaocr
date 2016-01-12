@@ -58,18 +58,20 @@ public class UIContainer {
 	private Font infoFont;
 	
 	private JFrame mainFrame;
-	private JButton fileBtn;
+	private JButton inputFileBtn;
+	private JButton outputFileBtn;
 	private JButton scanBtn;
 	private JButton copyBtn;
 	private JButton clearBtn;
 	private JButton resolveBtn;
-	private JFileChooser jfc;
+	private JFileChooser inputImgFileChooser;
+	private JFileChooser outputFileChooser;
 	private JTextArea statusLbl;
 	private JTextPane textPane;
+	private JTextField txtBlocks;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
-	private JComboBox<String> selectBlockLevel;
 	
 	private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
 	
@@ -81,32 +83,31 @@ public class UIContainer {
 		
 		MainOCRListener mainListener = new MainOCRListener();
 		
-		fileBtn = new JButton( GlobalConstants.CHOOSE_FILE_ACTION );
-		fileBtn.addActionListener(mainListener);
-		fileBtn.setEnabled(true);
+		inputFileBtn = new JButton( GlobalConstants.CHOOSE_INPUT_FILE_ACTION );
+		inputFileBtn.addActionListener(mainListener);
+		inputFileBtn.setEnabled(true);
+		
+		outputFileBtn = new JButton( GlobalConstants.CHOOSE_OUTPUT_FILE_ACTION );
+		outputFileBtn.addActionListener(mainListener);
+		outputFileBtn.setEnabled(true);
 		
 		txtInputImagePath = new JTextField();
 		txtInputImagePath.setPreferredSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		txtInputImagePath.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
-		//txtInputImagePath.setBorder( BorderFactory.createLineBorder( Color.gray ) ); // for debugging
 		
-		// TODO: file chooser for output file
 		txtOutputFileName = new JTextField();
 		txtOutputFileName.setPreferredSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		txtOutputFileName.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
-		//txtOutputFileName.setBorder( BorderFactory.createLineBorder( Color.gray ) ); // for debugging
 		
 		// TODO: read from file
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectAlphabet = new JComboBox<String>(alphabets);
 		selectAlphabet.addActionListener( mainListener );
 		
-		// TODO: blocksLevels
-		String [] blocksLevels = { GlobalConstants.BLOCKS_10, GlobalConstants.BLOCKS_15 };
-		selectBlockLevel = new JComboBox<String>(blocksLevels);
-		selectBlockLevel.addActionListener( mainListener );
-		
+		// TODO: blocks
+		txtBlocks = new JTextField(); 
+				
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
 		
@@ -127,26 +128,31 @@ public class UIContainer {
 		btnToolBar.add(resolveBtn);
 		
 		// layout manager configurations
-		GridBagConstraints fileBtnGridCons = new GridBagConstraints();
-		fileBtnGridCons.gridx = 0;
-		fileBtnGridCons.gridy = 0;
-		fileBtnGridCons.insets = new Insets(30,10,10,10);
-		fileBtnGridCons.anchor = GridBagConstraints.LINE_START;
+		GridBagConstraints inputFileBtnGridCons = new GridBagConstraints();
+		inputFileBtnGridCons.gridx = 0;
+		inputFileBtnGridCons.gridy = 0;
+		inputFileBtnGridCons.insets = new Insets(30,10,10,10);
+		inputFileBtnGridCons.anchor = GridBagConstraints.LINE_START;
 		
 		GridBagConstraints txtInputImgPathGridCons = new GridBagConstraints();
 		txtInputImgPathGridCons.gridx = 1;
 		txtInputImgPathGridCons.gridy = 0;
-		txtInputImgPathGridCons.insets = new Insets(30,0,10,0);
-		
-		GridBagConstraints txtOutputFilePathGridCons = new GridBagConstraints();
-		txtOutputFilePathGridCons.gridx = 1;
-		txtOutputFilePathGridCons.gridy = 1;
-		txtOutputFilePathGridCons.insets = new Insets(0,0,10,0);
+		txtInputImgPathGridCons.insets = new Insets(30,0,10,10);
 		
 		GridBagConstraints selectDialectGridCons = new GridBagConstraints();
 		selectDialectGridCons.gridx = 2;
 		selectDialectGridCons.gridy = 0;
 		selectDialectGridCons.insets = new Insets(30,0,10,0);
+		
+		GridBagConstraints outputFileBtnGridCons = new GridBagConstraints();
+		outputFileBtnGridCons.gridx = 0;
+		outputFileBtnGridCons.gridy = 1;
+		outputFileBtnGridCons.insets = new Insets(0,0,10,0);
+		
+		GridBagConstraints txtOutputFilePathGridCons = new GridBagConstraints();
+		txtOutputFilePathGridCons.gridx = 1;
+		txtOutputFilePathGridCons.gridy = 1;
+		txtOutputFilePathGridCons.insets = new Insets(0,0,10,10);
 		
 		GridBagConstraints btnToolBarGridCons = new GridBagConstraints();
 		btnToolBarGridCons.gridx = 0;
@@ -164,10 +170,11 @@ public class UIContainer {
 		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout( new GridBagLayout() );
-		buttonPanel.add( fileBtn, fileBtnGridCons );
+		buttonPanel.add( inputFileBtn, inputFileBtnGridCons );
 		buttonPanel.add( txtInputImagePath, txtInputImgPathGridCons );
 		buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
 		buttonPanel.add( selectAlphabet, selectDialectGridCons );
+		buttonPanel.add( outputFileBtn, outputFileBtnGridCons );
 		buttonPanel.add( btnToolBar, btnToolBarGridCons );
 		//buttonPanel.add( statusLbl, statusLblGridCons );
 		
@@ -204,9 +211,9 @@ public class UIContainer {
 		mainFrame.setLocationRelativeTo(null); // center 
 		mainFrame.setVisible(true);
 		
-		jfc = new JFileChooser();
-		
 		// set default values
+		inputImgFileChooser = new JFileChooser(GlobalConstants.SAMPLE_IMG_FILENAME);
+		outputFileChooser = new JFileChooser(GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
 		selectAlphabet.setSelectedIndex(0);
 		
@@ -223,8 +230,12 @@ public class UIContainer {
 			
 			switch(command) {
 				
-				case GlobalConstants.CHOOSE_FILE_ACTION:
-					chooseFile();
+				case GlobalConstants.CHOOSE_INPUT_FILE_ACTION:
+					chooseFile( inputImgFileChooser, txtInputImagePath );
+					break;
+				
+				case GlobalConstants.CHOOSE_OUTPUT_FILE_ACTION:
+					chooseFile( outputFileChooser, txtOutputFileName );
 					break;
 				
 				case GlobalConstants.COMBOBOX_CHANGED_ACTION:
@@ -262,12 +273,12 @@ public class UIContainer {
 	// ******************************
 	
 	
-	private void chooseFile() {
+	private void chooseFile( JFileChooser jfc, JTextField txtBox ) {
 		int returnVal = jfc.showOpenDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
         	File file = jfc.getSelectedFile();
         	String filePath = file.getPath();
-        	txtInputImagePath.setText( filePath ); 
+        	txtBox.setText( filePath ); 
         }
 		
 	}
@@ -846,7 +857,7 @@ public class UIContainer {
 		
 		charMappingTxt.setText( charMappings[navIndex] );
 		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedChars.size(), c.getCharCode() ) );
-		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getCharNumber(), c.getCharCode(), c.getW(), c.getH() ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getCharNumber(), c.getCharCode(), c.getW(), c.getH(), c.getBlockLength(), c.getNoOfHBlocks() ) );
 		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
