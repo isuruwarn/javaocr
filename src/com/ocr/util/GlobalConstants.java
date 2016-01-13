@@ -2,6 +2,7 @@ package com.ocr.util;
 
 
 
+
 /**
  * 
  * @author isuru
@@ -63,6 +64,15 @@ public class GlobalConstants {
 	public static final int STAT_LBL_W = 650;
 	public static final int STAT_LBL_H = 55;
 	
+	public static final int VBLOCKS_PER_CHAR_LBL_W = 100;
+	public static final int VBLOCKS_PER_CHAR_LBL_H = 25;
+	
+	public static final int WHITESPACE_WIDTH_LBL_W = 130;
+	public static final int WHITESPACE_WIDTH_LBL_H = 25;
+	
+	public static final int BLANKLINE_HEIGHT_LBL_W = 130;
+	public static final int BLANKLINE_HEIGHT_LBL_H = 25;
+	
 	public static final int CHAR_IDX_LBL_W = 375;
 	public static final int CHAR_IDX_LBL_H = 25;
 	
@@ -86,6 +96,9 @@ public class GlobalConstants {
 	public static final int CHAR_MAP_TXT_W = 100;
 	public static final int CHAR_MAP_TXT_H = 100;
 	
+	public static final int SMALL_TXTBOX_W = 30;
+	public static final int SMALL_TXTBOX_H = 25;
+	
 	public static final int CHAR_INFO_TXT_W = 375;
 	public static final int CHAR_INFO_TXT_H = 60;
 	
@@ -104,7 +117,7 @@ public class GlobalConstants {
 	public static final String SAVEALL_MAPPING_ACTION = "Save All";
 	public static final String CLEAR_MAPPING_ACTION = "Clear";
 	public static final String CLEARALL_MAPPING_ACTION = "Clear All";
-
+	public static final String SAVE_BLK_IMG_MAPPING_ACTION = "Save Block Image";
 	
 	// fonts
 	public static final String SANSSERIF_FONT_TYPE = "SansSerif";
@@ -131,23 +144,26 @@ public class GlobalConstants {
 	public static final String ERROR_LOADING_IMG_MSG = "Error while loading image. Please check if file is valid.";
 	public static final String SAVE_MAPPING_TITLE = "Save mapping";
 	public static final String SAVE_MULTIPLE_MAPPPINGS_TITLE = "Save multiple mappings";
-	public static final Object MAPPING_EXISTS_MSG = "Mapping already exists";
-	public static final Object SAVE_MAPPPING_SUCCESS_MSG = "Mapping successfully saved";
-	public static final Object SAVE_MAPPPING_ERROR_MSG1 = "Error while saving mapping. Please try again.";
-	public static final Object SAVE_MAPPPING_ERROR_MSG2 = "Please enter a value";
+	public static final String MAPPING_EXISTS_MSG = "Mapping already exists";
+	public static final String SAVE_MAPPPING_SUCCESS_MSG = "Mapping successfully saved";
+	public static final String SAVE_MAPPPING_ERROR_MSG1 = "Error while saving mapping. Please try again.";
+	public static final String SAVE_MAPPPING_ERROR_MSG2 = "Please enter a value";
 	public static final String SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG = "%d mappings were successfully saved";
-	public static final Object SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG = "Error while saving mulitple mappings. Please try again.";
+	public static final String SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG = "Error while saving mulitple mappings. Please try again.";
 	public static final String CLEAR_ALL_MAPPINGS_CONF_MSG = "Are you sure you want to clear all unsaved mappings in current session?";
 	public static final String MAPPING_ARROW_LBL = "--->";
 	public static final String MAPPING_IMG_TOOLTIP = "Actual character";
 	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
 	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
 	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nWidth: %d \t\tHeight: %d \nBlockLength: %d \tHBlocks: %d \nCharCode: %s";
+	public static final String VBLOCKS_PER_CHAR_LBL = " Vertical Blocks/char";
+	public static final String WHITESPACE_WIDTH_LBL = "Whitespace Width";
+	public static final String BLANKLINE_HEIGHT_LBL = "Blankline Height";
+	public static final String SAVE_BLK_IMG_FILE = "Save";
 	
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
-	
-	
+	public static final String SAMPLE_BLK_IMG_FILEPATH = "test/";
 	
 }
