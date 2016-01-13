@@ -64,7 +64,7 @@ public class GlobalConstants {
 	public static final int STAT_LBL_W = 650;
 	public static final int STAT_LBL_H = 55;
 	
-	public static final int VBLOCKS_PER_CHAR_LBL_W = 100;
+	public static final int VBLOCKS_PER_CHAR_LBL_W = 130;
 	public static final int VBLOCKS_PER_CHAR_LBL_H = 25;
 	
 	public static final int WHITESPACE_WIDTH_LBL_W = 130;
@@ -117,7 +117,7 @@ public class GlobalConstants {
 	public static final String SAVEALL_MAPPING_ACTION = "Save All";
 	public static final String CLEAR_MAPPING_ACTION = "Clear";
 	public static final String CLEARALL_MAPPING_ACTION = "Clear All";
-	public static final String SAVE_BLK_IMG_MAPPING_ACTION = "Save Block Image";
+	public static final String SAVE_IMG_AS_ACTION = "Save Image As..";
 	
 	// fonts
 	public static final String SANSSERIF_FONT_TYPE = "SansSerif";
@@ -156,14 +156,16 @@ public class GlobalConstants {
 	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
 	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
 	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nWidth: %d \t\tHeight: %d \nBlockLength: %d \tHBlocks: %d \nCharCode: %s";
-	public static final String VBLOCKS_PER_CHAR_LBL = " Vertical Blocks/char";
+	public static final String VBLOCKS_PER_CHAR_LBL = "Vertical Blocks/char";
 	public static final String WHITESPACE_WIDTH_LBL = "Whitespace Width";
 	public static final String BLANKLINE_HEIGHT_LBL = "Blankline Height";
-	public static final String SAVE_BLK_IMG_FILE = "Save";
+	public static final String SAVE_IMG_FILE = "Save";
+	public static final String MAPPING_CHAR_IMG_NAME = "charImg";
+	public static final String MAPPING_BLOCK_REP_IMG_NAME = "blockImg";
 	
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
-	public static final String SAMPLE_BLK_IMG_FILEPATH = "test/";
+	public static final String SAVE_IMG_FILEPATH = "test/";
 	
 }

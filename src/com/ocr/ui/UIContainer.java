@@ -27,8 +27,10 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -444,16 +446,28 @@ public class UIContainer {
 		charInfoTxt.setBackground( Color.white );
 		charInfoTxt.setEnabled(true);
 		
+		JMenuItem charImgMenuItem = new JMenuItem( GlobalConstants.SAVE_IMG_AS_ACTION );
+		charImgMenuItem.setName( GlobalConstants.MAPPING_CHAR_IMG_NAME );
+		JPopupMenu charImgPopupMenu = new JPopupMenu();
+		charImgPopupMenu.add(charImgMenuItem);
+		
+		JMenuItem blockImgMenuItem = new JMenuItem( GlobalConstants.SAVE_IMG_AS_ACTION );
+		blockImgMenuItem.setName( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME );
+		JPopupMenu blockImgPopupMenu = new JPopupMenu();
+		blockImgPopupMenu.add(blockImgMenuItem);
+		
 		charImgLbl = new JLabel();
 		charImgLbl.setHorizontalAlignment(JTextField.CENTER);
 		charImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
 		charImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
+		charImgLbl.setComponentPopupMenu(charImgPopupMenu);
 		
 		charBlockImgLbl = new JLabel();
 		charBlockImgLbl.setHorizontalAlignment(JTextField.CENTER);
 		charBlockImgLbl.setVerticalAlignment(JTextField.CENTER);
 		charBlockImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
 		charBlockImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
+		charBlockImgLbl.setComponentPopupMenu(blockImgPopupMenu);
 		
 		JLabel mappingIcon = new JLabel( GlobalConstants.MAPPING_ARROW_LBL );
 		mappingIcon.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE ) );
@@ -495,7 +509,6 @@ public class UIContainer {
 		JButton saveAllBtn = new JButton( GlobalConstants.SAVEALL_MAPPING_ACTION);
 		JButton clearBtn = new JButton( GlobalConstants.CLEAR_MAPPING_ACTION);
 		JButton clearAllBtn = new JButton( GlobalConstants.CLEARALL_MAPPING_ACTION);
-		JButton saveBlockImg = new JButton( GlobalConstants.SAVE_BLK_IMG_MAPPING_ACTION);
 		
 		PopupListener resolveListener = new PopupListener();
 		prevBtn.addActionListener(resolveListener);
@@ -504,7 +517,8 @@ public class UIContainer {
 		saveAllBtn.addActionListener(resolveListener);
 		clearBtn.addActionListener(resolveListener);
 		clearAllBtn.addActionListener(resolveListener);
-		saveBlockImg.addActionListener(resolveListener);
+		charImgMenuItem.addActionListener(resolveListener);
+		blockImgMenuItem.addActionListener(resolveListener);
 		
 		JPanel mappingsNavPanel = new JPanel();
 		mappingsNavPanel.add(prevBtn);
@@ -513,7 +527,6 @@ public class UIContainer {
 		mappingsNavPanel.add(saveAllBtn);
 		mappingsNavPanel.add(clearBtn);
 		mappingsNavPanel.add(clearAllBtn);
-		mappingsNavPanel.add(saveBlockImg);
 		
 		charButtonsListener = new CharButtonsListener();
 		charBtnFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, java.awt.Font.PLAIN, GlobalConstants.REG_CHAR_BUTTON_FONT_SIZE );
@@ -699,6 +712,8 @@ public class UIContainer {
 	}
 	
 	
+	
+	
 	private void setCharMappingText( String text ) {
 		String currentStr = charMappings[navIndex] == null ? "" : charMappings[navIndex];
 		charMappings[navIndex] = currentStr + text;
@@ -790,8 +805,8 @@ public class UIContainer {
 				clearAll();
 				break;
 			
-			case GlobalConstants.SAVE_BLK_IMG_MAPPING_ACTION:
-				saveBlockImage( (Component) e.getSource() );
+			case GlobalConstants.SAVE_IMG_AS_ACTION:
+				saveImageDialog( (Component) e.getSource() );
 				break;
 			}
 		}
@@ -909,16 +924,30 @@ public class UIContainer {
 	}
 	
 	
-	private void saveBlockImage( Component comp ) {
+	private void saveImageDialog( Component comp ) {
+		
+		BufferedImage charImg = null;
+		String sampleFileName = null;
 		Char c = unrecognizedChars.get( navIndex );
-		String sampleFileName = GlobalConstants.SAMPLE_BLK_IMG_FILEPATH + c.getCharNumber() + ".png";
-		JFileChooser jfc = new JFileChooser(GlobalConstants.SAMPLE_BLK_IMG_FILEPATH);
-		jfc.setSelectedFile( new File( sampleFileName ) );
+		JMenuItem jMenuItem = (JMenuItem) comp;
+		String compName = jMenuItem.getName();
+		
+		if( compName.equals( GlobalConstants.MAPPING_CHAR_IMG_NAME ) ) {
+			charImg = inputImage.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
+			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_CHAR_IMG_NAME + c.getCharNumber() + ".png";
+			
+		} else if( compName.equals( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME ) ) {
+			charImg = c.getBlockImage();
+			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getCharNumber() + ".png";
+			
+		}
+		
 		try {
-			int returnVal = jfc.showDialog( comp, GlobalConstants.SAVE_BLK_IMG_FILE );
+			JFileChooser jfc = new JFileChooser(GlobalConstants.SAVE_IMG_FILEPATH);
+			jfc.setSelectedFile( new File( sampleFileName ) );
+			int returnVal = jfc.showDialog( comp, GlobalConstants.SAVE_IMG_FILE );
 	        if (returnVal == JFileChooser.APPROVE_OPTION) {
 	        	File file = jfc.getSelectedFile();
-	        	BufferedImage charImg = c.getBlockImage();
 	        	ImageIO.write( charImg, "png", file );
 	        }
 		} catch (IOException e) {
