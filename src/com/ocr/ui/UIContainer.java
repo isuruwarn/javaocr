@@ -393,11 +393,12 @@ public class UIContainer {
 	private void comboBoxChanged( ActionEvent e ) {
 		JComboBox<String> selectBox = (JComboBox<String>) e.getSource();
 		String selection = (String) selectBox.getSelectedItem();
+		String blocks = txtVBlocksPerChar.getText();
 		if( selection.equals( GlobalConstants.ENGLISH ) ) {
-			mappingsFile = GlobalConstants.ENG_MAP_FILE;
+			mappingsFile = String.format( GlobalConstants.ENG_MAP_FILE, blocks );
 			mainFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE );
 		} else if( selection.equals( GlobalConstants.SINHALA ) ) {
-			mappingsFile = GlobalConstants.SIN_MAP_FILE;
+			mappingsFile = String.format( GlobalConstants.SIN_MAP_FILE, blocks );
 			mainFont = new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_SIN_FONT_SIZE );
 		}
 		textPane.setFont(mainFont);

@@ -16,8 +16,8 @@ public class GlobalConstants {
 	
 	
 	// TODO: read from file
-	public static final String ENG_MAP_FILE = "files/eng15.map";
-	public static final String SIN_MAP_FILE = "files/sin15.map";
+	public static final String ENG_MAP_FILE = "files/eng%s.map";
+	public static final String SIN_MAP_FILE = "files/sin%s.map";
 	
 	
 	// icon image file
