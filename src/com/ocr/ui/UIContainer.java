@@ -1,6 +1,7 @@
 package com.ocr.ui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -13,9 +14,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -57,9 +60,6 @@ public class UIContainer {
 	private Font mainFont;
 	private Font infoFont;
 	
-	private JLabel lblVBlocksPerChar;
-	private JLabel lblWhitespaceWidth;
-	private JLabel lblBlanklineHeight;
 	private JFrame mainFrame;
 	private JButton inputFileBtn;
 	private JButton outputFileBtn;
@@ -67,8 +67,6 @@ public class UIContainer {
 	private JButton copyBtn;
 	private JButton clearBtn;
 	private JButton resolveBtn;
-	private JFileChooser inputImgFileChooser;
-	private JFileChooser outputFileChooser;
 	private JTextArea statusLbl;
 	private JTextPane textPane;
 	private JTextField txtVBlocksPerChar;
@@ -77,6 +75,8 @@ public class UIContainer {
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
 	private JComboBox<String> selectAlphabet;
+	private JFileChooser inputImgFileChooser;
+	private JFileChooser outputFileChooser;
 	
 	private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
 	
@@ -112,9 +112,45 @@ public class UIContainer {
 		selectAlphabet = new JComboBox<String>(alphabets);
 		selectAlphabet.addActionListener( mainListener );
 		
-		// TODO: blocks
+		JLabel lblVBlocksPerChar = new JLabel( GlobalConstants.VBLOCKS_PER_CHAR_LBL );
+		lblVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
+		lblVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
+		lblVBlocksPerChar.setHorizontalAlignment(JTextField.LEFT);
+		
+		JLabel lblWhitespaceWidth = new JLabel( GlobalConstants.WHITESPACE_WIDTH_LBL );
+		lblWhitespaceWidth.setPreferredSize( new Dimension( GlobalConstants.WHITESPACE_WIDTH_LBL_W, GlobalConstants.WHITESPACE_WIDTH_LBL_H ) );
+		lblWhitespaceWidth.setMinimumSize( new Dimension( GlobalConstants.WHITESPACE_WIDTH_LBL_W, GlobalConstants.WHITESPACE_WIDTH_LBL_H ) );
+		lblWhitespaceWidth.setHorizontalAlignment(JTextField.RIGHT);
+		
+		JLabel lblBlanklineHeight = new JLabel( GlobalConstants.BLANKLINE_HEIGHT_LBL );
+		lblBlanklineHeight.setPreferredSize( new Dimension( GlobalConstants.BLANKLINE_HEIGHT_LBL_W, GlobalConstants.BLANKLINE_HEIGHT_LBL_H ) );
+		lblBlanklineHeight.setMinimumSize( new Dimension( GlobalConstants.BLANKLINE_HEIGHT_LBL_W, GlobalConstants.BLANKLINE_HEIGHT_LBL_H ) );
+		lblBlanklineHeight.setHorizontalAlignment(JTextField.RIGHT);
+		
 		txtVBlocksPerChar = new JTextField(); 
-				
+		txtVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		txtVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		txtVBlocksPerChar.setHorizontalAlignment(JTextField.CENTER);
+		
+		txtWhitespaceWidth = new JTextField(); 
+		txtWhitespaceWidth.setPreferredSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		txtWhitespaceWidth.setMinimumSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		txtWhitespaceWidth.setHorizontalAlignment(JTextField.CENTER);
+		
+		txtBlanklineHeight = new JTextField(); 
+		txtBlanklineHeight.setPreferredSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		txtBlanklineHeight.setMinimumSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		txtBlanklineHeight.setHorizontalAlignment(JTextField.CENTER);
+		
+		JPanel txtBoxPanel = new JPanel();
+		txtBoxPanel.add(lblVBlocksPerChar);
+		txtBoxPanel.add(txtVBlocksPerChar);
+		txtBoxPanel.add(lblWhitespaceWidth);
+		txtBoxPanel.add(txtWhitespaceWidth);
+		txtBoxPanel.add(lblBlanklineHeight);
+		txtBoxPanel.add(txtBlanklineHeight);
+		
+		
 		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
 		
@@ -138,39 +174,46 @@ public class UIContainer {
 		GridBagConstraints inputFileBtnGridCons = new GridBagConstraints();
 		inputFileBtnGridCons.gridx = 0;
 		inputFileBtnGridCons.gridy = 0;
-		inputFileBtnGridCons.insets = new Insets(30,10,10,10);
+		inputFileBtnGridCons.insets = new Insets(10,10,10,10);
 		inputFileBtnGridCons.anchor = GridBagConstraints.LINE_START;
 		
 		GridBagConstraints txtInputImgPathGridCons = new GridBagConstraints();
 		txtInputImgPathGridCons.gridx = 1;
 		txtInputImgPathGridCons.gridy = 0;
-		txtInputImgPathGridCons.insets = new Insets(30,0,10,10);
+		txtInputImgPathGridCons.insets = new Insets(10,0,10,10);
 		
 		GridBagConstraints selectDialectGridCons = new GridBagConstraints();
 		selectDialectGridCons.gridx = 2;
 		selectDialectGridCons.gridy = 0;
-		selectDialectGridCons.insets = new Insets(30,0,10,0);
+		selectDialectGridCons.insets = new Insets(10,0,10,0);
 		
 		GridBagConstraints outputFileBtnGridCons = new GridBagConstraints();
 		outputFileBtnGridCons.gridx = 0;
 		outputFileBtnGridCons.gridy = 1;
-		outputFileBtnGridCons.insets = new Insets(0,0,10,0);
+		outputFileBtnGridCons.insets = new Insets(0,0,0,0);
 		
 		GridBagConstraints txtOutputFilePathGridCons = new GridBagConstraints();
 		txtOutputFilePathGridCons.gridx = 1;
 		txtOutputFilePathGridCons.gridy = 1;
-		txtOutputFilePathGridCons.insets = new Insets(0,0,10,10);
+		txtOutputFilePathGridCons.insets = new Insets(0,0,0,10);
+		
+		GridBagConstraints txtBoxPanelGridCons = new GridBagConstraints();
+		txtBoxPanelGridCons.gridx = 0;
+		txtBoxPanelGridCons.gridy = 2;
+		txtBoxPanelGridCons.gridwidth = 3;
+		txtBoxPanelGridCons.anchor = GridBagConstraints.LINE_START;
+		txtBoxPanelGridCons.insets = new Insets(10,0,0,0);
 		
 		GridBagConstraints btnToolBarGridCons = new GridBagConstraints();
 		btnToolBarGridCons.gridx = 0;
-		btnToolBarGridCons.gridy = 2;
+		btnToolBarGridCons.gridy = 3;
 		btnToolBarGridCons.gridwidth = 3;
-		btnToolBarGridCons.insets = new Insets(0,10,10,10);
+		btnToolBarGridCons.insets = new Insets(0,10,0,0);
 		btnToolBarGridCons.anchor = GridBagConstraints.CENTER;
 		
 		GridBagConstraints statusLblGridCons = new GridBagConstraints();
 		statusLblGridCons.gridx = 0;
-		statusLblGridCons.gridy = 3;
+		statusLblGridCons.gridy = 4;
 		statusLblGridCons.gridwidth = 3;
 		statusLblGridCons.insets = new Insets(0,0,0,0);
 		statusLblGridCons.anchor = GridBagConstraints.PAGE_END;
@@ -182,8 +225,8 @@ public class UIContainer {
 		buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
 		buttonPanel.add( selectAlphabet, selectDialectGridCons );
 		buttonPanel.add( outputFileBtn, outputFileBtnGridCons );
+		buttonPanel.add( txtBoxPanel, txtBoxPanelGridCons );
 		buttonPanel.add( btnToolBar, btnToolBarGridCons );
-		//buttonPanel.add( statusLbl, statusLblGridCons );
 		
 		// main text area
 		textPane = new JTextPane();
@@ -219,10 +262,25 @@ public class UIContainer {
 		mainFrame.setVisible(true);
 		
 		// set default values
-		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME);
-		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME);
+		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
+		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
+		txtVBlocksPerChar.setText( String.valueOf(Scanner.verticalBlocksPerChar) );
+		txtWhitespaceWidth.setText( String.valueOf(Scanner.minWhitespaceWidth) );
+		txtBlanklineHeight.setText( String.valueOf(Scanner.minBlanklineHeight) );
 		selectAlphabet.setSelectedIndex(0);
 		
+		//inputImgFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_IMG_FILENAME) );
+		//outputFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_OUTPUT_FILENAME ) );
+		
+		// for debugging
+		/*
+		lblVBlocksPerChar.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		lblWhitespaceWidth.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		lblBlanklineHeight.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		txtBoxPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		btnToolBar.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		buttonPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		*/
 	}
 	
 	
@@ -286,7 +344,6 @@ public class UIContainer {
         	String filePath = file.getPath();
         	txtBox.setText( filePath ); 
         }
-		
 	}
 	
 	
@@ -299,6 +356,12 @@ public class UIContainer {
 			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.ERROR_LOADING_IMG_MSG, GlobalConstants.ERROR_LOADING_IMG_TITLE, JOptionPane.ERROR_MESSAGE );
 			
 		} else {
+			
+			// set basic parameters
+			Scanner.verticalBlocksPerChar = Integer.parseInt( txtVBlocksPerChar.getText() );
+			Scanner.minWhitespaceWidth = Integer.parseInt( txtWhitespaceWidth.getText() );
+			Scanner.minBlanklineHeight = Integer.parseInt( txtBlanklineHeight.getText() );
+			
 			StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
 			textPane.setText(sb.toString());
 			
@@ -432,6 +495,7 @@ public class UIContainer {
 		JButton saveAllBtn = new JButton( GlobalConstants.SAVEALL_MAPPING_ACTION);
 		JButton clearBtn = new JButton( GlobalConstants.CLEAR_MAPPING_ACTION);
 		JButton clearAllBtn = new JButton( GlobalConstants.CLEARALL_MAPPING_ACTION);
+		JButton saveBlockImg = new JButton( GlobalConstants.SAVE_BLK_IMG_MAPPING_ACTION);
 		
 		PopupListener resolveListener = new PopupListener();
 		prevBtn.addActionListener(resolveListener);
@@ -440,6 +504,7 @@ public class UIContainer {
 		saveAllBtn.addActionListener(resolveListener);
 		clearBtn.addActionListener(resolveListener);
 		clearAllBtn.addActionListener(resolveListener);
+		saveBlockImg.addActionListener(resolveListener);
 		
 		JPanel mappingsNavPanel = new JPanel();
 		mappingsNavPanel.add(prevBtn);
@@ -448,6 +513,7 @@ public class UIContainer {
 		mappingsNavPanel.add(saveAllBtn);
 		mappingsNavPanel.add(clearBtn);
 		mappingsNavPanel.add(clearAllBtn);
+		mappingsNavPanel.add(saveBlockImg);
 		
 		charButtonsListener = new CharButtonsListener();
 		charBtnFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, java.awt.Font.PLAIN, GlobalConstants.REG_CHAR_BUTTON_FONT_SIZE );
@@ -521,12 +587,12 @@ public class UIContainer {
 		mappingsNavPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
 		resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );*/
 		
-		JDialog dialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
-		dialog.getContentPane().add(resolveMappingsPanel);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		dialog.pack();
-		dialog.setLocationRelativeTo(null); // position to center of screen
-		dialog.setVisible(true);
+		JDialog mappingsDialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
+		mappingsDialog.getContentPane().add(resolveMappingsPanel);
+		mappingsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		mappingsDialog.pack();
+		mappingsDialog.setLocationRelativeTo(null); // position to center of screen
+		mappingsDialog.setVisible(true);
 		
 		// TODO: check for unsaved mappings before close and inform user if needed
 		
@@ -723,7 +789,10 @@ public class UIContainer {
 			case GlobalConstants.CLEARALL_MAPPING_ACTION:
 				clearAll();
 				break;
-				
+			
+			case GlobalConstants.SAVE_BLK_IMG_MAPPING_ACTION:
+				saveBlockImage( (Component) e.getSource() );
+				break;
 			}
 		}
 		
@@ -836,6 +905,24 @@ public class UIContainer {
 			charMappings = new String[ unrecognizedChars.size() ];
 			charMappingTxt.setText("");
 			charMappingIndexLbl.setText("");
+		}
+	}
+	
+	
+	private void saveBlockImage( Component comp ) {
+		Char c = unrecognizedChars.get( navIndex );
+		String sampleFileName = GlobalConstants.SAMPLE_BLK_IMG_FILEPATH + c.getCharNumber() + ".png";
+		JFileChooser jfc = new JFileChooser(GlobalConstants.SAMPLE_BLK_IMG_FILEPATH);
+		jfc.setSelectedFile( new File( sampleFileName ) );
+		try {
+			int returnVal = jfc.showDialog( comp, GlobalConstants.SAVE_BLK_IMG_FILE );
+	        if (returnVal == JFileChooser.APPROVE_OPTION) {
+	        	File file = jfc.getSelectedFile();
+	        	BufferedImage charImg = c.getBlockImage();
+	        	ImageIO.write( charImg, "png", file );
+	        }
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
