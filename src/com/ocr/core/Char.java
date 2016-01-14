@@ -14,6 +14,7 @@ public class Char extends ScannedItem {
 	
 	
 	private int charNumber;
+	private int lineNumber;
 	private int blockLength;
 	private int noOfHBlocks;
 	private boolean whiteSpace;
@@ -46,6 +47,14 @@ public class Char extends ScannedItem {
 
 	public void setCharNumber(int charNumber) {
 		this.charNumber = charNumber;
+	}
+	
+	public int getLineNumber() {
+		return lineNumber;
+	}
+
+	public void setLineNumber(int lineNumber) {
+		this.lineNumber = lineNumber;
 	}
 	
 	public boolean isWhiteSpace() {
@@ -116,7 +125,7 @@ public class Char extends ScannedItem {
 		
 		//int x = 0;
 		//int y = 0;
-		int pixelsPerBlock = 3;
+		int pixelsPerBlock = 2;
 		int blockStartX = 0;
 		int blockStartY = 0;
 		int verticalBlocks = Scanner.verticalBlocksPerChar;
@@ -126,7 +135,8 @@ public class Char extends ScannedItem {
 		for( int i=0; i<sequence.size(); i++ ) {
 			
 			//int rgb = 0xFFFFFF; // white
-			int rgb = 0xEEEEEE;
+			//int rgb = 0xC0C0C0; // for debugging
+			int rgb = -5000000; // for debugging
 			if( sequence.get(i) == 1 ) {
 				rgb = 0; // black
 			}

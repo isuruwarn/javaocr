@@ -138,8 +138,10 @@ public class GlobalConstants {
 	// text strings
 	public static final String TITLE = "Java OCR";
 	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
-	public static final String STAT_LBL_TXT_STR = "Image Width: %d \t Height: %d \n" +
-												"Lines: %d \nCharacters (with spaces): %d \nUnrecognized Characters: %d \n";
+	public static final String STAT_LBL_TXT_STR = "Image Width: %d \t Height: %d \n"
+												+ "Lines: %d \n"
+												+ "Characters (with spaces): %d \n"
+												+ "Unrecognized Characters: %d ";
 	public static final String ERROR_LOADING_IMG_TITLE = "Scan error";
 	public static final String ERROR_LOADING_IMG_MSG = "Error while loading image. Please check if file is valid.";
 	public static final String SAVE_MAPPING_TITLE = "Save mapping";
@@ -155,13 +157,17 @@ public class GlobalConstants {
 	public static final String MAPPING_IMG_TOOLTIP = "Actual character";
 	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
 	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
-	public static final String MAPPING_INFO_LBL_TXT = "CharNumber: %d \nWidth: %d \t\tHeight: %d \nBlockLength: %d \tHBlocks: %d \nCharCode: %s";
+	public static final String MAPPING_INFO_LBL_TXT = "LineNumber: %d \tCharNumber: %d \n"
+													+ "Width: %d \t\tHeight: %d \n"
+													+ "HBlocks: %d \t\tBlockLength: %d \n"
+													+ "CharCode: %s";
 	public static final String VBLOCKS_PER_CHAR_LBL = "Vertical Blocks/char";
 	public static final String WHITESPACE_WIDTH_LBL = "Whitespace Width";
 	public static final String BLANKLINE_HEIGHT_LBL = "Blankline Height";
 	public static final String SAVE_IMG_FILE = "Save";
 	public static final String MAPPING_CHAR_IMG_NAME = "charImg";
 	public static final String MAPPING_BLOCK_REP_IMG_NAME = "blockImg";
+	public static final String SEL_ALPHABET_COMBOBOX = "SelectAlphabetComboBox";
 	
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";

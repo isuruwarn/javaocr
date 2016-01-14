@@ -70,7 +70,7 @@ public class Scanner {
 	// TODO Handle thread safety. perhaps use as instance variables?
 	public static int minBlanklineHeight = 30;
 	public static int minWhitespaceWidth = 8;
-	public static int verticalBlocksPerChar = 15;
+	public static int verticalBlocksPerChar = 10;
 	
 	private int height = 0;
 	private int width = 0;
@@ -103,6 +103,7 @@ public class Scanner {
 			height = image.getHeight();
 			width = image.getWidth();
 			bitmap = new int [height] [width];
+			//System.out.format( "Image W: %d    H: %d \n", width, height );
 			
 			int lineHeight = 0;
 			int blankLineHeight = 0;
@@ -190,9 +191,14 @@ public class Scanner {
 	 */
 	private void processLine( Line l ) {
 		
+		int charNumber = 0;
 		int charWidth = 0;
 		int whitespaceWidth = 0;
-		int charNumber = 0;
+		
+		// to figure out exact height of char
+		int y1 = l.getH(); // will record the highest vertical point (max y value). we start with the lowest and work our way up.
+		int y2 = 0; // will record the lowest vertical point (min y value). we start with the highest and work our way down.
+		
 		boolean insideChar = false;
 		
 		// scan vertically (downwards) 
@@ -204,20 +210,29 @@ public class Scanner {
 				
 				int b = bitmap[y][x];
 				
-				// if we find a black pixel, we have come across a character
-				if( b != 0 ) {
+				if( b != 0 ) { // if we find a black pixel, we have come across a character
+					
 					insideChar = true;
-					break;
+					//break;
+					
+					int relativeYPosition = y - l.getY();  // y value relative to char height, starting from top
+					if( relativeYPosition < y1 ) {
+						y1 = relativeYPosition;
+					}
+					if( relativeYPosition > y2 ) {
+						y2 = relativeYPosition;
+					}
 				}
     		}
 			
     		if(insideChar) {
     			
     			charWidth++;
-    			// keep track of whitespace
-    			if( whitespaceWidth > minWhitespaceWidth ) {
+    			
+    			if( whitespaceWidth > minWhitespaceWidth ) { // keep track of whitespace
     				Char c = new Char("char" + l.getLineNumber() + "-" + charNumber);
     				c.setCharNumber(charNumber);
+    				c.setLineNumber( l.getLineNumber() );
     				c.setX( x - whitespaceWidth  );
     				c.setY( l.getY() );
     				c.setW(whitespaceWidth);
@@ -231,16 +246,24 @@ public class Scanner {
     		} else {
     			
     			whitespaceWidth++;
-    			// capture character
-    			if( charWidth > 0 ) {
+    			
+    			if( charWidth > 0 ) { // capture character
+    				
     				Char c = new Char("char" + l.getLineNumber() + "-" + charNumber);
     				c.setCharNumber(charNumber);
+    				c.setLineNumber( l.getLineNumber() );
     				c.setX( x - charWidth  );
-    				c.setY( l.getY() );
+    				//c.setY( l.getY() );
+    				c.setY( l.getY() + y1 );
     				c.setW(charWidth);
-    				c.setH( l.getH() );
+    				//c.setH( l.getH() );
+    				c.setH( y2-y1 + 1 );
     				l.getChars().add( charNumber, c );
     				charNumber++;
+    				
+    				// reset vertical pointers
+    				y1 = l.getH();
+    				y2 = 0;
     			}
     			charWidth = 0;
     		}
@@ -406,10 +429,14 @@ public class Scanner {
 					
 					for( int y=blockStartY; y<blockEndY; y++ ) {
 						
-						int b = bitmap[y][x];
-						if( b != 0 ) {
-							whiteSpace = false;
-							break;
+						try {
+							int b = bitmap[y][x];
+							if( b != 0 ) {
+								whiteSpace = false;
+								break;
+							}
+						} catch(ArrayIndexOutOfBoundsException e ) {
+							e.printStackTrace();
 						}
 					}
 					if(!whiteSpace) break;
@@ -542,12 +569,13 @@ public class Scanner {
         if( avgRGB < BW_THREASHOLD ) { // colored pixel
         	avgRGB = -99999999; // set any color (other than white) as black
         	//avgRGB = 0;
-        } else { // white pixel
-        	avgRGB = -000001;
-        	//avgRGB = 0xFFFFFF;
+        	
+        } else {
+        	//avgRGB = -000001; // set white-ish pixels to the same shade of white
+        	avgRGB = -5000000; // for debugging
         }
+        
         image.setRGB( j, i, avgRGB ); // reset pixel color
-        // TODO: find out why hex ints dont work
 	}
 	
 	

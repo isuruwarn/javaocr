@@ -112,12 +112,13 @@ public class UIContainer {
 		// TODO: read from file
 		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectAlphabet = new JComboBox<String>(alphabets);
+		selectAlphabet.setName( GlobalConstants.SEL_ALPHABET_COMBOBOX );
 		selectAlphabet.addActionListener( mainListener );
 		
 		JLabel lblVBlocksPerChar = new JLabel( GlobalConstants.VBLOCKS_PER_CHAR_LBL );
 		lblVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
 		lblVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
-		lblVBlocksPerChar.setHorizontalAlignment(JTextField.LEFT);
+		lblVBlocksPerChar.setHorizontalAlignment(JTextField.RIGHT);
 		
 		JLabel lblWhitespaceWidth = new JLabel( GlobalConstants.WHITESPACE_WIDTH_LBL );
 		lblWhitespaceWidth.setPreferredSize( new Dimension( GlobalConstants.WHITESPACE_WIDTH_LBL_W, GlobalConstants.WHITESPACE_WIDTH_LBL_H ) );
@@ -364,6 +365,8 @@ public class UIContainer {
 			Scanner.minWhitespaceWidth = Integer.parseInt( txtWhitespaceWidth.getText() );
 			Scanner.minBlanklineHeight = Integer.parseInt( txtBlanklineHeight.getText() );
 			
+			updateMappingsFile(); // in case user changed blocks per char
+			
 			StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
 			textPane.setText(sb.toString());
 			
@@ -392,17 +395,39 @@ public class UIContainer {
 	@SuppressWarnings("unchecked")
 	private void comboBoxChanged( ActionEvent e ) {
 		JComboBox<String> selectBox = (JComboBox<String>) e.getSource();
-		String selection = (String) selectBox.getSelectedItem();
+		if( GlobalConstants.SEL_ALPHABET_COMBOBOX.equals( selectBox.getName() ) ) {
+			updateMappingsFile();
+			updateMainFont();
+		}
+	}
+	
+	
+	
+	private void updateMappingsFile() {
+		
 		String blocks = txtVBlocksPerChar.getText();
-		if( selection.equals( GlobalConstants.ENGLISH ) ) {
+		
+		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
 			mappingsFile = String.format( GlobalConstants.ENG_MAP_FILE, blocks );
-			mainFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE );
-		} else if( selection.equals( GlobalConstants.SINHALA ) ) {
+			
+		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			mappingsFile = String.format( GlobalConstants.SIN_MAP_FILE, blocks );
+		}
+	}
+	
+	
+	
+	private void updateMainFont() {
+		
+		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
+			mainFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE );			
+		
+		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			mainFont = new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_SIN_FONT_SIZE );
 		}
 		textPane.setFont(mainFont);
 	}
+	
 	
 	
 	private Font sinhalaBtnFont;
@@ -935,11 +960,11 @@ public class UIContainer {
 		
 		if( compName.equals( GlobalConstants.MAPPING_CHAR_IMG_NAME ) ) {
 			charImg = inputImage.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
-			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_CHAR_IMG_NAME + c.getCharNumber() + ".png";
+			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_CHAR_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		} else if( compName.equals( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME ) ) {
 			charImg = c.getBlockImage();
-			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getCharNumber() + ".png";
+			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		}
 		
@@ -980,7 +1005,7 @@ public class UIContainer {
 		
 		charMappingTxt.setText( charMappings[navIndex] );
 		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedChars.size(), c.getCharCode() ) );
-		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getCharNumber(), c.getW(), c.getH(), c.getBlockLength(), c.getNoOfHBlocks(), c.getCharCode() ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), c.getCharCode() ) );
 		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
