@@ -367,6 +367,8 @@ public class UIContainer {
 			
 			updateMappingsFile(); // in case user changed blocks per char
 			
+			scn.relaodCharMap( mappingsFile );
+			
 			StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
 			textPane.setText(sb.toString());
 			
