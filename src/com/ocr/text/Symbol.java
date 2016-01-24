@@ -1,4 +1,4 @@
-package com.ocr.util;
+package com.ocr.text;
 
 
 /**

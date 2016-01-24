@@ -6,12 +6,14 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -35,12 +38,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import com.ocr.core.Char;
+import com.ocr.core.Line;
 import com.ocr.core.Scanner;
+import com.ocr.text.Symbol;
+import com.ocr.text.TextHandler;
 import com.ocr.util.GlobalConstants;
 import com.ocr.util.ScanUtils;
-import com.ocr.util.Symbol;
 
 
 
@@ -65,10 +72,11 @@ public class UIContainer {
 	private JFrame mainFrame;
 	private JButton inputFileBtn;
 	private JButton outputFileBtn;
-	private JButton scanBtn;
-	private JButton copyBtn;
-	private JButton clearBtn;
+	//private JButton scanBtn;
+	//private JButton copyBtn;
+	//private JButton clearBtn;
 	private JButton resolveBtn;
+	private JButton viewDocImgBtn1;
 	private JTextArea statusLbl;
 	private JTextPane textPane;
 	private JTextField txtVBlocksPerChar;
@@ -80,7 +88,7 @@ public class UIContainer {
 	private JFileChooser inputImgFileChooser;
 	private JFileChooser outputFileChooser;
 	
-	private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
+	//private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
 	
 	
 	/**
@@ -154,14 +162,18 @@ public class UIContainer {
 		txtBoxPanel.add(txtBlanklineHeight);
 		
 		
-		scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
+		JButton scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
 		scanBtn.addActionListener(mainListener);
 		
-		copyBtn = new JButton( GlobalConstants.COPY_ACTION );
+		JButton copyBtn = new JButton( GlobalConstants.COPY_ACTION );
 		copyBtn.addActionListener(mainListener);
 		
-		clearBtn = new JButton( GlobalConstants.CLEAR_ACTION );
+		JButton clearBtn = new JButton( GlobalConstants.CLEAR_ACTION );
 		clearBtn.addActionListener(mainListener);
+
+		viewDocImgBtn1 = new JButton( GlobalConstants.VIEW_DOC_IMG_ACTION);
+		viewDocImgBtn1.addActionListener(mainListener);
+		viewDocImgBtn1.setEnabled(false);
 		
 		resolveBtn = new JButton( GlobalConstants.RESOLVE_ACTION );
 		resolveBtn.addActionListener(mainListener);
@@ -171,6 +183,7 @@ public class UIContainer {
 		btnToolBar.add(scanBtn);
 		btnToolBar.add(copyBtn);
 		btnToolBar.add(clearBtn);
+		btnToolBar.add(viewDocImgBtn1);
 		btnToolBar.add(resolveBtn);
 		
 		// layout manager configurations
@@ -267,15 +280,17 @@ public class UIContainer {
 		// set default values
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
 		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
-		txtVBlocksPerChar.setText( String.valueOf(Scanner.verticalBlocksPerChar) );
-		txtWhitespaceWidth.setText( String.valueOf(Scanner.minWhitespaceWidth) );
-		txtBlanklineHeight.setText( String.valueOf(Scanner.minBlanklineHeight) );
+		txtVBlocksPerChar.setText( String.valueOf(scn.getVerticalBlocksPerChar()) );
+		txtWhitespaceWidth.setText( String.valueOf(scn.getMinWhitespaceWidth()) );
+		txtBlanklineHeight.setText( String.valueOf(scn.getMinBlanklineHeight()) );
 		selectAlphabet.setSelectedIndex(0);
 		
 		//inputImgFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_IMG_FILENAME) );
 		//outputFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_OUTPUT_FILENAME ) );
 		
 		// for debugging
+		scan();
+		resolve();
 		/*
 		lblVBlocksPerChar.setBorder( BorderFactory.createLineBorder( Color.black ) );
 		lblWhitespaceWidth.setBorder( BorderFactory.createLineBorder( Color.black ) );
@@ -322,12 +337,16 @@ public class UIContainer {
 					textPane.setText("");
 					statusLbl.setText("");
 					resolveBtn.setEnabled(false);
+					viewDocImgBtn1.setEnabled(false);
 					break;
 				
 				case GlobalConstants.RESOLVE_ACTION:
 					resolve();
 					break;
-					
+				
+				case GlobalConstants.VIEW_DOC_IMG_ACTION:
+					viewDocumentImage();
+					break;
 			}
 		}
 
@@ -361,9 +380,9 @@ public class UIContainer {
 		} else {
 			
 			// set basic parameters
-			Scanner.verticalBlocksPerChar = Integer.parseInt( txtVBlocksPerChar.getText() );
-			Scanner.minWhitespaceWidth = Integer.parseInt( txtWhitespaceWidth.getText() );
-			Scanner.minBlanklineHeight = Integer.parseInt( txtBlanklineHeight.getText() );
+			scn.setVerticalBlocksPerChar( Integer.parseInt( txtVBlocksPerChar.getText() ) );
+			scn.setMinWhitespaceWidth( Integer.parseInt( txtWhitespaceWidth.getText() ) );
+			scn.setMinBlanklineHeight( Integer.parseInt( txtBlanklineHeight.getText() ) );
 			
 			updateMappingsFile(); // in case user changed blocks per char
 			
@@ -384,10 +403,12 @@ public class UIContainer {
 			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, scn.getWidth(), scn.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
 			// get any unrecognized chars and enable resolve button if needed
-			unrecognizedChars = scn.getUnrecognizedChars();
-			if( unrecognizedChars.size() > 0 ) {
+			unrecognizedCharsArl = scn.getUnrecognizedChars();
+			if( unrecognizedCharsArl.size() > 0 ) {
 				resolveBtn.setEnabled(true);
 			}
+			
+			viewDocImgBtn1.setEnabled(true);
 		}
 	}
 	
@@ -432,27 +453,26 @@ public class UIContainer {
 	
 	
 	
-	private Font sinhalaBtnFont;
-	private Font charBtnFont;
-	private JLabel charImgLbl;
 	private JLabel charBlockImgLbl;
 	private JLabel charMappingIndexLbl;
 	private JLabel charMappingSavedLbl;
 	private JTextArea charInfoTxt;
 	private JTextField charMappingTxt;
-	private CharButtonsListener charButtonsListener;
+	private JPanel charBlockImgPanel;
 	
 	private int navIndex = 0;
-	private ArrayList<Char> unrecognizedChars;
-	private String [] charMappings;
+	private ArrayList<Char> unrecognizedCharsArl;
+	private String [] charMappingsArr;
 	private boolean [] savedMappingsArr;
+	private Object [] keyPointsArr;
 	
 	private void resolve() {
 		
 		navIndex = 0;
-		unrecognizedChars = scn.getUnrecognizedChars();
-		charMappings = new String[ unrecognizedChars.size() ];
-		savedMappingsArr = new boolean[ unrecognizedChars.size() ];
+		unrecognizedCharsArl = scn.getUnrecognizedChars();
+		charMappingsArr = new String [ unrecognizedCharsArl.size() ];
+		savedMappingsArr = new boolean [ unrecognizedCharsArl.size() ];
+		keyPointsArr = new Object [unrecognizedCharsArl.size()];
 		
 		// TODO: space to manually enter unicode value of symbol
 		
@@ -468,40 +488,38 @@ public class UIContainer {
 		charInfoTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
 		charInfoTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_INFO_TXT_W, GlobalConstants.CHAR_INFO_TXT_H ) );
 		charInfoTxt.setAlignmentX(JTextField.LEFT);
-		charInfoTxt.setAlignmentY(JTextField.TOP);
+		charInfoTxt.setAlignmentY(JTextField.CENTER_ALIGNMENT);
 		charInfoTxt.setFont(infoFont);
 		charInfoTxt.setForeground (Color.gray); // set text color
 		charInfoTxt.setBackground( Color.white );
 		charInfoTxt.setEnabled(true);
-		
-		JMenuItem charImgMenuItem = new JMenuItem( GlobalConstants.SAVE_IMG_AS_ACTION );
-		charImgMenuItem.setName( GlobalConstants.MAPPING_CHAR_IMG_NAME );
-		JPopupMenu charImgPopupMenu = new JPopupMenu();
-		charImgPopupMenu.add(charImgMenuItem);
 		
 		JMenuItem blockImgMenuItem = new JMenuItem( GlobalConstants.SAVE_IMG_AS_ACTION );
 		blockImgMenuItem.setName( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME );
 		JPopupMenu blockImgPopupMenu = new JPopupMenu();
 		blockImgPopupMenu.add(blockImgMenuItem);
 		
-		charImgLbl = new JLabel();
-		charImgLbl.setHorizontalAlignment(JTextField.CENTER);
-		charImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
-		charImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_IMG_LBL_W, GlobalConstants.CHAR_IMG_LBL_H ) );
-		charImgLbl.setComponentPopupMenu(charImgPopupMenu);
-		
 		charBlockImgLbl = new JLabel();
 		charBlockImgLbl.setHorizontalAlignment(JTextField.CENTER);
 		charBlockImgLbl.setVerticalAlignment(JTextField.CENTER);
-		charBlockImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
-		charBlockImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
+		//charBlockImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
+		//charBlockImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
 		charBlockImgLbl.setComponentPopupMenu(blockImgPopupMenu);
+		charBlockImgLbl.addMouseListener( new MappingsMouseListener() );
 		
-		JLabel mappingIcon = new JLabel( GlobalConstants.MAPPING_ARROW_LBL );
-		mappingIcon.setFont( new Font( GlobalConstants.VERDANA_FONT_TYPE, Font.BOLD, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE ) );
-				
+		charBlockImgPanel = new JPanel();
+		charBlockImgPanel.setPreferredSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
+		charBlockImgPanel.setMinimumSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
+		charBlockImgPanel.setOpaque(false);
+		charBlockImgPanel.add(charBlockImgLbl);
+		
+		JLabel arrowLbl = new JLabel( GlobalConstants.MAPPING_ARROW_LBL );
+		arrowLbl.setPreferredSize( new Dimension( GlobalConstants.ARROW_LBL_W, GlobalConstants.ARROW_LBL_H ) );
+		arrowLbl.setMinimumSize( new Dimension( GlobalConstants.ARROW_LBL_W, GlobalConstants.ARROW_LBL_H ) );
+		arrowLbl.setFont( new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, 30 ));
+		
 		charMappingTxt = new JTextField();
-		charMappingTxt.setEditable(false);
+		//charMappingTxt.setEditable(false);
 		charMappingTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_MAP_TXT_W, GlobalConstants.CHAR_MAP_TXT_H ) );
 		charMappingTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_MAP_TXT_W, GlobalConstants.CHAR_MAP_TXT_H ) );
 		charMappingTxt.setHorizontalAlignment(JTextField.CENTER);
@@ -510,6 +528,8 @@ public class UIContainer {
 		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.CHAR_MAPPINGS_SIN_FONT_SIZE ) );
 		}
+		charMappingTxt.getDocument().addDocumentListener( new MappingsTxtDocumentListener() );
+		charMappingTxt.addKeyListener( new MappingsKeyListener() );
 		
 		charMappingSavedLbl = new JLabel();
 		charMappingSavedLbl.setHorizontalAlignment(JTextField.CENTER);
@@ -519,10 +539,8 @@ public class UIContainer {
 		
 		JPanel mappingsImgPanel = new JPanel();
 		mappingsImgPanel.add(charMappingIndexLbl);
-		//mappingsImgPanel.add(charInfoTxt);
-		mappingsImgPanel.add(charImgLbl);
-		mappingsImgPanel.add(charBlockImgLbl);
-		mappingsImgPanel.add(mappingIcon);
+		mappingsImgPanel.add(charBlockImgPanel);
+		mappingsImgPanel.add(arrowLbl);
 		mappingsImgPanel.add(charMappingTxt);
 		mappingsImgPanel.add(charMappingSavedLbl);
 		mappingsImgPanel.add(charInfoTxt);
@@ -535,33 +553,68 @@ public class UIContainer {
 		JButton nextBtn = new JButton( GlobalConstants.NEXT_MAPPING_ACTION);
 		JButton saveBtn = new JButton( GlobalConstants.SAVE_MAPPING_ACTION);
 		JButton saveAllBtn = new JButton( GlobalConstants.SAVEALL_MAPPING_ACTION);
-		JButton clearBtn = new JButton( GlobalConstants.CLEAR_MAPPING_ACTION);
-		JButton clearAllBtn = new JButton( GlobalConstants.CLEARALL_MAPPING_ACTION);
+		JButton clearTxtMapsBtn = new JButton( GlobalConstants.CLEAR_TXT_MAPPINGS_ACTION);
+		JButton clearAllTxtMapsBtn = new JButton( GlobalConstants.CLEARALL_TXT_MAPPINGS_ACTION);
+		JButton clearKeyPointsBtn = new JButton( GlobalConstants.CLEAR_KP_MAPPINGS_ACTION);
+		JButton clearAllKeyPointsBtn = new JButton( GlobalConstants.CLEARALL_KP_MAPPINGS_ACTION);
+		JButton viewCharImgBtn = new JButton( GlobalConstants.VIEW_CHAR_IMG_ACTION);
+		JButton viewLineImgBtn = new JButton( GlobalConstants.VIEW_LINE_IMG_ACTION);
+		JButton viewDocImgBtn = new JButton( GlobalConstants.VIEW_DOC_IMG_ACTION);
 		
-		PopupListener resolveListener = new PopupListener();
+		MappingsActionListener resolveListener = new MappingsActionListener();
 		prevBtn.addActionListener(resolveListener);
 		nextBtn.addActionListener(resolveListener);
 		saveBtn.addActionListener(resolveListener);
 		saveAllBtn.addActionListener(resolveListener);
-		clearBtn.addActionListener(resolveListener);
-		clearAllBtn.addActionListener(resolveListener);
-		charImgMenuItem.addActionListener(resolveListener);
-		blockImgMenuItem.addActionListener(resolveListener);
+		clearTxtMapsBtn.addActionListener(resolveListener);
+		clearAllTxtMapsBtn.addActionListener(resolveListener);
+		clearKeyPointsBtn.addActionListener(resolveListener);
+		clearAllKeyPointsBtn.addActionListener(resolveListener);
+		viewCharImgBtn.addActionListener(resolveListener);
+		viewLineImgBtn.addActionListener(resolveListener);
+		viewDocImgBtn.addActionListener(resolveListener);
+		
+		prevBtn.setToolTipText( GlobalConstants.PREV_MAPPING_ACTION_TOOLTIP );
+		nextBtn.setToolTipText( GlobalConstants.NEXT_MAPPING_ACTION_TOOLTIP );
 		
 		JPanel mappingsNavPanel = new JPanel();
 		mappingsNavPanel.add(prevBtn);
 		mappingsNavPanel.add(nextBtn);
 		mappingsNavPanel.add(saveBtn);
 		mappingsNavPanel.add(saveAllBtn);
-		mappingsNavPanel.add(clearBtn);
-		mappingsNavPanel.add(clearAllBtn);
 		
-		charButtonsListener = new CharButtonsListener();
-		charBtnFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, java.awt.Font.PLAIN, GlobalConstants.REG_CHAR_BUTTON_FONT_SIZE );
-		sinhalaBtnFont = new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, java.awt.Font.PLAIN, GlobalConstants.SIN_CHAR_BUTTON_FONT_SIZE );
+		JPanel mappingsClearPanel = new JPanel();
+		mappingsClearPanel.add(clearTxtMapsBtn);
+		mappingsClearPanel.add(clearAllTxtMapsBtn);
+		mappingsClearPanel.add(clearKeyPointsBtn);
+		mappingsClearPanel.add(clearAllKeyPointsBtn);
+		
+		JPanel viewImagesPanel = new JPanel();
+		viewImagesPanel.add(viewCharImgBtn);
+		viewImagesPanel.add(viewLineImgBtn);
+		viewImagesPanel.add(viewDocImgBtn);
+		
+		MappingsSpSinCharActionListener spSinCharListener = new MappingsSpSinCharActionListener();
+		JButton ksha = createCharButton( Symbol.KSHA.getUnicodeValue(), Symbol.KSHA.getKeyCode(), Symbol.KSHA.name(), spSinCharListener );
+		JButton thalujaNasikya = createCharButton( Symbol.THALUJA_NASIKAYA.getUnicodeValue(), Symbol.THALUJA_NASIKAYA.getKeyCode(), Symbol.THALUJA_NASIKAYA.name(), spSinCharListener );
+		JButton sanyogaNasikaya = createCharButton( Symbol.SANYOGA_NASIKAYA.getUnicodeValue(), Symbol.SANYOGA_NASIKAYA.getKeyCode(), Symbol.SANYOGA_NASIKAYA.name(), spSinCharListener );
+		JButton kombuDeka = createCharButton( Symbol.KOMBU_DEKA.getUnicodeValue(), Symbol.KOMBU_DEKA.getKeyCode(), Symbol.KOMBU_DEKA.name(), spSinCharListener );
+		JButton kombuvaHaGayanuKitta = createCharButton( Symbol.KOMBUVA_HAA_GAYANUKITTA.getUnicodeValue(), Symbol.KOMBUVA_HAA_GAYANUKITTA.getKeyCode(), Symbol.KOMBUVA_HAA_GAYANUKITTA.name(), spSinCharListener );
+		JButton digaGaetaPilla = createCharButton( Symbol.DIGA_GAETTA_PILLA.getUnicodeValue(), Symbol.DIGA_GAETTA_PILLA.getKeyCode(), Symbol.DIGA_GAETTA_PILLA.name(), spSinCharListener );
+		JButton gayanukitta = createCharButton( Symbol.GAYANUKITTA.getUnicodeValue(), Symbol.GAYANUKITTA.getKeyCode(), Symbol.GAYANUKITTA.name(), spSinCharListener );
+		JButton digaGayanukitta = createCharButton( Symbol.DIGA_GAYANUKITTA.getUnicodeValue(), Symbol.DIGA_GAYANUKITTA.getKeyCode(), Symbol.DIGA_GAYANUKITTA.name(), spSinCharListener );
+		
+		JPanel spSinCharsBtnPanel = new JPanel();
+		spSinCharsBtnPanel.add(ksha);
+		spSinCharsBtnPanel.add(thalujaNasikya);
+		spSinCharsBtnPanel.add(sanyogaNasikaya);
+		spSinCharsBtnPanel.add(kombuDeka);
+		spSinCharsBtnPanel.add(kombuvaHaGayanuKitta);
+		spSinCharsBtnPanel.add(digaGaetaPilla);
+		spSinCharsBtnPanel.add(gayanukitta);
+		spSinCharsBtnPanel.add(digaGayanukitta);
 		
 		// layout manager configurations
-		
 		GridBagConstraints imgPanelGridCons = new GridBagConstraints();
 		imgPanelGridCons.gridx = 0;
 		imgPanelGridCons.gridy = 0;
@@ -570,63 +623,54 @@ public class UIContainer {
 
 		GridBagConstraints navPanelGridCons = new GridBagConstraints();
 		navPanelGridCons.gridx = 0;
-		navPanelGridCons.gridy = 2;
-		navPanelGridCons.insets = new Insets(0,0,10,0);
+		navPanelGridCons.gridy = 1;
+		navPanelGridCons.insets = new Insets(0,0,0,0);
 		navPanelGridCons.anchor = GridBagConstraints.CENTER;
 		
-		GridBagConstraints numBtnPanelGridCons = new GridBagConstraints();
-		numBtnPanelGridCons.gridx = 0;
-		numBtnPanelGridCons.gridy = 3;
-		numBtnPanelGridCons.insets = new Insets(0,0,0,0);
-		numBtnPanelGridCons.anchor = GridBagConstraints.CENTER;
+		GridBagConstraints clearPanelGridCons = new GridBagConstraints();
+		clearPanelGridCons.gridx = 0;
+		clearPanelGridCons.gridy = 2;
+		clearPanelGridCons.insets = new Insets(0,0,0,0);
+		clearPanelGridCons.anchor = GridBagConstraints.CENTER;
 		
-		GridBagConstraints spCharBtnPanelGridCons = new GridBagConstraints();
-		spCharBtnPanelGridCons.gridx = 0;
-		spCharBtnPanelGridCons.gridy = 4;
-		spCharBtnPanelGridCons.insets = new Insets(0,0,0,0);
-		spCharBtnPanelGridCons.anchor = GridBagConstraints.CENTER;
+		GridBagConstraints viewImgsBtnPanelGridCons = new GridBagConstraints();
+		viewImgsBtnPanelGridCons.gridx = 0;
+		viewImgsBtnPanelGridCons.gridy = 3;
+		viewImgsBtnPanelGridCons.insets = new Insets(0,0,0,0);
+		viewImgsBtnPanelGridCons.anchor = GridBagConstraints.CENTER;
 		
-		GridBagConstraints charBtnPanelGridCons = new GridBagConstraints();
-		charBtnPanelGridCons.gridx = 0;
-		charBtnPanelGridCons.gridy = 5;
-		charBtnPanelGridCons.insets = new Insets(0,0,0,0);
-		charBtnPanelGridCons.anchor = GridBagConstraints.CENTER;
+		GridBagConstraints spSinCharsBtnPanelGridCons = new GridBagConstraints();
+		spSinCharsBtnPanelGridCons.gridx = 0;
+		spSinCharsBtnPanelGridCons.gridy = 4;
+		spSinCharsBtnPanelGridCons.insets = new Insets(0,0,0,0);
+		spSinCharsBtnPanelGridCons.anchor = GridBagConstraints.CENTER;
 		
 		JPanel resolveMappingsPanel = new JPanel();
+		resolveMappingsPanel.setPreferredSize( new Dimension( GlobalConstants.MAPPINGS_PANEL_W, GlobalConstants.MAPPINGS_PANEL_H ) );
+		resolveMappingsPanel.setMinimumSize( new Dimension( GlobalConstants.MAPPINGS_PANEL_W, GlobalConstants.MAPPINGS_PANEL_H ) );
 		resolveMappingsPanel.setLayout( new GridBagLayout() );
 		resolveMappingsPanel.add( mappingsImgPanel, imgPanelGridCons);
 		resolveMappingsPanel.add( mappingsNavPanel, navPanelGridCons );
-		resolveMappingsPanel.add( getNumButtonsPanel(), numBtnPanelGridCons );
-		resolveMappingsPanel.add( getSpecialCharButtonsPanel(), spCharBtnPanelGridCons );
-		resolveMappingsPanel.add( getCharButtonsPanel(), charBtnPanelGridCons );
+		resolveMappingsPanel.add( mappingsClearPanel, clearPanelGridCons );
+		resolveMappingsPanel.add( viewImagesPanel, viewImgsBtnPanelGridCons );
 		
-		
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
-			resolveMappingsPanel.setPreferredSize( new Dimension( GlobalConstants.ENG_MAPPINGS_PANEL_W, GlobalConstants.ENG_MAPPINGS_PANEL_H ) );
-			resolveMappingsPanel.setMinimumSize( new Dimension( GlobalConstants.ENG_MAPPINGS_PANEL_W, GlobalConstants.ENG_MAPPINGS_PANEL_H ) );
-		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			resolveMappingsPanel.setPreferredSize( new Dimension( GlobalConstants.SIN_MAPPINGS_PANEL_W, GlobalConstants.SIN_MAPPINGS_PANEL_H ) );
-			resolveMappingsPanel.setMinimumSize( new Dimension( GlobalConstants.SIN_MAPPINGS_PANEL_W, GlobalConstants.SIN_MAPPINGS_PANEL_H ) );
+		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+			resolveMappingsPanel.add( spSinCharsBtnPanel, spSinCharsBtnPanelGridCons );
 		}
 		
 		setUnrecognizedCharDetails();
 		
-		// set key event dispatcher
-		if( mappingsKeyEventDispatcher == null ) {
-			mappingsKeyEventDispatcher = new MappingsKeyEventDispatcher();
-			KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-			manager.addKeyEventDispatcher(mappingsKeyEventDispatcher);
-		}
 		
 		// for debugging
+		
 		/*charMappingIndexLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
-		charImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
-		charBlockImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) ); 
-		mappingIcon.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		charBlockImgLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
+		arrowLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		charMappingSavedLbl.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		charInfoTxt.setBorder( BorderFactory.createLineBorder( Color.gray ) );
 		mappingsNavPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
-		resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );*/
+		resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		*/
 		
 		JDialog mappingsDialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
 		mappingsDialog.getContentPane().add(resolveMappingsPanel);
@@ -636,11 +680,6 @@ public class UIContainer {
 		mappingsDialog.setVisible(true);
 		
 		// TODO: check for unsaved mappings before close and inform user if needed
-		
-		// reset key event stuff, otherwise a new object is created each time the popup is opened,
-		// which will result in multiple outputs for each key stroke.
-		mappingsKeyEventDispatcher = null;
-		KeyboardFocusManager.setCurrentKeyboardFocusManager(null);
 		
 		scan(); // re-scan to refresh
 		
@@ -652,155 +691,144 @@ public class UIContainer {
 	// ******************************
 	
 	
-	private JPanel getNumButtonsPanel( ) {
-		JPanel numericButtonsPanel = new JPanel();
-		numericButtonsPanel.setPreferredSize( new Dimension( GlobalConstants.NUM_BTNS_PANEL_W, GlobalConstants.NUM_BTNS_PANEL_H ) );
-		numericButtonsPanel.setMinimumSize( new Dimension( GlobalConstants.NUM_BTNS_PANEL_W, GlobalConstants.NUM_BTNS_PANEL_H ) );
-		//numericButtonsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
-		for( int i=0; i<10; i++ ) {
-			JButton numBtn = createCharButton( String.valueOf(i), charButtonsListener, GlobalConstants.REG_CHAR_BUTTON_W, GlobalConstants.REG_CHAR_BUTTON_H, charBtnFont );
-			numericButtonsPanel.add(numBtn);
+	
+	class MappingsTxtDocumentListener implements DocumentListener {
+
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			charMappingsArr[navIndex] = charMappingTxt.getText();
 		}
-		return numericButtonsPanel;
+
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			charMappingsArr[navIndex] = charMappingTxt.getText();
+		}
+
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			charMappingsArr[navIndex] = charMappingTxt.getText();
+		}
+		
 	}
 	
 	
-	private JPanel getSpecialCharButtonsPanel() {
-		JPanel specialCharButtonsPanel = new JPanel();
-		specialCharButtonsPanel.setPreferredSize( new Dimension( GlobalConstants.SP_CHAR_BTNS_PANEL_W, GlobalConstants.SP_CHAR_BTNS_PANEL_H ) );
-		specialCharButtonsPanel.setMinimumSize( new Dimension( GlobalConstants.SP_CHAR_BTNS_PANEL_W, GlobalConstants.SP_CHAR_BTNS_PANEL_H ) );
-		//specialCharButtonsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
-		for( int i=33; i<127; i++ ) {
-			if( i>=48 && i < 58 ) {
-				// numbers - do nothing
-			} else if( i>=65 && i < 91 ) {
-				// upper case letters - do nothing
-			}else if( i>=97 && i < 123 ) {
-				// lower case letters - do nothing
+	class MappingsMouseListener implements MouseListener {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			
+			Char c = unrecognizedCharsArl.get( navIndex );
+			Icon icon = charBlockImgLbl.getIcon();
+			int iconWidth = icon.getIconWidth();
+			int iconHeight = icon.getIconHeight();
+			int x = e.getX();
+			int y = e.getY();
+			int hBlocksInChar = c.getNoOfHBlocks();
+			int vBlocksInChar = scn.getVerticalBlocksPerChar();
+			int blockWidth = iconWidth / hBlocksInChar;
+			int blockHeight = iconHeight / vBlocksInChar;
+			//float blockWidth = (float) iconWidth / hBlocksInChar;
+			//float blockHeight = (float) iconHeight / vBlocksInChar;
+			int colNumber = x / blockWidth;
+			int rowNumber = y / blockHeight;
+			//int colNumber = Math.round( x / blockWidth );
+			//int rowNumber = Math.round( y / blockHeight );
+			int clickBlockNumber = ( colNumber * vBlocksInChar ) + rowNumber;
+
+			System.out.println("clickBlockNumber=" + clickBlockNumber );
+			
+			ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
+			if( keyPoints == null ) {
+				keyPoints = new ArrayList<Integer>();
+				keyPointsArr[navIndex] = keyPoints;
+			}
+			if( keyPoints.contains(clickBlockNumber) ) {
+				keyPoints.remove( new Integer(clickBlockNumber) );
 			} else {
-				JButton spCharBtn = createCharButton( String.valueOf( (char) i ), charButtonsListener, GlobalConstants.REG_CHAR_BUTTON_W, GlobalConstants.REG_CHAR_BUTTON_H, charBtnFont );
-				specialCharButtonsPanel.add(spCharBtn);
+				keyPoints.add(clickBlockNumber);
 			}
+			
+			setMappingsBlockImageLbl(c);
 		}
-		return specialCharButtonsPanel;
-	}
-	
-	
-	private JPanel getCharButtonsPanel() {
-		
-		JPanel charButtonsPanel = new JPanel();
-		//charButtonsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) ); // for debugging
-		
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
-			
-			for( int i=65; i<91; i++ ) {
-				JButton upperCaseCharBtn = createCharButton( String.valueOf( (char) i ), charButtonsListener, GlobalConstants.REG_CHAR_BUTTON_W, GlobalConstants.REG_CHAR_BUTTON_H, charBtnFont );
-				JButton lowerCaseCharBtn = createCharButton( String.valueOf( (char) ( i + 32 ) ), charButtonsListener, GlobalConstants.REG_CHAR_BUTTON_W, GlobalConstants.REG_CHAR_BUTTON_H, charBtnFont );
-				charButtonsPanel.add(upperCaseCharBtn);
-				charButtonsPanel.add(lowerCaseCharBtn);
-			}
-			charButtonsPanel.setPreferredSize( new Dimension( GlobalConstants.ENG_CHAR_BTNS_PANEL_W, GlobalConstants.ENG_CHAR_BTNS_PANEL_H ) );
-			charButtonsPanel.setMinimumSize( new Dimension( GlobalConstants.ENG_CHAR_BTNS_PANEL_W, GlobalConstants.ENG_CHAR_BTNS_PANEL_H ) );
-			
-		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			
-			int [] alphabet = {  97, 1400, 1401, 1402, 105, 73, 117, 1407, 79, 85, 
-					             101, 1403, 1404, 111, 1405, 1406, 107, 75, 103, 71, 70, 
-					             86, 99, 67, 106, 74, 113, 81, 1408, 83, 
-					             116, 84, 100, 68, 110, 78, 122, 90, 119, 87, 
-					             112, 80, 98, 66, 109, 77, 121, 114, 108, 118, 
-					             120, 88, 115, 104, 76, 102, 72, 1304, 89, 82,
-					             92, 124, 96, 126, 64, 94, 60, 62, 91, 123,
-					             93, 125, 1320, 95, 1322, 1323, 1324, 1321, 65, 69 };
-			
-			for( int code: alphabet ) {
-				String unicodeVal = Symbol.getSymbolForASCII(code);
-				String symbolName = Symbol.getSymbolNameForASII(code);
-				JButton sinhalaCharBtn = createCharButton( unicodeVal, charButtonsListener, GlobalConstants.SIN_CHAR_BUTTON_W, GlobalConstants.SIN_CHAR_BUTTON_H, sinhalaBtnFont );
-				sinhalaCharBtn.setToolTipText(symbolName);
-				charButtonsPanel.add(sinhalaCharBtn);
-			}
-			
-			charButtonsPanel.setPreferredSize( new Dimension( GlobalConstants.SIN_CHAR_BTNS_PANEL_W, GlobalConstants.SIN_CHAR_BTNS_PANEL_H ) );
-			charButtonsPanel.setMinimumSize( new Dimension( GlobalConstants.SIN_CHAR_BTNS_PANEL_W, GlobalConstants.SIN_CHAR_BTNS_PANEL_H ) );
-		}
-		
-		return charButtonsPanel;
-	}
-	
-	
-	class CharButtonsListener implements ActionListener {
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
-			String charVal = e.getActionCommand();
-			setCharMappingText( charVal );
+		public void mousePressed(MouseEvent e) {
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			
 		}
 		
 	}
 	
 	
-	
-	
-	private void setCharMappingText( String text ) {
-		String currentStr = charMappings[navIndex] == null ? "" : charMappings[navIndex];
-		charMappings[navIndex] = currentStr + text;
-		charMappingTxt.setText( currentStr + text);
-	}
-	
-	
-	
-	class MappingsKeyEventDispatcher implements KeyEventDispatcher {
-        
+	class MappingsKeyListener implements KeyListener {
+
 		@Override
-        public boolean dispatchKeyEvent(KeyEvent e) {
-            
-        	if( e.getID() == KeyEvent.KEY_PRESSED ) {
+		public void keyTyped(KeyEvent e) {
+			
+			String inputKey = String.valueOf( e.getKeyChar() );
+			
+			if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+				
+				if( inputKey.matches("[A-Za-z]") || 
+					inputKey.equals( "`" ) || 
+					inputKey.equals( "~" ) || 
+					inputKey.equals( "@" ) || 
+					inputKey.equals( "^" ) || 
+					inputKey.equals( "_" ) || 
+					inputKey.equals( "[" ) || 
+					inputKey.equals( "{" ) || 
+					inputKey.equals( "]" ) || 
+					inputKey.equals( "}" ) || 
+					inputKey.equals( "\\" ) || 
+					inputKey.equals( "|" ) || 
+					inputKey.equals( "<" ) || 
+					inputKey.equals( ">" ) ) {
+					
+					e.consume(); // prevents default action, to stop original character from being printed.
+					TextHandler.insertText( inputKey, charMappingTxt );
+				}
+				
+			}
+			
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) { // capture non-char keys
+			int keyCode =  e.getKeyCode();
+			if( keyCode == 38 ) {
+				nextMapping();
             	
-        		char keyChar = e.getKeyChar();
-                int keyCode = e.getKeyCode();
-                //System.out.println( "KEY PRESSED - " + keyChar + " " +  keyCode );
-                
-        		if( keyCode == 8 ) {
-        			String currentStr = charMappings[navIndex] == null ? "" : charMappings[navIndex];
-        			String afterBackSpace = currentStr;
-        			if( currentStr.length() > 0 ) {
-        				afterBackSpace = currentStr.substring( 0, currentStr.length()-1 );
-        			}
-        			charMappings[navIndex] = afterBackSpace;
-        			charMappingTxt.setText( afterBackSpace );
-        			
-        		} else if( keyCode == 37 ) {
-                	prevMapping();
-                	
-                } else if( keyCode == 39 ) {
-                	nextMapping();
-                	
-                } else if( keyCode >= 32 ) {
-                	
-                	String newChar = "";
-                	
-                	if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
-                		newChar = String.valueOf(keyChar);
-                		
-                	} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-                		newChar = Symbol.getSymbolForASCII( (int) keyChar );
-                		if( newChar == null ) {
-                			newChar = String.valueOf(keyChar);
-                		}
-                	}
-                	setCharMappingText( newChar );
-                }
-                
+            } else if( keyCode == 40 ) {
+            	prevMapping();
             }
-            return false;
-        }
-        
-    }
+		}
 
+		@Override
+		public void keyReleased(KeyEvent e) {
+			
+		}
+		
+	}
+	
+	
 	
 
-	class PopupListener implements ActionListener {
+	class MappingsActionListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -825,18 +853,51 @@ public class UIContainer {
 				saveAllMappings();
 				break;
 			
-			case GlobalConstants.CLEAR_MAPPING_ACTION:
-				clear();
+			case GlobalConstants.CLEAR_TXT_MAPPINGS_ACTION:
+				clearTextMapping();
 				break;
 			
-			case GlobalConstants.CLEARALL_MAPPING_ACTION:
-				clearAll();
+			case GlobalConstants.CLEARALL_TXT_MAPPINGS_ACTION:
+				clearAllTextMappings();
+				break;
+			
+			case GlobalConstants.CLEAR_KP_MAPPINGS_ACTION:
+				clearKeyPointMappings();
+				break;
+			
+			case GlobalConstants.CLEARALL_KP_MAPPINGS_ACTION:
+				clearAllKeyPointMappings();
 				break;
 			
 			case GlobalConstants.SAVE_IMG_AS_ACTION:
 				saveImageDialog( (Component) e.getSource() );
 				break;
+				
+			case GlobalConstants.VIEW_CHAR_IMG_ACTION:
+				viewCharImage();
+				break;
+				
+			case GlobalConstants.VIEW_LINE_IMG_ACTION:
+				viewLineImage();
+				break;
+				
+			case GlobalConstants.VIEW_DOC_IMG_ACTION:
+				viewDocumentImage();
+				break;
 			}
+			
+			charMappingTxt.requestFocusInWindow();
+		}
+		
+	}
+	
+	
+	class MappingsSpSinCharActionListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String inputKey = e.getActionCommand();
+			TextHandler.insertText( inputKey, charMappingTxt );
 		}
 		
 	}
@@ -854,7 +915,7 @@ public class UIContainer {
 	
 	
 	private void nextMapping() {
-		if( navIndex < unrecognizedChars.size() - 1 ) navIndex++;
+		if( navIndex < unrecognizedCharsArl.size() - 1 ) navIndex++;
 		setUnrecognizedCharDetails();
 	}
 	
@@ -862,8 +923,8 @@ public class UIContainer {
 	private void saveMapping() {
 		
 		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
-		String newCharCode = unrecognizedChars.get( navIndex ).getCharCode();
-		String newCharValue = charMappings[navIndex];
+		String newCharCode = unrecognizedCharsArl.get( navIndex ).getCharCode( scn.getVerticalBlocksPerChar() );
+		String newCharValue = charMappingsArr[navIndex];
 		
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
@@ -900,13 +961,13 @@ public class UIContainer {
 		int savedMappings = 0;
 		HashMap<String,String> newMappings = new HashMap<String,String>(); // holds new or modified char mappings
 		
-		for( int i=0; i<charMappings.length; i++ ) {
+		for( int i=0; i<charMappingsArr.length; i++ ) {
 			
-			String newCharValue = charMappings[i];
+			String newCharValue = charMappingsArr[i];
 			
 			if ( newCharValue != null && !newCharValue.isEmpty() ) {
 				
-				String newCharCode = unrecognizedChars.get(i).getCharCode();
+				String newCharCode = unrecognizedCharsArl.get(i).getCharCode( scn.getVerticalBlocksPerChar() );
 				String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
@@ -935,28 +996,43 @@ public class UIContainer {
 	}
 	
 	
-	private void clear() {
-		charMappings[navIndex] = null;
+	private void clearTextMapping() {
+		charMappingsArr[navIndex] = null;
 		charMappingTxt.setText("");
-		charMappingIndexLbl.setText("");
 	}
 	
 	
-	private void clearAll() {
+	private void clearAllTextMappings() {
 		int resp = JOptionPane.showConfirmDialog( mainFrame, GlobalConstants.CLEAR_ALL_MAPPINGS_CONF_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.CANCEL_OPTION );
 		if( resp == 0 ) { // OK
-			charMappings = new String[ unrecognizedChars.size() ];
+			charMappingsArr = new String[ unrecognizedCharsArl.size() ];
 			charMappingTxt.setText("");
-			charMappingIndexLbl.setText("");
+		}
+	}
+	
+	private void clearKeyPointMappings() {
+		keyPointsArr[navIndex] = null;
+		Char c = unrecognizedCharsArl.get( navIndex );
+		setMappingsBlockImageLbl(c);
+	}
+	
+	
+	private void clearAllKeyPointMappings() {
+		int resp = JOptionPane.showConfirmDialog( mainFrame, GlobalConstants.CLEAR_ALL_MAPPINGS_CONF_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.CANCEL_OPTION );
+		if( resp == 0 ) { // OK
+			keyPointsArr = new Object[ unrecognizedCharsArl.size() ];
+			Char c = unrecognizedCharsArl.get( navIndex );
+			setMappingsBlockImageLbl(c);
 		}
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void saveImageDialog( Component comp ) {
 		
 		BufferedImage charImg = null;
 		String sampleFileName = null;
-		Char c = unrecognizedChars.get( navIndex );
+		Char c = unrecognizedCharsArl.get( navIndex );
 		JMenuItem jMenuItem = (JMenuItem) comp;
 		String compName = jMenuItem.getName();
 		
@@ -965,7 +1041,8 @@ public class UIContainer {
 			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_CHAR_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		} else if( compName.equals( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME ) ) {
-			charImg = c.getBlockImage();
+			ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
+			charImg = c.getBlockImage( scn.getVerticalBlocksPerChar(), keyPoints );
 			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		}
@@ -984,6 +1061,41 @@ public class UIContainer {
 	}
 	
 	
+	private void viewCharImage() {
+		Char c = unrecognizedCharsArl.get( navIndex );
+		BufferedImage charImg = inputImage.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
+		viewImage( charImg, GlobalConstants.VIEW_CHAR_IMG_ACTION, GlobalConstants.VIEW_CHAR_IMG_LBL_W, GlobalConstants.VIEW_CHAR_IMG_LBL_H );
+	}
+	
+	
+	private void viewLineImage() {
+		Char c = unrecognizedCharsArl.get( navIndex );
+		Line l = scn.getLines().get( c.getLineNumber() );
+		BufferedImage lineImg = inputImage.getSubimage( l.getX(), l.getY(), l.getW(), l.getH() );
+		viewImage( lineImg, GlobalConstants.VIEW_LINE_IMG_ACTION, GlobalConstants.VIEW_LINE_IMG_LBL_W, GlobalConstants.VIEW_LINE_IMG_LBL_H );
+	}
+	
+	
+	private void viewDocumentImage() {
+		viewImage( inputImage, GlobalConstants.VIEW_DOC_IMG_ACTION, GlobalConstants.VIEW_DOC_IMG_LBL_W, GlobalConstants.VIEW_DOC_IMG_LBL_H );
+	}
+	
+	
+	private void viewImage( Image img, String msg, int w, int h ) {
+		ImageIcon imgIcon = new ImageIcon(img);
+		JLabel imgLbl = new JLabel();
+		imgLbl.setIcon(imgIcon);
+		imgLbl.setBackground( Color.white );
+		imgLbl.setOpaque(true);
+		imgLbl.setHorizontalAlignment(JTextField.CENTER);
+		imgLbl.setVerticalAlignment(JTextField.CENTER);
+		JScrollPane scrollPane = new JScrollPane(imgLbl);
+		scrollPane.setPreferredSize( new Dimension( w, h ) );
+		scrollPane.setMinimumSize( new Dimension( w, h ) );
+		JOptionPane.showMessageDialog( mainFrame, scrollPane, msg, JOptionPane.INFORMATION_MESSAGE );
+	}
+	
+	
 	// ******************************
 	// end PopupListener methods 
 	// ******************************
@@ -992,22 +1104,16 @@ public class UIContainer {
 	
 	private void setUnrecognizedCharDetails() {
 		
-		Char c = unrecognizedChars.get( navIndex );
+		Char c = unrecognizedCharsArl.get( navIndex );
 		//c.printSequence();
 		
-		BufferedImage charImg = inputImage.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
-		// TODO: display character as scaled image
-		ImageIcon charImgIcon = new ImageIcon(charImg);
-		charImgLbl.setIcon(charImgIcon);
-		charImgLbl.setToolTipText( GlobalConstants.MAPPING_IMG_TOOLTIP );
-		
-		ImageIcon blockImgIcon = new ImageIcon( c.getBlockImage() );
-		charBlockImgLbl.setIcon(blockImgIcon);
+		// set block image
+		setMappingsBlockImageLbl(c);
 		charBlockImgLbl.setToolTipText( GlobalConstants.MAPPING_BLOCK_REP_TOOLTIP );
 		
-		charMappingTxt.setText( charMappings[navIndex] );
-		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedChars.size(), c.getCharCode() ) );
-		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), c.getCharCode() ) );
+		charMappingTxt.setText( charMappingsArr[navIndex] );
+		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), c.getCharCode( scn.getVerticalBlocksPerChar() ) ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), c.getCharCode( scn.getVerticalBlocksPerChar() ) ) );
 		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
@@ -1016,16 +1122,33 @@ public class UIContainer {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	private void setMappingsBlockImageLbl( Char c ) {
+		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
+		Image blockImg = c.getBlockImage( scn.getVerticalBlocksPerChar(), keyPoints );
+		int w = -1;
+		int h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
+		if(  c.getW() > c.getH() ) {
+			w = GlobalConstants.CHAR_BLOCK_IMG_LBL_W;
+			h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
+		}
+		Image resizedImage = blockImg.getScaledInstance( w, h, Image.SCALE_DEFAULT );
+		ImageIcon blockImgIcon = new ImageIcon( resizedImage );
+		charBlockImgLbl.setIcon(blockImgIcon);
+	}
 	
-	private JButton createCharButton( String text, ActionListener listener, int w, int h, Font font ) {
+	
+	private JButton createCharButton( String text, String actionCommand, String toolTip, ActionListener listener ) {
 		JButton charBtn = new JButton();
 		charBtn.setText(text);
+		charBtn.setActionCommand(actionCommand);
+		charBtn.setToolTipText(toolTip);
 		charBtn.addActionListener(listener);
-		charBtn.setPreferredSize( new Dimension( w, h ) );
-		charBtn.setMinimumSize( new Dimension( w, h ) );
-		charBtn.setFont(font);
 		return charBtn;
 	}
+	
+	
+	
 	
 	
 }

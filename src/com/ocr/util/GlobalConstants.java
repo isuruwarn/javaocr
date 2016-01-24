@@ -30,14 +30,11 @@ public class GlobalConstants {
 
 	
 	// panel dimensions
-	public static final int ENG_MAPPINGS_PANEL_W = 600;
-	public static final int ENG_MAPPINGS_PANEL_H = 650;
-	
-	public static final int SIN_MAPPINGS_PANEL_W = 600;
-	public static final int SIN_MAPPINGS_PANEL_H = 810;
+	public static final int MAPPINGS_PANEL_W = 600;
+	public static final int MAPPINGS_PANEL_H = 500;
 	
 	public static final int MAPPINGS_IMG_PANEL_W = 400;
-	public static final int MAPPINGS_IMG_PANEL_H = 210;
+	public static final int MAPPINGS_IMG_PANEL_H = 320;
 	
 	public static final int NUM_BTNS_PANEL_W = 600;
 	public static final int NUM_BTNS_PANEL_H = 50;
@@ -53,8 +50,8 @@ public class GlobalConstants {
 	
 	
 	// button dimensions
-	public static final int REG_CHAR_BUTTON_W = 45;
-	public static final int REG_CHAR_BUTTON_H = 35;
+	//public static final int REG_CHAR_BUTTON_W = 80;
+	//public static final int REG_CHAR_BUTTON_H = 80;
 	
 	public static final int SIN_CHAR_BUTTON_W = 50;
 	public static final int SIN_CHAR_BUTTON_H = 40;
@@ -73,17 +70,29 @@ public class GlobalConstants {
 	public static final int BLANKLINE_HEIGHT_LBL_W = 130;
 	public static final int BLANKLINE_HEIGHT_LBL_H = 25;
 	
-	public static final int CHAR_IDX_LBL_W = 375;
-	public static final int CHAR_IDX_LBL_H = 25;
+	public static final int CHAR_IDX_LBL_W = 350;
+	public static final int CHAR_IDX_LBL_H = 30;
 	
 	public static final int CHAR_IMG_LBL_W = 100;
 	public static final int CHAR_IMG_LBL_H = 100;
 	
-	public static final int CHAR_BLOCK_IMG_LBL_W = 75;
-	public static final int CHAR_BLOCK_IMG_LBL_H = 100;
+	public static final int CHAR_BLOCK_IMG_LBL_W = 200;
+	public static final int CHAR_BLOCK_IMG_LBL_H = 200;
 	
 	public static final int CHAR_SAVED_IMG_LBL_W = 50;
-	public static final int CHAR_SAVED_IMG_LBL_H = 100;
+	public static final int CHAR_SAVED_IMG_LBL_H = 25;
+	
+	public static final int ARROW_LBL_W = 30;
+	public static final int ARROW_LBL_H = 25;
+	
+	public static final int VIEW_CHAR_IMG_LBL_W = -1;
+	public static final int VIEW_CHAR_IMG_LBL_H = -1;
+	
+	public static final int VIEW_LINE_IMG_LBL_W = 800;
+	public static final int VIEW_LINE_IMG_LBL_H = 80;
+	
+	public static final int VIEW_DOC_IMG_LBL_W = 800;
+	public static final int VIEW_DOC_IMG_LBL_H = 700;
 	
 
 	// text box dimensions
@@ -93,14 +102,14 @@ public class GlobalConstants {
 	public static final int INPUT_IMG_PATH_TXT_W = 300;
 	public static final int INPUT_IMG_PATH_TXT_H = 25;
 	
-	public static final int CHAR_MAP_TXT_W = 100;
-	public static final int CHAR_MAP_TXT_H = 100;
+	public static final int CHAR_MAP_TXT_W = 50;
+	public static final int CHAR_MAP_TXT_H = 30;
 	
 	public static final int SMALL_TXTBOX_W = 30;
 	public static final int SMALL_TXTBOX_H = 25;
 	
-	public static final int CHAR_INFO_TXT_W = 375;
-	public static final int CHAR_INFO_TXT_H = 60;
+	public static final int CHAR_INFO_TXT_W = 350;
+	public static final int CHAR_INFO_TXT_H = 70;
 	
 	
 	// action commands
@@ -113,11 +122,20 @@ public class GlobalConstants {
 	public static final String RESOLVE_ACTION = "Resolve";
 	public static final String PREV_MAPPING_ACTION = "Prev";
 	public static final String NEXT_MAPPING_ACTION = "Next";
+	//public static final String PREV_MAPPING_ACTION = "\u25C0";
+	//public static final String NEXT_MAPPING_ACTION = "\u25B6";
+	public static final String PREV_MAPPING_ACTION_TOOLTIP = "Press down arrow \u2193";
+	public static final String NEXT_MAPPING_ACTION_TOOLTIP = "Press up arrow \u2191";
 	public static final String SAVE_MAPPING_ACTION = "Save";
 	public static final String SAVEALL_MAPPING_ACTION = "Save All";
-	public static final String CLEAR_MAPPING_ACTION = "Clear";
-	public static final String CLEARALL_MAPPING_ACTION = "Clear All";
+	public static final String CLEAR_TXT_MAPPINGS_ACTION = "Clear Text";
+	public static final String CLEARALL_TXT_MAPPINGS_ACTION = "Clear All Text";
+	public static final String CLEAR_KP_MAPPINGS_ACTION = "Clear Key Points";
+	public static final String CLEARALL_KP_MAPPINGS_ACTION = "Clear All Key Points";
 	public static final String SAVE_IMG_AS_ACTION = "Save Image As..";
+	public static final String VIEW_CHAR_IMG_ACTION = "View Char Image";
+	public static final String VIEW_LINE_IMG_ACTION = "View Line Image";
+	public static final String VIEW_DOC_IMG_ACTION = "View Document";
 	
 	// fonts
 	public static final String SANSSERIF_FONT_TYPE = "SansSerif";
@@ -130,8 +148,8 @@ public class GlobalConstants {
 	public static final int MAIN_TEXT_SIN_FONT_SIZE = 20;
 	public static final int SIN_CHAR_BUTTON_FONT_SIZE = 15;
 	public static final int REG_CHAR_BUTTON_FONT_SIZE = 12;
-	public static final int CHAR_MAPPINGS_ENG_FONT_SIZE = 35;
-	public static final int CHAR_MAPPINGS_SIN_FONT_SIZE = 35;
+	public static final int CHAR_MAPPINGS_ENG_FONT_SIZE = 14;
+	public static final int CHAR_MAPPINGS_SIN_FONT_SIZE = 14;
 	public static final int CHAR_MAPPING_INFO_FONT_SIZE = 10;
 	
 	
@@ -153,7 +171,7 @@ public class GlobalConstants {
 	public static final String SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG = "%d mappings were successfully saved";
 	public static final String SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG = "Error while saving mulitple mappings. Please try again.";
 	public static final String CLEAR_ALL_MAPPINGS_CONF_MSG = "Are you sure you want to clear all unsaved mappings in current session?";
-	public static final String MAPPING_ARROW_LBL = "--->";
+	public static final String MAPPING_ARROW_LBL = "\u279C"; //"\u27A0";
 	public static final String MAPPING_IMG_TOOLTIP = "Actual character";
 	public static final String MAPPING_BLOCK_REP_TOOLTIP = "Block representation";
 	public static final String MAPPING_IDX_LBL_TXT = "%d of %d";
@@ -170,8 +188,10 @@ public class GlobalConstants {
 	public static final String SEL_ALPHABET_COMBOBOX = "SelectAlphabetComboBox";
 	
 	
-	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img14.png";
+	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	public static final String SAVE_IMG_FILEPATH = "test/";
+	
+	
 	
 }

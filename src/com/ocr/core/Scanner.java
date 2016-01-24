@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import com.ocr.text.Symbol;
 import com.ocr.util.ScanUtils;
-import com.ocr.util.Symbol;
 
 
 
@@ -67,10 +67,9 @@ public class Scanner {
 	public static final int BW_THREASHOLD = -10800000; // average RGB values less than this will be saved as black pixels. 
 														// average RGB values greater than this will be saved as white pixels
 	
-	// TODO Handle thread safety. perhaps use as instance variables?
-	public static int minBlanklineHeight = 30;
-	public static int minWhitespaceWidth = 8;
-	public static int verticalBlocksPerChar = 10;
+	private int minBlanklineHeight = 30;
+	private int minWhitespaceWidth = 8;
+	private int verticalBlocksPerChar = 10;
 	
 	private int height = 0;
 	private int width = 0;
@@ -229,7 +228,7 @@ public class Scanner {
     			
     			charWidth++;
     			
-    			if( whitespaceWidth > minWhitespaceWidth ) { // keep track of whitespace
+    			if( whitespaceWidth > this.minWhitespaceWidth ) { // keep track of whitespace
     				Char c = new Char("char" + l.getLineNumber() + "-" + charNumber);
     				c.setCharNumber(charNumber);
     				c.setLineNumber( l.getLineNumber() );
@@ -304,7 +303,7 @@ public class Scanner {
 				}
 				
 				// a character needs to be a minimum of 15 pixels, otherwise we cannot identify it
-				if( c.getH() < verticalBlocksPerChar ) {
+				if( c.getH() < this.verticalBlocksPerChar ) {
 					sb.append("?");
 					continue;
 				}
@@ -313,14 +312,14 @@ public class Scanner {
 				mapToGrid(c);
 				
 				// Step 5: try and identify the character by looking up the saved in file for any matches
-				String s = getCharValueFromMap( mapFile, c.getCharCode() );
+				String s = getCharValueFromMap( mapFile, c.getCharCode(verticalBlocksPerChar) );
 				
 				if( s == null ) { // unrecognized char
 					
 					sb.append("?");
 					
-					if( unrecognizedCharCodes.indexOf( c.getCharCode() ) == -1 ) { // eliminate duplicates
-						unrecognizedCharCodes.add( c.getCharCode() );
+					if( unrecognizedCharCodes.indexOf( c.getCharCode(verticalBlocksPerChar) ) == -1 ) { // eliminate duplicates
+						unrecognizedCharCodes.add( c.getCharCode(verticalBlocksPerChar) );
 						unrecognizedChars.add(c);
 					}
 					
@@ -384,8 +383,8 @@ public class Scanner {
 	private void mapToGrid( Char c ) {
 		
 		int blockNumber = 0;
-		int blockLength = c.getH() / verticalBlocksPerChar;
-		int noOfVBlocks = verticalBlocksPerChar;
+		int blockLength = c.getH() / this.verticalBlocksPerChar;
+		int noOfVBlocks = this.verticalBlocksPerChar;
 		int noOfHBlocks = c.getW() / blockLength;
 		if( noOfHBlocks == 0 ) {
 			noOfHBlocks = 1;
@@ -402,7 +401,7 @@ public class Scanner {
 		an additional pixel to each of the first 7 vertical blocks. So they will have a blockLength of 3, 
 		where as the next 8 will revert back to the original blockLength of 2. 
 		*/
-		int vBlockRemainder = c.getH() % verticalBlocksPerChar;
+		int vBlockRemainder = c.getH() % this.verticalBlocksPerChar;
 		int hBlockRemainder = c.getW() % noOfHBlocks;
 		int vBlockLength = blockLength;
 		int hBlockLength = blockLength;
@@ -463,7 +462,7 @@ public class Scanner {
 			}
 			
 			vBlockLength = blockLength;
-			vBlockRemainder = c.getH() % verticalBlocksPerChar;
+			vBlockRemainder = c.getH() % this.verticalBlocksPerChar;
 			if( vBlockRemainder > 0 ) { vBlockLength++; vBlockRemainder--; }
 			
 			// reset vertical pointers
@@ -571,8 +570,8 @@ public class Scanner {
         	//avgRGB = 0;
         	
         } else {
-        	//avgRGB = -000001; // set white-ish pixels to the same shade of white
-        	avgRGB = -5000000; // for debugging
+        	avgRGB = -000001; // set white-ish pixels to the same shade of white
+        	//avgRGB = -5000000; // for debugging
         }
         
         image.setRGB( j, i, avgRGB ); // reset pixel color
@@ -615,30 +614,34 @@ public class Scanner {
 		return width;
 	}
 	
-	/*
-	public static int getMinBlanklineHeight() {
+	public ArrayList<Line> getLines() {
+		return lines;
+	}
+	
+	
+	public int getMinBlanklineHeight() {
 		return minBlanklineHeight;
 	}
 	
-	public static void setMinBlanklineHeight(int minBlanklineHeight) {
-		Scanner.minBlanklineHeight = minBlanklineHeight;
+	public void setMinBlanklineHeight(int minBlanklineHeight) {
+		this.minBlanklineHeight = minBlanklineHeight;
 	}
 	
-	public static int getMinWhitespaceWidth() {
-		return minWhitespaceWidth;
+	public int getMinWhitespaceWidth() {
+		return this.minWhitespaceWidth;
 	}
 
-	public static void setMinWhitespaceWidth(int minWhitespaceWidth) {
-		Scanner.minWhitespaceWidth = minWhitespaceWidth;
+	public void setMinWhitespaceWidth(int minWhitespaceWidth) {
+		this.minWhitespaceWidth = minWhitespaceWidth;
 	}
 	
-	public static int getVerticalBlocksPerChar() {
+	public int getVerticalBlocksPerChar() {
 		return verticalBlocksPerChar;
 	}
 
-	public static void setVerticalBlocksPerChar(int verticalBlocksPerChar) {
-		Scanner.verticalBlocksPerChar = verticalBlocksPerChar;
+	public void setVerticalBlocksPerChar(int verticalBlocksPerChar) {
+		this.verticalBlocksPerChar = verticalBlocksPerChar;
 	}
-	*/
+	
 	
 }

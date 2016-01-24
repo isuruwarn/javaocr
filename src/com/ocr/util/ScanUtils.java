@@ -264,12 +264,12 @@ public class ScanUtils {
 	 * @param line
 	 * @param imgFilePath
 	 */
-	public static void writeCharImages( BufferedImage image, Line line, String imgFilePath ) {
+	public static void writeCharImages( BufferedImage image, Line line, String imgFilePath, int verticalBlocksPerChar ) {
 		try {
 			for( Char c: line.getChars() ) {
 				String name = c.getName();
-				if( c.getCharCode()!=null && c.getCharCode().length()>0 ) {
-					name += "-" + c.getCharCode();
+				if( c.getCharCode( verticalBlocksPerChar )!=null && c.getCharCode( verticalBlocksPerChar ).length()>0 ) {
+					name += "-" + c.getCharCode(verticalBlocksPerChar);
 					//name = c.getCharCode();
 				}
 				//System.out.println( name + " - (" + c.getX() + "," + c.getY() + "), w=" + c.getW() + ", h=" + c.getH() );
@@ -291,14 +291,14 @@ public class ScanUtils {
 	 * @param lines
 	 * @param mapFile
 	 */
-	public static void writeCharCodesToFile( ArrayList<Line> lines, String mapFile ) {
+	public static void writeCharCodesToFile( ArrayList<Line> lines, String mapFile, int verticalBlocksPerChar ) {
 		StringBuilder sb = new StringBuilder();
 		for(Line l: lines) {
 			for( Char c: l.getChars() ) {
-				if( c.getCharCode() != null && 
-					c.getCharCode().length() > 0 && 
-					sb.indexOf( c.getCharCode() + "=" ) == -1 ) { // check for duplicates
-					sb.append( c.getCharCode() + "=\n" );
+				if( c.getCharCode(verticalBlocksPerChar) != null && 
+					c.getCharCode(verticalBlocksPerChar).length() > 0 && 
+					sb.indexOf( c.getCharCode(verticalBlocksPerChar) + "=" ) == -1 ) { // check for duplicates
+					sb.append( c.getCharCode(verticalBlocksPerChar) + "=\n" );
 				}
 			}
 		}

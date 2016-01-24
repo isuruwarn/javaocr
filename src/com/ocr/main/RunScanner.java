@@ -8,10 +8,14 @@ import com.ocr.ui.UIContainer;
 
 public class RunScanner {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 
 		try {
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			//UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			//UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+			//UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -23,24 +27,14 @@ public class RunScanner {
 			e.printStackTrace();
 			
 		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
+			System.err.println("Error - " + e.getMessage());
+			//UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 		}
 		
     	javax.swing.SwingUtilities.invokeLater( new Runnable() {
     		
     		public void run() {
-    			
-    			/*
-    			String imgFile = "img/sampleImg9.png";
-    			String mapFile = "files/eng15.map";
-    			
-    			Scanner scn = new Scanner();
-    			BufferedImage image = ScanUtils.loadImage( imgFile );
-    			ArrayList<Line> lines = scn.init( image );
-    			StringBuilder sb = scn.readCharacters( lines, mapFile ); 
-    			System.out.println(sb);
-    			*/
-    			
     			new UIContainer();
             }
     		

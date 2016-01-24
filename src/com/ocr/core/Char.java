@@ -91,10 +91,16 @@ public class Char extends ScannedItem {
 	}
 	
 	
-	public void printSequence() {
-		String [] sb = new String [Scanner.verticalBlocksPerChar];
+	/**
+	 * Takes in verticalBlocksPerChar used by current Scanner instance, and prints
+	 * sequence.
+	 * 
+	 * @param verticalBlocksPerChar
+	 */
+	public void printSequence( int verticalBlocksPerChar ) {
+		String [] sb = new String [verticalBlocksPerChar];
 		for( int i=0; i<sequence.size(); i++ ) {
-			int j = i % Scanner.verticalBlocksPerChar;
+			int j = i % verticalBlocksPerChar;
 			if( sb[j] == null ) sb[j] = "";
 			sb[j] += sequence.get(i) + " ";
 		}
@@ -105,12 +111,19 @@ public class Char extends ScannedItem {
 	
 	
 	
-	public String getCharCode() {
+	/**
+	 * Takes in verticalBlocksPerChar used by current Scanner instance, and calculates
+	 * charCode
+	 * 
+	 * @param verticalBlocksPerChar
+	 * @return
+	 */
+	public String getCharCode( int verticalBlocksPerChar ) {
 		String s = "";
 		String charCode = "";
 		for( int i=0; i<sequence.size(); i++ ) {
 			s += sequence.get(i);
-			if( (i+1) % Scanner.verticalBlocksPerChar == 0 ) {
+			if( (i+1) % verticalBlocksPerChar == 0 ) {
 				int n = Integer.parseInt( s, 2 );
 				charCode += n;
 				s = "";
@@ -121,22 +134,28 @@ public class Char extends ScannedItem {
 	
 	
 	
-	public BufferedImage getBlockImage() {
+	/**
+	 * Takes in verticalBlocksPerChar used by current Scanner instance, and constructs
+	 * an BufferedImage of the block representation. Each block will be blown up based
+	 * in equal width and height based the pixelsPerBlock variable. Also, to demarcate 
+	 * each block, a marker is added at the top right corner of each block.
+	 * 
+	 * @param verticalBlocksPerChar
+	 * @return
+	 *
+	public BufferedImage getBlockImage( int verticalBlocksPerChar ) {
 		
-		//int x = 0;
-		//int y = 0;
-		int pixelsPerBlock = 2;
+		int pixelsPerBlock = 20;
 		int blockStartX = 0;
 		int blockStartY = 0;
-		int verticalBlocks = Scanner.verticalBlocksPerChar;
-		int horizontalBlocks = sequence.size()/Scanner.verticalBlocksPerChar;
+		int verticalBlocks = verticalBlocksPerChar;
+		int horizontalBlocks = sequence.size()/verticalBlocksPerChar;
 		BufferedImage blockImg = new BufferedImage( horizontalBlocks*pixelsPerBlock, verticalBlocks*pixelsPerBlock, BufferedImage.TYPE_INT_RGB );
 		
 		for( int i=0; i<sequence.size(); i++ ) {
 			
-			//int rgb = 0xFFFFFF; // white
-			//int rgb = 0xC0C0C0; // for debugging
-			int rgb = -5000000; // for debugging
+			// -5000000;
+			int rgb = 0xFFFFFF; // white 
 			if( sequence.get(i) == 1 ) {
 				rgb = 0; // black
 			}
@@ -146,7 +165,9 @@ public class Char extends ScannedItem {
 				int blockEndY = blockStartY + pixelsPerBlock;
 				for( int y=blockStartY; y<blockEndY; y++ ) {
 					for( int x=blockStartX; x<blockEndX; x++ ) {
-						blockImg.setRGB( x, y, rgb );
+						int rgb2 = rgb;
+						if( x == blockStartX && y == blockStartY ) { rgb2 = 0xC0C0C0; }
+						blockImg.setRGB( x, y, rgb2 );
 					}
 				}
 				
@@ -155,7 +176,7 @@ public class Char extends ScannedItem {
 			}
 			
 			blockStartY += pixelsPerBlock;
-			if( (i+1) % Scanner.verticalBlocksPerChar == 0 ) {
+			if( (i+1) % verticalBlocksPerChar == 0 ) {
 				blockStartX += pixelsPerBlock;
 				blockStartY = 0;
 			}
@@ -164,6 +185,51 @@ public class Char extends ScannedItem {
 		
 		return blockImg;
 	}
+	*/
 	
+	
+	/**
+	 * Takes in verticalBlocksPerChar used by current Scanner instance, and constructs
+	 * an BufferedImage of the block representation. Each block will be blown up based
+	 * in equal width and height based the pixelsPerBlock variable. Also, to demarcate 
+	 * each block, a marker is added at the top right corner of each block.
+	 * 
+	 * @param verticalBlocksPerChar
+	 * @return
+	 */
+	public BufferedImage getBlockImage( int verticalBlocksPerChar, ArrayList<Integer> keyPoints ) {
+		
+		int verticalBlocks = verticalBlocksPerChar;
+		int horizontalBlocks = sequence.size()/verticalBlocksPerChar;
+		BufferedImage blockImg = new BufferedImage( horizontalBlocks, verticalBlocks, BufferedImage.TYPE_INT_RGB );
+		
+		try {
+			int blockIndex = 0;
+			for( int x=0; x<horizontalBlocks; x++ ) {
+				
+				for( int y=0; y<verticalBlocks; y++ ) {
+					
+					//int rgb = 0xFFFFFF; // white
+					int rgb = 0xDCDCDC; // gainsboro
+					if( sequence.get(blockIndex) == 1 ) {
+						rgb = 0; // black
+					}
+					
+					if( keyPoints!=null && keyPoints.contains( blockIndex ) ) {
+						rgb = 0xFF0000;
+					}
+					
+					blockImg.setRGB( x, y, rgb );
+					blockIndex++;
+				}
+				
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return blockImg;
+	}
 	
 }
