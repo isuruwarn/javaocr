@@ -8,10 +8,11 @@ package com.ocr.core;
  */
 public abstract class ScannedItem {
 	
-	private int x;
-	private int y;
-	private int w;
-	private int h;
+	protected int x;
+	protected int y;
+	protected int w;
+	protected int h;
+	protected String name;
 	
 	public int getX() {
 		return x;
@@ -37,5 +38,10 @@ public abstract class ScannedItem {
 	public void setH(int h) {
 		this.h = h;
 	}
-	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 }

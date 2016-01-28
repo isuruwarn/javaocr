@@ -43,11 +43,12 @@ import javax.swing.event.DocumentListener;
 
 import com.ocr.core.Char;
 import com.ocr.core.Line;
-import com.ocr.core.Scanner;
+import com.ocr.core.OCRHandler;
 import com.ocr.text.Symbol;
 import com.ocr.text.TextHandler;
+import com.ocr.util.FileUtils;
 import com.ocr.util.GlobalConstants;
-import com.ocr.util.ScanUtils;
+import com.ocr.util.ImageUtils;
 
 
 
@@ -61,9 +62,9 @@ import com.ocr.util.ScanUtils;
 public class UIContainer {
 	
 	
-	private Scanner scn;
+	private OCRHandler ocrHandler;
 	
-	private String mappingsFile;
+	private String dialect;
 	private BufferedImage inputImage;
 	
 	private Font mainFont;
@@ -84,7 +85,7 @@ public class UIContainer {
 	private JTextField txtBlanklineHeight;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
-	private JComboBox<String> selectAlphabet;
+	private JComboBox<String> selectDialect;
 	private JFileChooser inputImgFileChooser;
 	private JFileChooser outputFileChooser;
 	
@@ -96,7 +97,7 @@ public class UIContainer {
 	 */
 	public UIContainer() {
 
-		scn = new Scanner();
+		ocrHandler = new OCRHandler(); // new ScannerImpl();
 		inputImgFileChooser = new JFileChooser(GlobalConstants.SAMPLE_IMG_FILENAME);
 		outputFileChooser = new JFileChooser(GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		MainOCRListener mainListener = new MainOCRListener();
@@ -118,10 +119,10 @@ public class UIContainer {
 		txtOutputFileName.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		
 		// TODO: read from file
-		String [] alphabets = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
-		selectAlphabet = new JComboBox<String>(alphabets);
-		selectAlphabet.setName( GlobalConstants.SEL_ALPHABET_COMBOBOX );
-		selectAlphabet.addActionListener( mainListener );
+		String [] dialects = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
+		selectDialect = new JComboBox<String>(dialects);
+		selectDialect.setName( GlobalConstants.SEL_DIALECT_COMBOBOX );
+		selectDialect.addActionListener( mainListener );
 		
 		JLabel lblVBlocksPerChar = new JLabel( GlobalConstants.VBLOCKS_PER_CHAR_LBL );
 		lblVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
@@ -239,7 +240,7 @@ public class UIContainer {
 		buttonPanel.add( inputFileBtn, inputFileBtnGridCons );
 		buttonPanel.add( txtInputImagePath, txtInputImgPathGridCons );
 		buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
-		buttonPanel.add( selectAlphabet, selectDialectGridCons );
+		buttonPanel.add( selectDialect, selectDialectGridCons );
 		buttonPanel.add( outputFileBtn, outputFileBtnGridCons );
 		buttonPanel.add( txtBoxPanel, txtBoxPanelGridCons );
 		buttonPanel.add( btnToolBar, btnToolBarGridCons );
@@ -280,10 +281,10 @@ public class UIContainer {
 		// set default values
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
 		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
-		txtVBlocksPerChar.setText( String.valueOf(scn.getVerticalBlocksPerChar()) );
-		txtWhitespaceWidth.setText( String.valueOf(scn.getMinWhitespaceWidth()) );
-		txtBlanklineHeight.setText( String.valueOf(scn.getMinBlanklineHeight()) );
-		selectAlphabet.setSelectedIndex(0);
+		txtVBlocksPerChar.setText( String.valueOf(ocrHandler.getVerticalBlocksPerChar()) );
+		txtWhitespaceWidth.setText( String.valueOf(ocrHandler.getMinWhitespaceWidth()) );
+		txtBlanklineHeight.setText( String.valueOf(ocrHandler.getMinBlanklineHeight()) );
+		selectDialect.setSelectedIndex(0);
 		
 		//inputImgFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_IMG_FILENAME) );
 		//outputFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_OUTPUT_FILENAME ) );
@@ -372,7 +373,7 @@ public class UIContainer {
 	private void scan() {
 		
 		String imgFile = txtInputImagePath.getText();
-		inputImage = ScanUtils.loadImage( imgFile );
+		inputImage = ImageUtils.loadImage( imgFile );
 		
 		if( inputImage == null ) {
 			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.ERROR_LOADING_IMG_MSG, GlobalConstants.ERROR_LOADING_IMG_TITLE, JOptionPane.ERROR_MESSAGE );
@@ -380,30 +381,30 @@ public class UIContainer {
 		} else {
 			
 			// set basic parameters
-			scn.setVerticalBlocksPerChar( Integer.parseInt( txtVBlocksPerChar.getText() ) );
-			scn.setMinWhitespaceWidth( Integer.parseInt( txtWhitespaceWidth.getText() ) );
-			scn.setMinBlanklineHeight( Integer.parseInt( txtBlanklineHeight.getText() ) );
+			ocrHandler.setVerticalBlocksPerChar( Integer.parseInt( txtVBlocksPerChar.getText() ) );
+			ocrHandler.setMinWhitespaceWidth( Integer.parseInt( txtWhitespaceWidth.getText() ) );
+			ocrHandler.setMinBlanklineHeight( Integer.parseInt( txtBlanklineHeight.getText() ) );
 			
-			updateMappingsFile(); // in case user changed blocks per char
+			// in case user changed blocks per char
+			updateMappingsFile(); 
+			//ocrHandler.relaodCharMap( dialect ); not needed as we create a new mappingsFile object before each scan
 			
-			scn.relaodCharMap( mappingsFile );
-			
-			StringBuilder sb = scn.readCharacters( inputImage, mappingsFile );
+			StringBuilder sb = ocrHandler.scan( inputImage, dialect );
 			textPane.setText(sb.toString());
 			
 			// output result to text file
 			//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
 			String outputFile = txtOutputFileName.getText();
-			ScanUtils.writeToFile( sb, outputFile );
+			FileUtils.writeToFile( sb, outputFile );
 			
 			// update status label
-			int linesRead = scn.getLinesRead();
-			int charsRead = scn.getCharsRead();
-			int noOfUnrecognizedChars = scn.getUnrecognizedChars().size();
-			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, scn.getWidth(), scn.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
+			int linesRead = ocrHandler.getLinesRead();
+			int charsRead = ocrHandler.getCharsRead();
+			int noOfUnrecognizedChars = ocrHandler.getUnrecognizedChars().size();
+			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, ocrHandler.getWidth(), ocrHandler.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
 			// get any unrecognized chars and enable resolve button if needed
-			unrecognizedCharsArl = scn.getUnrecognizedChars();
+			unrecognizedCharsArl = ocrHandler.getUnrecognizedChars();
 			if( unrecognizedCharsArl.size() > 0 ) {
 				resolveBtn.setEnabled(true);
 			}
@@ -418,7 +419,7 @@ public class UIContainer {
 	@SuppressWarnings("unchecked")
 	private void comboBoxChanged( ActionEvent e ) {
 		JComboBox<String> selectBox = (JComboBox<String>) e.getSource();
-		if( GlobalConstants.SEL_ALPHABET_COMBOBOX.equals( selectBox.getName() ) ) {
+		if( GlobalConstants.SEL_DIALECT_COMBOBOX.equals( selectBox.getName() ) ) {
 			updateMappingsFile();
 			updateMainFont();
 		}
@@ -427,25 +428,17 @@ public class UIContainer {
 	
 	
 	private void updateMappingsFile() {
-		
-		String blocks = txtVBlocksPerChar.getText();
-		
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
-			mappingsFile = String.format( GlobalConstants.ENG_MAP_FILE, blocks );
-			
-		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
-			mappingsFile = String.format( GlobalConstants.SIN_MAP_FILE, blocks );
-		}
+		dialect = selectDialect.getSelectedItem().toString();
 	}
 	
 	
 	
 	private void updateMainFont() {
 		
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
+		if( selectDialect.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
 			mainFont = new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_ENG_FONT_SIZE );			
 		
-		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+		} else if( selectDialect.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			mainFont = new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.MAIN_TEXT_SIN_FONT_SIZE );
 		}
 		textPane.setFont(mainFont);
@@ -469,7 +462,7 @@ public class UIContainer {
 	private void resolve() {
 		
 		navIndex = 0;
-		unrecognizedCharsArl = scn.getUnrecognizedChars();
+		unrecognizedCharsArl = ocrHandler.getUnrecognizedChars();
 		charMappingsArr = new String [ unrecognizedCharsArl.size() ];
 		savedMappingsArr = new boolean [ unrecognizedCharsArl.size() ];
 		keyPointsArr = new Object [unrecognizedCharsArl.size()];
@@ -502,8 +495,6 @@ public class UIContainer {
 		charBlockImgLbl = new JLabel();
 		charBlockImgLbl.setHorizontalAlignment(JTextField.CENTER);
 		charBlockImgLbl.setVerticalAlignment(JTextField.CENTER);
-		//charBlockImgLbl.setPreferredSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
-		//charBlockImgLbl.setMinimumSize( new Dimension( GlobalConstants.CHAR_BLOCK_IMG_LBL_W, GlobalConstants.CHAR_BLOCK_IMG_LBL_H ) );
 		charBlockImgLbl.setComponentPopupMenu(blockImgPopupMenu);
 		charBlockImgLbl.addMouseListener( new MappingsMouseListener() );
 		
@@ -519,13 +510,12 @@ public class UIContainer {
 		arrowLbl.setFont( new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, 30 ));
 		
 		charMappingTxt = new JTextField();
-		//charMappingTxt.setEditable(false);
 		charMappingTxt.setPreferredSize( new Dimension( GlobalConstants.CHAR_MAP_TXT_W, GlobalConstants.CHAR_MAP_TXT_H ) );
 		charMappingTxt.setMinimumSize( new Dimension( GlobalConstants.CHAR_MAP_TXT_W, GlobalConstants.CHAR_MAP_TXT_H ) );
 		charMappingTxt.setHorizontalAlignment(JTextField.CENTER);
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
+		if( selectDialect.getSelectedItem().equals( GlobalConstants.ENGLISH ) ) {
 			charMappingTxt.setFont( new Font( GlobalConstants.SANSSERIF_FONT_TYPE, Font.PLAIN, GlobalConstants.CHAR_MAPPINGS_ENG_FONT_SIZE ) );
-		} else if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+		} else if( selectDialect.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			charMappingTxt.setFont( new Font( GlobalConstants.ISKOOLA_POTA_FONT_TYPE, Font.PLAIN, GlobalConstants.CHAR_MAPPINGS_SIN_FONT_SIZE ) );
 		}
 		charMappingTxt.getDocument().addDocumentListener( new MappingsTxtDocumentListener() );
@@ -559,7 +549,7 @@ public class UIContainer {
 		JButton clearAllKeyPointsBtn = new JButton( GlobalConstants.CLEARALL_KP_MAPPINGS_ACTION);
 		JButton viewCharImgBtn = new JButton( GlobalConstants.VIEW_CHAR_IMG_ACTION);
 		JButton viewLineImgBtn = new JButton( GlobalConstants.VIEW_LINE_IMG_ACTION);
-		JButton viewDocImgBtn = new JButton( GlobalConstants.VIEW_DOC_IMG_ACTION);
+		JButton viewDocImgBtn2 = new JButton( GlobalConstants.VIEW_DOC_IMG_ACTION);
 		
 		MappingsActionListener resolveListener = new MappingsActionListener();
 		prevBtn.addActionListener(resolveListener);
@@ -572,7 +562,7 @@ public class UIContainer {
 		clearAllKeyPointsBtn.addActionListener(resolveListener);
 		viewCharImgBtn.addActionListener(resolveListener);
 		viewLineImgBtn.addActionListener(resolveListener);
-		viewDocImgBtn.addActionListener(resolveListener);
+		viewDocImgBtn2.addActionListener(resolveListener);
 		
 		prevBtn.setToolTipText( GlobalConstants.PREV_MAPPING_ACTION_TOOLTIP );
 		nextBtn.setToolTipText( GlobalConstants.NEXT_MAPPING_ACTION_TOOLTIP );
@@ -592,7 +582,7 @@ public class UIContainer {
 		JPanel viewImagesPanel = new JPanel();
 		viewImagesPanel.add(viewCharImgBtn);
 		viewImagesPanel.add(viewLineImgBtn);
-		viewImagesPanel.add(viewDocImgBtn);
+		viewImagesPanel.add(viewDocImgBtn2);
 		
 		MappingsSpSinCharActionListener spSinCharListener = new MappingsSpSinCharActionListener();
 		JButton ksha = createCharButton( Symbol.KSHA.getUnicodeValue(), Symbol.KSHA.getKeyCode(), Symbol.KSHA.name(), spSinCharListener );
@@ -654,7 +644,7 @@ public class UIContainer {
 		resolveMappingsPanel.add( mappingsClearPanel, clearPanelGridCons );
 		resolveMappingsPanel.add( viewImagesPanel, viewImgsBtnPanelGridCons );
 		
-		if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+		if( selectDialect.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 			resolveMappingsPanel.add( spSinCharsBtnPanel, spSinCharsBtnPanelGridCons );
 		}
 		
@@ -725,7 +715,7 @@ public class UIContainer {
 			int x = e.getX();
 			int y = e.getY();
 			int hBlocksInChar = c.getNoOfHBlocks();
-			int vBlocksInChar = scn.getVerticalBlocksPerChar();
+			int vBlocksInChar = ocrHandler.getVerticalBlocksPerChar();
 			int blockWidth = iconWidth / hBlocksInChar;
 			int blockHeight = iconHeight / vBlocksInChar;
 			//float blockWidth = (float) iconWidth / hBlocksInChar;
@@ -782,7 +772,7 @@ public class UIContainer {
 			
 			String inputKey = String.valueOf( e.getKeyChar() );
 			
-			if( selectAlphabet.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
+			if( selectDialect.getSelectedItem().equals( GlobalConstants.SINHALA ) ) {
 				
 				if( inputKey.matches("[A-Za-z]") || 
 					inputKey.equals( "`" ) || 
@@ -922,14 +912,14 @@ public class UIContainer {
 	
 	private void saveMapping() {
 		
-		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
-		String newCharCode = unrecognizedCharsArl.get( navIndex ).getCharCode( scn.getVerticalBlocksPerChar() );
+		ocrHandler.relaodCharMap( dialect ); // first reload mappings file to get any new mappings
+		String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) );
 		String newCharValue = charMappingsArr[navIndex];
 		
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
 			
-			String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
+			String existingCharValue = ocrHandler.getCharValueFromMap( dialect, newCharCode ); // check if char is already mapped
 			
 			if ( existingCharValue != null && !existingCharValue.isEmpty() && newCharValue.equals(existingCharValue) ) { // mapping already exists
 				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.MAPPING_EXISTS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -937,7 +927,7 @@ public class UIContainer {
 			} else {
 				
 				// create new mapping or update existing mapping
-				boolean success = ScanUtils.setProperty( mappingsFile, newCharCode, newCharValue );
+				boolean success = ocrHandler.setMapping( dialect, newCharCode, newCharValue );
 				
 				if(success) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -957,7 +947,7 @@ public class UIContainer {
 	
 	private void saveAllMappings() {
 		
-		scn.relaodCharMap( mappingsFile ); // first reload mappings file to get any new mappings
+		ocrHandler.relaodCharMap( dialect ); // first reload mappings file to get any new mappings
 		int savedMappings = 0;
 		HashMap<String,String> newMappings = new HashMap<String,String>(); // holds new or modified char mappings
 		
@@ -967,8 +957,8 @@ public class UIContainer {
 			
 			if ( newCharValue != null && !newCharValue.isEmpty() ) {
 				
-				String newCharCode = unrecognizedCharsArl.get(i).getCharCode( scn.getVerticalBlocksPerChar() );
-				String existingCharValue = scn.getCharValueFromMap( mappingsFile, newCharCode ); // check if char is already mapped
+				String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(i) );
+				String existingCharValue = ocrHandler.getCharValueFromMap( dialect, newCharCode ); // check if char is already mapped
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
 					
@@ -979,14 +969,14 @@ public class UIContainer {
 				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
 					
 					newMappings.put( newCharCode, newCharValue );
-					ScanUtils.deleteProperty( mappingsFile, newCharCode ); // remove old mapping from mappings file
+					ocrHandler.deleteMapping( dialect, newCharCode ); // remove old mapping from mappings file
 					savedMappingsArr[i] = true;
 					savedMappings++;
 				}
 			}
 		}
 		
-		boolean success = ScanUtils.setMultipleProperties( mappingsFile, newMappings );
+		boolean success = ocrHandler.setMappings( dialect, newMappings );
 		
 		if(success) {
 			JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -1042,7 +1032,7 @@ public class UIContainer {
 			
 		} else if( compName.equals( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME ) ) {
 			ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-			charImg = c.getBlockImage( scn.getVerticalBlocksPerChar(), keyPoints );
+			charImg = ImageUtils.getBlockImage( c, ocrHandler.getVerticalBlocksPerChar(), keyPoints );
 			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		}
@@ -1070,7 +1060,7 @@ public class UIContainer {
 	
 	private void viewLineImage() {
 		Char c = unrecognizedCharsArl.get( navIndex );
-		Line l = scn.getLines().get( c.getLineNumber() );
+		Line l = ocrHandler.getLines().get( c.getLineNumber() );
 		BufferedImage lineImg = inputImage.getSubimage( l.getX(), l.getY(), l.getW(), l.getH() );
 		viewImage( lineImg, GlobalConstants.VIEW_LINE_IMG_ACTION, GlobalConstants.VIEW_LINE_IMG_LBL_W, GlobalConstants.VIEW_LINE_IMG_LBL_H );
 	}
@@ -1112,8 +1102,8 @@ public class UIContainer {
 		charBlockImgLbl.setToolTipText( GlobalConstants.MAPPING_BLOCK_REP_TOOLTIP );
 		
 		charMappingTxt.setText( charMappingsArr[navIndex] );
-		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), c.getCharCode( scn.getVerticalBlocksPerChar() ) ) );
-		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), c.getCharCode( scn.getVerticalBlocksPerChar() ) ) );
+		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) ) ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) ) ) );
 		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
@@ -1125,17 +1115,23 @@ public class UIContainer {
 	@SuppressWarnings("unchecked")
 	private void setMappingsBlockImageLbl( Char c ) {
 		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-		Image blockImg = c.getBlockImage( scn.getVerticalBlocksPerChar(), keyPoints );
-		int w = -1;
+		Image blockImg = ImageUtils.getBlockImage( c, ocrHandler.getVerticalBlocksPerChar(), keyPoints );
+//		int w = -1;
+//		int h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
+//		if(  c.getW() > c.getH() ) {
+//			w = GlobalConstants.CHAR_BLOCK_IMG_LBL_W;
+//			h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
+//		}
+		int w = GlobalConstants.CHAR_BLOCK_IMG_LBL_W;
 		int h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
-		if(  c.getW() > c.getH() ) {
-			w = GlobalConstants.CHAR_BLOCK_IMG_LBL_W;
-			h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
-		}
 		Image resizedImage = blockImg.getScaledInstance( w, h, Image.SCALE_DEFAULT );
 		ImageIcon blockImgIcon = new ImageIcon( resizedImage );
 		charBlockImgLbl.setIcon(blockImgIcon);
 	}
+	
+	
+
+	
 	
 	
 	private JButton createCharButton( String text, String actionCommand, String toolTip, ActionListener listener ) {

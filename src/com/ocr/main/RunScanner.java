@@ -11,11 +11,7 @@ public class RunScanner {
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 
 		try {
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			//UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			//UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-			//UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -28,8 +24,7 @@ public class RunScanner {
 			
 		} catch (UnsupportedLookAndFeelException e) {
 			System.err.println("Error - " + e.getMessage());
-			//UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			
 		}
 		
     	javax.swing.SwingUtilities.invokeLater( new Runnable() {

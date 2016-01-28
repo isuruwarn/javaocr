@@ -16,8 +16,8 @@ public class GlobalConstants {
 	
 	
 	// TODO: read from file
-	public static final String ENG_MAP_FILE = "files/eng%s.map";
-	public static final String SIN_MAP_FILE = "files/sin%s.map";
+	public static final String MAPPINGS_FILE_PATH = "files/";
+	public static final String MAPPINGS_FILENAME = "%s_%s_%s.map";
 	
 	
 	// icon image file
@@ -185,7 +185,7 @@ public class GlobalConstants {
 	public static final String SAVE_IMG_FILE = "Save";
 	public static final String MAPPING_CHAR_IMG_NAME = "charImg";
 	public static final String MAPPING_BLOCK_REP_IMG_NAME = "blockImg";
-	public static final String SEL_ALPHABET_COMBOBOX = "SelectAlphabetComboBox";
+	public static final String SEL_DIALECT_COMBOBOX = "SelectDialectComboBox";
 	
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
