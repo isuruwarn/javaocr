@@ -32,7 +32,6 @@ public class ScannerImpl extends AbstractScanner {
 	
 	private int minBlanklineHeight = 30;
 	private int minWhitespaceWidth = 8;
-	//private int verticalBlocksPerChar = 12;
 	
 	private int height = 0;
 	private int width = 0;
@@ -302,7 +301,7 @@ public class ScannerImpl extends AbstractScanner {
 				String charCode = ocrEngine.processChar( c, bitmap );
 				
 				// Step 5: lookup up the charcode in the saved in file for any matches
-				String s = mappingsFile.getCharValueFromMap( charCode );
+				String s = mappingsFile.lookupCharCode( charCode );
 				
 				if( s == null ) { // unrecognized char
 					

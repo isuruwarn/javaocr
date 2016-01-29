@@ -15,12 +15,24 @@ import com.ocr.mappings.MappingsFile;
  */
 public interface Scanner {
 	
+	
+	/**
+	 * This method should implement the main scanning algorithm which will identify the lines and
+	 * characters within the given image.
+	 * 
+	 * @param req
+	 * @return
+	 */
 	ScanResult scan( ScanRequest req );
 	
-	int getMinBlanklineHeight();
-	
-	int getMinWhitespaceWidth();
 	
 	MappingsFile getMappingsFile();
+	
+	
+	int getMinBlanklineHeight(); //TODO: Can we avoid using this getter?
+	
+	
+	int getMinWhitespaceWidth(); //TODO: Can we avoid using this getter?
+	
 	
 }

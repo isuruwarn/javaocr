@@ -48,13 +48,12 @@ public final class OCRHandler {
 	
 	
 	
-	
-	
 	public ScanResult scan( ScanRequest req ) {
 		return scanner.scan(req);
 	}
 	
-
+	
+	
 	public String getCharCode( Char c ) {
 		return ocrEngine.getCharCode(c);
 	}
@@ -64,32 +63,7 @@ public final class OCRHandler {
 		return ocrEngine.getVerticalBlocksPerChar();
 	}
 	
-	
-	public void relaodCharMap(String dialect) {
-		scanner.getMappingsFile().relaodCharMap(dialect);
-	}
-	
-	
-	public String getCharValueFromMap( String dialect, String charCode ) {
-		return scanner.getMappingsFile().getCharValueFromMap( charCode );
-	}
-	
-	
-	public boolean setMapping( String dialect, String newCharCode, String newCharValue ) {
-		return scanner.getMappingsFile().setMapping( dialect, newCharCode, newCharValue );
-	}
-	
-	
-	public boolean setMappings( String dialect, HashMap<String, String> newMappings ) {
-		return scanner.getMappingsFile().setMappings( dialect, newMappings );
-	}
-	
-	
-	public boolean deleteMapping(String dialect, String charCode) {
-		return scanner.getMappingsFile().deleteMapping( dialect, charCode );
-	}
-	
-				
+
 
 	public int getMinWhitespaceWidth() {
 		return scanner.getMinWhitespaceWidth();
@@ -98,5 +72,32 @@ public final class OCRHandler {
 	public int getMinBlanklineHeight() {
 		return scanner.getMinBlanklineHeight();
 	}
+	
+	
+	
+	public void relaodCharMap(String dialect) {
+		scanner.getMappingsFile().relaodCharMap(dialect);
+	}
+	
+	
+	public String lookupCharCode( String dialect, String charCode ) {
+		return scanner.getMappingsFile().lookupCharCode( charCode );
+	}
+	
+	
+	public boolean saveMapping( String dialect, String newCharCode, String newCharValue ) {
+		return scanner.getMappingsFile().saveMapping( dialect, newCharCode, newCharValue );
+	}
+	
+	
+	public boolean saveMappings( String dialect, HashMap<String, String> newMappings ) {
+		return scanner.getMappingsFile().saveMappings( dialect, newMappings );
+	}
+	
+	
+	public boolean deleteMapping(String dialect, String charCode) {
+		return scanner.getMappingsFile().deleteMapping( dialect, charCode );
+	}
+	
 	
 }

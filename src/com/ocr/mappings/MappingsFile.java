@@ -36,7 +36,13 @@ public class MappingsFile {
 	
 	
 	
-	public String getCharValueFromMap( String charCode ) {
+	/**
+	 * Looks up char code in mappings file and returns the matching String, if found.
+	 * 
+	 * @param charCode
+	 * @return
+	 */
+	public String lookupCharCode( String charCode ) {
 		String mappingFile = getMappingFileName();
 		String c = null;
 		if( charMappings == null ) {
@@ -54,14 +60,14 @@ public class MappingsFile {
 	
 		
 	
-	public boolean setMapping( String dialect, String newCharCode, String newCharValue ) {
+	public boolean saveMapping( String dialect, String newCharCode, String newCharValue ) {
 		String mappingFile = getMappingFileName();
 		return FileUtils.setProperty( mappingFile, newCharCode, newCharValue );
 	}
 	
 	
 	
-	public boolean setMappings( String dialect, HashMap<String,String> newMappings ) {
+	public boolean saveMappings( String dialect, HashMap<String,String> newMappings ) {
 		String mappingFile = getMappingFileName();
 		return FileUtils.setMultipleProperties( mappingFile, newMappings );
 	}

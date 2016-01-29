@@ -916,7 +916,7 @@ public class UIContainer {
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
 			
-			String existingCharValue = ocrHandler.getCharValueFromMap( dialect, newCharCode ); // check if char is already mapped
+			String existingCharValue = ocrHandler.lookupCharCode( dialect, newCharCode ); // check if char is already mapped
 			
 			if ( existingCharValue != null && !existingCharValue.isEmpty() && newCharValue.equals(existingCharValue) ) { // mapping already exists
 				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.MAPPING_EXISTS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -924,7 +924,7 @@ public class UIContainer {
 			} else {
 				
 				// create new mapping or update existing mapping
-				boolean success = ocrHandler.setMapping( dialect, newCharCode, newCharValue );
+				boolean success = ocrHandler.saveMapping( dialect, newCharCode, newCharValue );
 				
 				if(success) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -955,7 +955,7 @@ public class UIContainer {
 			if ( newCharValue != null && !newCharValue.isEmpty() ) {
 				
 				String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(i) );
-				String existingCharValue = ocrHandler.getCharValueFromMap( dialect, newCharCode ); // check if char is already mapped
+				String existingCharValue = ocrHandler.lookupCharCode( dialect, newCharCode ); // check if char is already mapped
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
 					
@@ -973,7 +973,7 @@ public class UIContainer {
 			}
 		}
 		
-		boolean success = ocrHandler.setMappings( dialect, newMappings );
+		boolean success = ocrHandler.saveMappings( dialect, newMappings );
 		
 		if(success) {
 			JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
