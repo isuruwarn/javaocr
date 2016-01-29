@@ -1,13 +1,15 @@
-package com.ocr.scanner;
+package com.ocr.scanner.impl;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import com.ocr.api.OCREngine;
-import com.ocr.core.AbstractScanner;
 import com.ocr.core.Char;
 import com.ocr.core.Line;
-import com.ocr.core.MappingsFile;
+import com.ocr.core.ScanRequest;
+import com.ocr.core.ScanResult;
+import com.ocr.mappings.MappingsFile;
+import com.ocr.scanner.AbstractScanner;
 import com.ocr.text.Symbol;
 import com.ocr.util.ScanUtils;
 
@@ -30,7 +32,7 @@ public class ScannerImpl extends AbstractScanner {
 	
 	private int minBlanklineHeight = 30;
 	private int minWhitespaceWidth = 8;
-	private int verticalBlocksPerChar = 12;
+	//private int verticalBlocksPerChar = 12;
 	
 	private int height = 0;
 	private int width = 0;
@@ -61,11 +63,13 @@ public class ScannerImpl extends AbstractScanner {
 	 * @param mapFile
 	 * @return
 	 */
-	public StringBuilder scan( BufferedImage inputImage, String dialect ) {
-		mappingsFile = new MappingsFile( dialect, this.verticalBlocksPerChar, ocrEngine.getName() );
+	public ScanResult scan( ScanRequest req ) {
+		BufferedImage inputImage = req.getImage();
+		String dialect = req.getDialect();
+		mappingsFile = new MappingsFile( dialect, ocrEngine.getVerticalBlocksPerChar(), ocrEngine.getName() );
 		ArrayList<Line> lines = this.init( inputImage ); //reads image and prepares Line and Char objects
-		StringBuilder sb = this.readCharacters( lines );
-		return sb;
+		StringBuilder document = this.readCharacters( lines );
+		return prepareResult( document );
 	}
 	
 	
@@ -288,14 +292,14 @@ public class ScannerImpl extends AbstractScanner {
 				}
 				
 				// a character needs to have a minimum height of verticalBlocksPerChar pixels, otherwise we cannot identify it
-				if( c.getH() < this.verticalBlocksPerChar ) {
+				if( c.getH() < ocrEngine.getVerticalBlocksPerChar() ) {
 					sb.append("?");
 					continue;
 				}
 				
 				// Step 4: map each character into a grid (block representation) of 1s and 0s
 				//mapToGrid(c);
-				String charCode = ocrEngine.processChar( c, verticalBlocksPerChar, bitmap );
+				String charCode = ocrEngine.processChar( c, bitmap );
 				
 				// Step 5: lookup up the charcode in the saved in file for any matches
 				String s = mappingsFile.getCharValueFromMap( charCode );
@@ -339,37 +343,21 @@ public class ScannerImpl extends AbstractScanner {
 	
 	
 	
-	
-	
-	
-	public int getHeight() {
-		return height;
+	protected ScanResult prepareResult( StringBuilder document ) {
+		ScanResult res = new ScanResult();
+		res.setDocument(document);
+		res.setLines(lines);
+		res.setCharsRead(charsRead);
+		res.setLinesRead(linesRead);
+		//res.setRecognizedCharCodes(recognizedCharCodes);
+		//res.setRecognizedChars(recognizedChars);
+		res.setUnrecognizedCharCodes(unrecognizedCharCodes);
+		res.setUnrecognizedChars(unrecognizedChars);
+		res.setWidth(width);
+		res.setHeight(height);
+		return res;
 	}
 	
-	
-	public int getWidth() {
-		return width;
-	}
-	
-	
-	public ArrayList<Line> getLines() {
-		return lines;
-	}
-	
-	
-	public int getLinesRead() {
-		return linesRead;
-	}
-	
-	
-	public int getCharsRead() {
-		return charsRead;
-	}
-	
-	
-	public ArrayList<Char> getUnrecognizedChars() {
-		return unrecognizedChars;
-	}
 	
 	
 	public int getMinBlanklineHeight() {
@@ -377,38 +365,13 @@ public class ScannerImpl extends AbstractScanner {
 	}
 	
 	
-	public void setMinBlanklineHeight(int minBlanklineHeight) {
-		this.minBlanklineHeight = minBlanklineHeight;
-	}
-	
-	
 	public int getMinWhitespaceWidth() {
 		return this.minWhitespaceWidth;
-	}
-	
-	
-	public void setMinWhitespaceWidth(int minWhitespaceWidth) {
-		this.minWhitespaceWidth = minWhitespaceWidth;
-	}
-	
-	
-	public int getVerticalBlocksPerChar() {
-		return verticalBlocksPerChar;
-	}
-	
-	
-	public void setVerticalBlocksPerChar(int verticalBlocksPerChar) {
-		this.verticalBlocksPerChar = verticalBlocksPerChar;
 	}
 	
 
 	public MappingsFile getMappingsFile() {
 		return mappingsFile;
-	}
-	
-	
-	public void setMappingsFile(MappingsFile mappingsFile) {
-		this.mappingsFile = mappingsFile;
 	}
 	
 	

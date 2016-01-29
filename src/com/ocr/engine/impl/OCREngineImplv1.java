@@ -1,21 +1,23 @@
-package com.ocr.engine;
+package com.ocr.engine.impl;
 
-import com.ocr.core.AbstractOCREngine;
 import com.ocr.core.Char;
+import com.ocr.engine.AbstractOCREngine;
 
 
 
 
 
-public class OCREngineImplv2 extends AbstractOCREngine {
+public class OCREngineImplv1 extends AbstractOCREngine {
 	
-
-	private static final String NAME = "v2"; 
+	
+	private static final String NAME = "v1";
+	private static final int VBLOCKS_PER_CHAR = 12;
+	
 	
 	/**
-	 * Contains the main character recognition algorithm. Maps given char to a grid based on 
-	 * OCR algorithm, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR), and a
-	 * variable number of blocks horizontally. For example, A might be represented as:
+	 * Contains the main character recognition algorithm.
+	 * Maps each character into a grid, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR),
+	 * and a variable number of blocks horizontally. For example, A might be represented as:
 	 * 
 	 * 	0 0 0 0 0 0 0 0 
 	 *	0 0 0 1 1 0 0 0 
@@ -35,11 +37,11 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	 * 
 	 * @param c
 	 */
-	public String processChar( Char c, int verticalBlocksPerChar, byte [][] bitmap ) {
+	public String processChar( Char c, byte [][] bitmap ) {
 		
 		int blockNumber = 0;
-		int blockLength = c.getH() / verticalBlocksPerChar;
-		int noOfVBlocks = verticalBlocksPerChar;
+		int blockLength = c.getH() / VBLOCKS_PER_CHAR;
+		int noOfVBlocks = VBLOCKS_PER_CHAR;
 		int noOfHBlocks = c.getW() / blockLength;
 		if( noOfHBlocks == 0 ) {
 			noOfHBlocks = 1;
@@ -56,7 +58,7 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 		an additional pixel to each of the first 7 vertical blocks. So they will have a blockLength of 3, 
 		where as the next 8 will revert back to the original blockLength of 2. 
 		*/
-		int vBlockRemainder = c.getH() % verticalBlocksPerChar;
+		int vBlockRemainder = c.getH() % VBLOCKS_PER_CHAR;
 		int hBlockRemainder = c.getW() % noOfHBlocks;
 		int vBlockLength = blockLength;
 		int hBlockLength = blockLength;
@@ -117,7 +119,7 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 			}
 			
 			vBlockLength = blockLength;
-			vBlockRemainder = c.getH() % verticalBlocksPerChar;
+			vBlockRemainder = c.getH() % VBLOCKS_PER_CHAR;
 			if( vBlockRemainder > 0 ) { vBlockLength++; vBlockRemainder--; }
 			
 			// reset vertical pointers
@@ -137,7 +139,7 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 			
 		}
 		
-		return getCharCode( c, verticalBlocksPerChar );
+		return getCharCode(c);
 	}
 	
 	
@@ -151,12 +153,12 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	 * @param verticalBlocksPerChar
 	 * @return
 	 */
-	public  String getCharCode( Char c, int verticalBlocksPerChar ) {
+	public  String getCharCode( Char c ) {
 		String s = "";
 		String charCode = "";
 		for( int i=0; i<c.getBlockSequence().size(); i++ ) {
 			s += c.getBlockSequence().get(i);
-			if( (i+1) % verticalBlocksPerChar == 0 ) {
+			if( (i+1) % VBLOCKS_PER_CHAR == 0 ) {
 				int n = Integer.parseInt( s, 2 );
 				charCode += n;
 				s = "";
@@ -175,7 +177,10 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	}
 	
 	
-	
+
+	public int getVerticalBlocksPerChar() {
+		return VBLOCKS_PER_CHAR;
+	}
 	
 	
 

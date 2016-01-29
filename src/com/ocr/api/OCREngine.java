@@ -7,7 +7,7 @@ public interface OCREngine {
 	
 	
 	
-	String processChar( Char c, int verticalBlocksPerChar, byte [][] bitmap );
+	String processChar( Char c, byte [][] bitmap );
 	
 	/**
 	 * Returns char code for given char based on OCR algorithm
@@ -16,7 +16,7 @@ public interface OCREngine {
 	 * @param verticalBlocksPerChar
 	 * @return
 	 */
-	String getCharCode( Char c, int verticalBlocksPerChar );
+	String getCharCode( Char c );
 	
 	/**
 	 * The OCR algorithm name is important in identifying the mappings file name. 
@@ -24,5 +24,8 @@ public interface OCREngine {
 	 * @return
 	 */
 	String getName();
+	
+	
+	int getVerticalBlocksPerChar();
 	
 }

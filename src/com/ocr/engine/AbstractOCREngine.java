@@ -1,4 +1,4 @@
-package com.ocr.core;
+package com.ocr.engine;
 
 import com.ocr.api.OCREngine;
 

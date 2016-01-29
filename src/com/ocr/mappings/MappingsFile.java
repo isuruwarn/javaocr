@@ -1,4 +1,4 @@
-package com.ocr.core;
+package com.ocr.mappings;
 
 import java.util.HashMap;
 import java.util.Properties;

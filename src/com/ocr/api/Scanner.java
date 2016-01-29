@@ -1,11 +1,8 @@
 package com.ocr.api;
 
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-
-import com.ocr.core.Char;
-import com.ocr.core.Line;
-import com.ocr.core.MappingsFile;
+import com.ocr.core.ScanRequest;
+import com.ocr.core.ScanResult;
+import com.ocr.mappings.MappingsFile;
 
 
 
@@ -18,31 +15,11 @@ import com.ocr.core.MappingsFile;
  */
 public interface Scanner {
 	
-	StringBuilder scan( BufferedImage inputImage, String dialect );
-	
-	int getHeight();
-	
-	int getWidth();
-	
-	ArrayList<Line> getLines();
-	
-	int getLinesRead();
-	
-	int getCharsRead();
-	
-	ArrayList<Char> getUnrecognizedChars();
+	ScanResult scan( ScanRequest req );
 	
 	int getMinBlanklineHeight();
 	
-	void setMinBlanklineHeight( int minBlanklineHeight );
-	
 	int getMinWhitespaceWidth();
-	
-	void setMinWhitespaceWidth(int minWhitespaceWidth);
-	
-	int getVerticalBlocksPerChar();
-	
-	void setVerticalBlocksPerChar(int verticalBlocksPerChar);
 	
 	MappingsFile getMappingsFile();
 	

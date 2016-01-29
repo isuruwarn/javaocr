@@ -44,6 +44,8 @@ import javax.swing.event.DocumentListener;
 import com.ocr.core.Char;
 import com.ocr.core.Line;
 import com.ocr.core.OCRHandler;
+import com.ocr.core.ScanRequest;
+import com.ocr.core.ScanResult;
 import com.ocr.text.Symbol;
 import com.ocr.text.TextHandler;
 import com.ocr.util.FileUtils;
@@ -62,7 +64,6 @@ import com.ocr.util.ImageUtils;
 public class UIContainer {
 	
 	
-	private OCRHandler ocrHandler;
 	
 	private String dialect;
 	private BufferedImage inputImage;
@@ -73,9 +74,6 @@ public class UIContainer {
 	private JFrame mainFrame;
 	private JButton inputFileBtn;
 	private JButton outputFileBtn;
-	//private JButton scanBtn;
-	//private JButton copyBtn;
-	//private JButton clearBtn;
 	private JButton resolveBtn;
 	private JButton viewDocImgBtn1;
 	private JTextArea statusLbl;
@@ -89,15 +87,15 @@ public class UIContainer {
 	private JFileChooser inputImgFileChooser;
 	private JFileChooser outputFileChooser;
 	
-	//private MappingsKeyEventDispatcher mappingsKeyEventDispatcher;
+	private OCRHandler ocrHandler;
+	private ScanResult scanResult;
 	
 	
-	/**
-	 * Constructor
-	 */
+	
+	
 	public UIContainer() {
 
-		ocrHandler = new OCRHandler(); // new ScannerImpl();
+		ocrHandler = new OCRHandler();
 		inputImgFileChooser = new JFileChooser(GlobalConstants.SAMPLE_IMG_FILENAME);
 		outputFileChooser = new JFileChooser(GlobalConstants.SAMPLE_OUTPUT_FILENAME);
 		MainOCRListener mainListener = new MainOCRListener();
@@ -281,9 +279,9 @@ public class UIContainer {
 		// set default values
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
 		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
-		txtVBlocksPerChar.setText( String.valueOf(ocrHandler.getVerticalBlocksPerChar()) );
-		txtWhitespaceWidth.setText( String.valueOf(ocrHandler.getMinWhitespaceWidth()) );
-		txtBlanklineHeight.setText( String.valueOf(ocrHandler.getMinBlanklineHeight()) );
+		txtVBlocksPerChar.setText( String.valueOf( ocrHandler.getVerticalBlocksPerChar() ) ); // default verticalBlocksPerChar
+		txtWhitespaceWidth.setText( String.valueOf( ocrHandler.getMinWhitespaceWidth() ) ); // default minWhitespaceWidth
+		txtBlanklineHeight.setText( String.valueOf( ocrHandler.getMinBlanklineHeight() ) ); // default minBlanklineHeight
 		selectDialect.setSelectedIndex(0);
 		
 		//inputImgFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_IMG_FILENAME) );
@@ -381,30 +379,29 @@ public class UIContainer {
 		} else {
 			
 			// set basic parameters
-			ocrHandler.setVerticalBlocksPerChar( Integer.parseInt( txtVBlocksPerChar.getText() ) );
-			ocrHandler.setMinWhitespaceWidth( Integer.parseInt( txtWhitespaceWidth.getText() ) );
-			ocrHandler.setMinBlanklineHeight( Integer.parseInt( txtBlanklineHeight.getText() ) );
+			ScanRequest req = new ScanRequest();
+			req.setVerticalBlocksPerChar( Integer.parseInt( txtVBlocksPerChar.getText() ) );
+			req.setMinWhitespaceWidth( Integer.parseInt( txtWhitespaceWidth.getText() ) );
+			req.setMinBlanklineHeight( Integer.parseInt( txtBlanklineHeight.getText() ) );
+			req.setImage(inputImage);
+			req.setDialect(dialect);
 			
-			// in case user changed blocks per char
-			updateMappingsFile(); 
-			//ocrHandler.relaodCharMap( dialect ); not needed as we create a new mappingsFile object before each scan
-			
-			StringBuilder sb = ocrHandler.scan( inputImage, dialect );
-			textPane.setText(sb.toString());
+			scanResult = ocrHandler.scan(req);
+			textPane.setText( scanResult.getDocument().toString() );
 			
 			// output result to text file
 			//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
 			String outputFile = txtOutputFileName.getText();
-			FileUtils.writeToFile( sb, outputFile );
+			FileUtils.writeToFile( scanResult.getDocument(), outputFile );
 			
 			// update status label
-			int linesRead = ocrHandler.getLinesRead();
-			int charsRead = ocrHandler.getCharsRead();
-			int noOfUnrecognizedChars = ocrHandler.getUnrecognizedChars().size();
-			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, ocrHandler.getWidth(), ocrHandler.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
+			int linesRead = scanResult.getLinesRead();
+			int charsRead = scanResult.getCharsRead();
+			int noOfUnrecognizedChars = scanResult.getUnrecognizedChars().size();
+			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, scanResult.getWidth(), scanResult.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
 			// get any unrecognized chars and enable resolve button if needed
-			unrecognizedCharsArl = ocrHandler.getUnrecognizedChars();
+			unrecognizedCharsArl = scanResult.getUnrecognizedChars();
 			if( unrecognizedCharsArl.size() > 0 ) {
 				resolveBtn.setEnabled(true);
 			}
@@ -462,7 +459,7 @@ public class UIContainer {
 	private void resolve() {
 		
 		navIndex = 0;
-		unrecognizedCharsArl = ocrHandler.getUnrecognizedChars();
+		//unrecognizedCharsArl = ocrHandler.getUnrecognizedChars();
 		charMappingsArr = new String [ unrecognizedCharsArl.size() ];
 		savedMappingsArr = new boolean [ unrecognizedCharsArl.size() ];
 		keyPointsArr = new Object [unrecognizedCharsArl.size()];
@@ -1060,7 +1057,7 @@ public class UIContainer {
 	
 	private void viewLineImage() {
 		Char c = unrecognizedCharsArl.get( navIndex );
-		Line l = ocrHandler.getLines().get( c.getLineNumber() );
+		Line l = scanResult.getLines().get( c.getLineNumber() );
 		BufferedImage lineImg = inputImage.getSubimage( l.getX(), l.getY(), l.getW(), l.getH() );
 		viewImage( lineImg, GlobalConstants.VIEW_LINE_IMG_ACTION, GlobalConstants.VIEW_LINE_IMG_LBL_W, GlobalConstants.VIEW_LINE_IMG_LBL_H );
 	}
@@ -1102,7 +1099,7 @@ public class UIContainer {
 		charBlockImgLbl.setToolTipText( GlobalConstants.MAPPING_BLOCK_REP_TOOLTIP );
 		
 		charMappingTxt.setText( charMappingsArr[navIndex] );
-		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) ) ) );
+		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), ocrHandler.getCharCode( c ) ) );
 		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) ) ) );
 		
 		charMappingSavedLbl.setIcon(null);
