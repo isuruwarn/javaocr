@@ -1,18 +1,20 @@
-package com.ocr.core;
+package com.ocr.dto;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import com.ocr.core.Char;
+import com.ocr.core.Line;
 
 
 
-public class ScanResult {
+public class OCRResult {
 	
-	
+
 	private int height = 0;
 	private int width = 0;
 	private int linesRead = 0;
 	private int charsRead = 0;
-	//private byte [][] bitmap;
 	
 	private ArrayList<Line> lines;
 	private ArrayList<Char> recognizedChars;
@@ -20,10 +22,38 @@ public class ScanResult {
 	private ArrayList<String> recognizedCharCodes;
 	private ArrayList<String> unrecognizedCharCodes;
 	
-	private StringBuilder document;
-	
+	private StringBuilder document;	
+	private BufferedImage inputImage;
 	
 
+	
+	public OCRResult() {
+		
+	}
+	
+	
+	public OCRResult( ScanResult scanResult, OCREngineResult ocrEngRes ) {
+		
+		this.height = scanResult.getHeight();
+		this.width = scanResult.getWidth();
+		this.linesRead = scanResult.getLinesRead();
+		this.charsRead = scanResult.getCharsRead();
+		this.lines = scanResult.getLines();
+		
+		this.document = ocrEngRes.getDocument();	
+		this.unrecognizedChars =  ocrEngRes.getUnrecognizedChars();
+		this.unrecognizedCharCodes = ocrEngRes.getUnrecognizedCharCodes();
+		//this.recognizedCharCodes = ocrEngRes.getRecognizedCharCodes();
+		//this.recognizedChars = ocrEngRes.getRecognizedChars();
+		
+		// TODO: is it OK to set these objects as references? Or should all objects be cloned? 
+		
+	}
+	
+	
+	
+	
+	
 	public int getHeight() {
 		return height;
 	}
@@ -55,16 +85,6 @@ public class ScanResult {
 	public void setCharsRead(int charsRead) {
 		this.charsRead = charsRead;
 	}
-	
-	/*
-	public byte[][] getBitmap() {
-		return bitmap;
-	}
-
-	public void setBitmap(byte[][] bitmap) {
-		this.bitmap = bitmap;
-	}
-	*/
 	
 	public ArrayList<Line> getLines() {
 		return lines;
@@ -114,5 +134,13 @@ public class ScanResult {
 		this.document = document;
 	}
 	
+	public BufferedImage getInputImage() {
+		return inputImage;
+	}
 
+	public void setInputImage(BufferedImage inputImage) {
+		this.inputImage = inputImage;
+	}
+	
+	
 }

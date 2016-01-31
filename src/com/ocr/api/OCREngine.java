@@ -1,6 +1,8 @@
 package com.ocr.api;
 
 import com.ocr.core.Char;
+import com.ocr.dto.OCREngineRequest;
+import com.ocr.dto.OCREngineResult;
 
 
 public interface OCREngine {
@@ -8,13 +10,13 @@ public interface OCREngine {
 	
 	/**
 	 * This method should implement the main character recognition algorithm. Should return a
-	 * char code which can be used to identify the given <Char> in the mappings file. 
+	 * <OCRResult> object which contains the characters of the scanned document, and other details
+	 * such as unrecognized characters and charcodes.
 	 * 
-	 * @param c
-	 * @param bitmap
-	 * @return
+	 * @param OCRRequest
+	 * @return 
 	 */
-	String processChar( Char c, byte [][] bitmap );
+	OCREngineResult processLines( OCREngineRequest req );
 	
 	
 	/**

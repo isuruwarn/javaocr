@@ -28,15 +28,11 @@ public class ImageUtils {
 	 * 
 	 * @param imgFile
 	 * @return
+	 * @throws IOException 
 	 */
-	public static BufferedImage loadImage( String imgFile ) {
-		BufferedImage image = null;
-		try {
-			File input = new File( imgFile );
-			image = ImageIO.read(input);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public static BufferedImage loadImage( String imgFile ) throws IOException {
+		File input = new File( imgFile );
+		BufferedImage image = ImageIO.read(input);
 		return image;
 	}
 	

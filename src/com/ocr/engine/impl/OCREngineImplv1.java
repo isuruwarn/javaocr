@@ -1,7 +1,14 @@
 package com.ocr.engine.impl;
 
+import java.util.ArrayList;
+
 import com.ocr.core.Char;
+import com.ocr.core.Line;
+import com.ocr.dto.OCREngineRequest;
+import com.ocr.dto.OCREngineResult;
 import com.ocr.engine.AbstractOCREngine;
+import com.ocr.mappings.MappingsFile;
+import com.ocr.text.Symbol;
 
 
 
@@ -14,10 +21,96 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	private static final int VBLOCKS_PER_CHAR = 12;
 	
 	
+	
 	/**
-	 * Contains the main character recognition algorithm.
-	 * Maps each character into a grid, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR),
-	 * and a variable number of blocks horizontally. For example, A might be represented as:
+	 * 
+	 */
+	public OCREngineResult processLines( OCREngineRequest req ) {
+		
+		byte [][] bitmap = req.getBitmap();
+		ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
+		ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
+		MappingsFile mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
+		StringBuilder sb = new StringBuilder();
+		
+		
+		for( Line l: req.getLines() ) {
+			
+			if( l.isBlankLine() ) {
+				sb.append("\n");
+				continue;
+			}
+			
+			String kombuwa = ""; 
+			
+			for( Char c: l.getChars() ) {
+				
+				if( c.isWhiteSpace() ) {
+					sb.append(" ");
+					continue;
+				}
+				
+				// a character needs to have a minimum height of verticalBlocksPerChar pixels, otherwise we cannot identify it
+				if( c.getH() < VBLOCKS_PER_CHAR ) {
+					sb.append("?");
+					continue;
+				}
+				
+				// Step 4: map each character into a grid (block representation) of 1s and 0s
+				
+				String charCode = processChar( c, bitmap );
+				
+				// Step 5: lookup up the charcode in the saved in file for any matches
+				String s = mappingsFile.lookupCharCode( charCode );
+				
+				if( s == null ) { // unrecognized char
+					
+					sb.append("?");
+					
+					if( unrecognizedCharCodes.indexOf( charCode ) == -1 ) { // eliminate duplicates
+						unrecognizedCharCodes.add(charCode);
+						unrecognizedChars.add(c);
+					}
+					
+				} else {
+					
+					if( kombuwa.length() > 0 ) {
+						
+						if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+							kombuwa += s;
+						} else {
+							sb.append( s + kombuwa );
+							kombuwa = "";
+						}
+						
+					} else if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+						kombuwa = s;
+						
+					} else {
+						sb.append(s);
+					}
+				}
+				
+			}
+			
+			sb.append("\n");
+		}
+		
+		OCREngineResult res = new OCREngineResult();
+		res.setDocument(sb);
+		res.setUnrecognizedChars(unrecognizedChars);
+		res.setUnrecognizedCharCodes(unrecognizedCharCodes);
+		return res;
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Contains the main character recognition algorithm. Maps given char to a grid based on 
+	 * OCR algorithm, which is a fixed number of blocks vertically (BLOCKS_PER_CHAR), and a
+	 * variable number of blocks horizontally. For example, A might be represented as:
 	 * 
 	 * 	0 0 0 0 0 0 0 0 
 	 *	0 0 0 1 1 0 0 0 
@@ -169,19 +262,16 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 
 
 
-
-
 	@Override
 	public String getName() {
 		return NAME;
 	}
 	
 	
-
+	
 	public int getVerticalBlocksPerChar() {
 		return VBLOCKS_PER_CHAR;
 	}
-	
 	
 
 }

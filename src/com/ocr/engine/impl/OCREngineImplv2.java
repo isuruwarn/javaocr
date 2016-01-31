@@ -1,7 +1,14 @@
 package com.ocr.engine.impl;
 
+import java.util.ArrayList;
+
 import com.ocr.core.Char;
+import com.ocr.core.Line;
+import com.ocr.dto.OCREngineRequest;
+import com.ocr.dto.OCREngineResult;
 import com.ocr.engine.AbstractOCREngine;
+import com.ocr.mappings.MappingsFile;
+import com.ocr.text.Symbol;
 
 
 
@@ -12,6 +19,91 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 
 	private static final String NAME = "v2";
 	private static final int VBLOCKS_PER_CHAR = 12;
+	
+	
+	
+	/**
+	 * 
+	 */
+	public OCREngineResult processLines( OCREngineRequest req ) {
+		
+		byte [][] bitmap = req.getBitmap();
+		ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
+		ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
+		MappingsFile mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
+		StringBuilder sb = new StringBuilder();
+		
+		
+		for( Line l: req.getLines() ) {
+			
+			if( l.isBlankLine() ) {
+				sb.append("\n");
+				continue;
+			}
+			
+			String kombuwa = ""; 
+			
+			for( Char c: l.getChars() ) {
+				
+				if( c.isWhiteSpace() ) {
+					sb.append(" ");
+					continue;
+				}
+				
+				// a character needs to have a minimum height of verticalBlocksPerChar pixels, otherwise we cannot identify it
+				if( c.getH() < VBLOCKS_PER_CHAR ) {
+					sb.append("?");
+					continue;
+				}
+				
+				// Step 4: map each character into a grid (block representation) of 1s and 0s
+				
+				String charCode = processChar( c, bitmap );
+				
+				// Step 5: lookup up the charcode in the saved in file for any matches
+				String s = mappingsFile.lookupCharCode( charCode );
+				
+				if( s == null ) { // unrecognized char
+					
+					sb.append("?");
+					
+					if( unrecognizedCharCodes.indexOf( charCode ) == -1 ) { // eliminate duplicates
+						unrecognizedCharCodes.add(charCode);
+						unrecognizedChars.add(c);
+					}
+					
+				} else {
+					
+					if( kombuwa.length() > 0 ) {
+						
+						if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+							kombuwa += s;
+						} else {
+							sb.append( s + kombuwa );
+							kombuwa = "";
+						}
+						
+					} else if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+						kombuwa = s;
+						
+					} else {
+						sb.append(s);
+					}
+				}
+				
+			}
+			
+			sb.append("\n");
+		}
+		
+		OCREngineResult res = new OCREngineResult();
+		res.setDocument(sb);
+		res.setUnrecognizedChars(unrecognizedChars);
+		res.setUnrecognizedCharCodes(unrecognizedCharCodes);
+		return res;
+	}
+	
+	
 	
 	
 	
@@ -170,8 +262,6 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 
 
 
-
-
 	@Override
 	public String getName() {
 		return NAME;
@@ -182,9 +272,6 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	public int getVerticalBlocksPerChar() {
 		return VBLOCKS_PER_CHAR;
 	}
-	
-	
-	
 	
 
 }

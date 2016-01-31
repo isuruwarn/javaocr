@@ -1,8 +1,9 @@
 package com.ocr.api;
 
-import com.ocr.core.ScanRequest;
-import com.ocr.core.ScanResult;
-import com.ocr.mappings.MappingsFile;
+import java.io.IOException;
+
+import com.ocr.dto.ScanRequest;
+import com.ocr.dto.ScanResult;
 
 
 
@@ -23,10 +24,7 @@ public interface Scanner {
 	 * @param req
 	 * @return
 	 */
-	ScanResult scan( ScanRequest req );
-	
-	
-	MappingsFile getMappingsFile();
+	ScanResult scanImage( ScanRequest req ) throws IOException;
 	
 	
 	int getMinBlanklineHeight(); //TODO: Can we avoid using this getter?

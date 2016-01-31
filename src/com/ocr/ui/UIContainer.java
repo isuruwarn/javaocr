@@ -44,8 +44,8 @@ import javax.swing.event.DocumentListener;
 import com.ocr.core.Char;
 import com.ocr.core.Line;
 import com.ocr.core.OCRHandler;
-import com.ocr.core.ScanRequest;
-import com.ocr.core.ScanResult;
+import com.ocr.dto.OCRRequest;
+import com.ocr.dto.OCRResult;
 import com.ocr.text.Symbol;
 import com.ocr.text.TextHandler;
 import com.ocr.util.FileUtils;
@@ -78,7 +78,7 @@ public class UIContainer {
 	private JButton viewDocImgBtn1;
 	private JTextArea statusLbl;
 	private JTextPane textPane;
-	private JTextField txtVBlocksPerChar;
+	//private JTextField txtVBlocksPerChar;
 	private JTextField txtWhitespaceWidth;
 	private JTextField txtBlanklineHeight;
 	private JTextField txtInputImagePath;
@@ -88,7 +88,7 @@ public class UIContainer {
 	private JFileChooser outputFileChooser;
 	
 	private OCRHandler ocrHandler;
-	private ScanResult scanResult;
+	private OCRResult scanResult;
 	
 	
 	
@@ -98,14 +98,14 @@ public class UIContainer {
 		ocrHandler = new OCRHandler();
 		inputImgFileChooser = new JFileChooser(GlobalConstants.SAMPLE_IMG_FILENAME);
 		outputFileChooser = new JFileChooser(GlobalConstants.SAMPLE_OUTPUT_FILENAME);
-		MainOCRListener mainListener = new MainOCRListener();
+		MainOCRActionListener mainActionListener = new MainOCRActionListener();
 		
 		inputFileBtn = new JButton( GlobalConstants.CHOOSE_INPUT_FILE_ACTION );
-		inputFileBtn.addActionListener(mainListener);
+		inputFileBtn.addActionListener(mainActionListener);
 		inputFileBtn.setEnabled(true);
 		
 		outputFileBtn = new JButton( GlobalConstants.CHOOSE_OUTPUT_FILE_ACTION );
-		outputFileBtn.addActionListener(mainListener);
+		outputFileBtn.addActionListener(mainActionListener);
 		outputFileBtn.setEnabled(true);
 		
 		txtInputImagePath = new JTextField();
@@ -120,12 +120,12 @@ public class UIContainer {
 		String [] dialects = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
 		selectDialect = new JComboBox<String>(dialects);
 		selectDialect.setName( GlobalConstants.SEL_DIALECT_COMBOBOX );
-		selectDialect.addActionListener( mainListener );
+		selectDialect.addActionListener( mainActionListener );
 		
-		JLabel lblVBlocksPerChar = new JLabel( GlobalConstants.VBLOCKS_PER_CHAR_LBL );
-		lblVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
-		lblVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
-		lblVBlocksPerChar.setHorizontalAlignment(JTextField.RIGHT);
+		//JLabel lblVBlocksPerChar = new JLabel( GlobalConstants.VBLOCKS_PER_CHAR_LBL );
+		//lblVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
+		//lblVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.VBLOCKS_PER_CHAR_LBL_W, GlobalConstants.VBLOCKS_PER_CHAR_LBL_H ) );
+		//lblVBlocksPerChar.setHorizontalAlignment(JTextField.RIGHT);
 		
 		JLabel lblWhitespaceWidth = new JLabel( GlobalConstants.WHITESPACE_WIDTH_LBL );
 		lblWhitespaceWidth.setPreferredSize( new Dimension( GlobalConstants.WHITESPACE_WIDTH_LBL_W, GlobalConstants.WHITESPACE_WIDTH_LBL_H ) );
@@ -137,10 +137,10 @@ public class UIContainer {
 		lblBlanklineHeight.setMinimumSize( new Dimension( GlobalConstants.BLANKLINE_HEIGHT_LBL_W, GlobalConstants.BLANKLINE_HEIGHT_LBL_H ) );
 		lblBlanklineHeight.setHorizontalAlignment(JTextField.RIGHT);
 		
-		txtVBlocksPerChar = new JTextField(); 
-		txtVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
-		txtVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
-		txtVBlocksPerChar.setHorizontalAlignment(JTextField.CENTER);
+		//txtVBlocksPerChar = new JTextField(); 
+		//txtVBlocksPerChar.setPreferredSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		//txtVBlocksPerChar.setMinimumSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
+		//txtVBlocksPerChar.setHorizontalAlignment(JTextField.CENTER);
 		
 		txtWhitespaceWidth = new JTextField(); 
 		txtWhitespaceWidth.setPreferredSize( new Dimension( GlobalConstants.SMALL_TXTBOX_W, GlobalConstants.SMALL_TXTBOX_H ) );
@@ -153,8 +153,8 @@ public class UIContainer {
 		txtBlanklineHeight.setHorizontalAlignment(JTextField.CENTER);
 		
 		JPanel txtBoxPanel = new JPanel();
-		txtBoxPanel.add(lblVBlocksPerChar);
-		txtBoxPanel.add(txtVBlocksPerChar);
+		//txtBoxPanel.add(lblVBlocksPerChar);
+		//txtBoxPanel.add(txtVBlocksPerChar);
 		txtBoxPanel.add(lblWhitespaceWidth);
 		txtBoxPanel.add(txtWhitespaceWidth);
 		txtBoxPanel.add(lblBlanklineHeight);
@@ -162,20 +162,20 @@ public class UIContainer {
 		
 		
 		JButton scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
-		scanBtn.addActionListener(mainListener);
+		scanBtn.addActionListener(mainActionListener);
 		
 		JButton copyBtn = new JButton( GlobalConstants.COPY_ACTION );
-		copyBtn.addActionListener(mainListener);
+		copyBtn.addActionListener(mainActionListener);
 		
 		JButton clearBtn = new JButton( GlobalConstants.CLEAR_ACTION );
-		clearBtn.addActionListener(mainListener);
-
+		clearBtn.addActionListener(mainActionListener);
+		
 		viewDocImgBtn1 = new JButton( GlobalConstants.VIEW_DOC_IMG_ACTION);
-		viewDocImgBtn1.addActionListener(mainListener);
+		viewDocImgBtn1.addActionListener(mainActionListener);
 		viewDocImgBtn1.setEnabled(false);
 		
 		resolveBtn = new JButton( GlobalConstants.RESOLVE_ACTION );
-		resolveBtn.addActionListener(mainListener);
+		resolveBtn.addActionListener(mainActionListener);
 		resolveBtn.setEnabled(false);
 		
 		JPanel btnToolBar = new JPanel();
@@ -279,7 +279,6 @@ public class UIContainer {
 		// set default values
 		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
 		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
-		txtVBlocksPerChar.setText( String.valueOf( ocrHandler.getVerticalBlocksPerChar() ) ); // default verticalBlocksPerChar
 		txtWhitespaceWidth.setText( String.valueOf( ocrHandler.getMinWhitespaceWidth() ) ); // default minWhitespaceWidth
 		txtBlanklineHeight.setText( String.valueOf( ocrHandler.getMinBlanklineHeight() ) ); // default minBlanklineHeight
 		selectDialect.setSelectedIndex(0);
@@ -302,7 +301,7 @@ public class UIContainer {
 	
 	
 	
-	class MainOCRListener implements ActionListener {
+	class MainOCRActionListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -370,24 +369,19 @@ public class UIContainer {
 	
 	private void scan() {
 		
-		String imgFile = txtInputImagePath.getText();
-		inputImage = ImageUtils.loadImage( imgFile );
-		
-		if( inputImage == null ) {
-			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.ERROR_LOADING_IMG_MSG, GlobalConstants.ERROR_LOADING_IMG_TITLE, JOptionPane.ERROR_MESSAGE );
-			
-		} else {
+		try {
+			String imgFile = txtInputImagePath.getText();
 			
 			// set basic parameters
-			ScanRequest req = new ScanRequest();
-			req.setVerticalBlocksPerChar( Integer.parseInt( txtVBlocksPerChar.getText() ) );
+			OCRRequest req = new OCRRequest();
 			req.setMinWhitespaceWidth( Integer.parseInt( txtWhitespaceWidth.getText() ) );
 			req.setMinBlanklineHeight( Integer.parseInt( txtBlanklineHeight.getText() ) );
-			req.setImage(inputImage);
+			req.setImagePath(imgFile);
 			req.setDialect(dialect);
 			
 			scanResult = ocrHandler.scan(req);
 			textPane.setText( scanResult.getDocument().toString() );
+			inputImage = scanResult.getInputImage();
 			
 			// output result to text file
 			//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
@@ -407,6 +401,9 @@ public class UIContainer {
 			}
 			
 			viewDocImgBtn1.setEnabled(true);
+			
+		} catch( IOException ioe ) {
+			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.ERROR_LOADING_IMG_MSG, GlobalConstants.ERROR_LOADING_IMG_TITLE, JOptionPane.ERROR_MESSAGE );
 		}
 	}
 	
@@ -417,15 +414,10 @@ public class UIContainer {
 	private void comboBoxChanged( ActionEvent e ) {
 		JComboBox<String> selectBox = (JComboBox<String>) e.getSource();
 		if( GlobalConstants.SEL_DIALECT_COMBOBOX.equals( selectBox.getName() ) ) {
-			updateMappingsFile();
+			dialect = selectDialect.getSelectedItem().toString();
+			resolveBtn.setEnabled(false);
 			updateMainFont();
 		}
-	}
-	
-	
-	
-	private void updateMappingsFile() {
-		dialect = selectDialect.getSelectedItem().toString();
 	}
 	
 	
@@ -459,7 +451,6 @@ public class UIContainer {
 	private void resolve() {
 		
 		navIndex = 0;
-		//unrecognizedCharsArl = ocrHandler.getUnrecognizedChars();
 		charMappingsArr = new String [ unrecognizedCharsArl.size() ];
 		savedMappingsArr = new boolean [ unrecognizedCharsArl.size() ];
 		keyPointsArr = new Object [unrecognizedCharsArl.size()];
@@ -916,7 +907,7 @@ public class UIContainer {
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
 			
-			String existingCharValue = ocrHandler.lookupCharCode( dialect, newCharCode ); // check if char is already mapped
+			String existingCharValue = ocrHandler.lookupCharCode( newCharCode ); // check if char is already mapped
 			
 			if ( existingCharValue != null && !existingCharValue.isEmpty() && newCharValue.equals(existingCharValue) ) { // mapping already exists
 				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.MAPPING_EXISTS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -924,7 +915,7 @@ public class UIContainer {
 			} else {
 				
 				// create new mapping or update existing mapping
-				boolean success = ocrHandler.saveMapping( dialect, newCharCode, newCharValue );
+				boolean success = ocrHandler.saveMapping( newCharCode, newCharValue );
 				
 				if(success) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -955,7 +946,7 @@ public class UIContainer {
 			if ( newCharValue != null && !newCharValue.isEmpty() ) {
 				
 				String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(i) );
-				String existingCharValue = ocrHandler.lookupCharCode( dialect, newCharCode ); // check if char is already mapped
+				String existingCharValue = ocrHandler.lookupCharCode( newCharCode ); // check if char is already mapped
 				
 				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
 					
@@ -966,14 +957,14 @@ public class UIContainer {
 				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
 					
 					newMappings.put( newCharCode, newCharValue );
-					ocrHandler.deleteMapping( dialect, newCharCode ); // remove old mapping from mappings file
+					ocrHandler.deleteMapping( newCharCode ); // remove old mapping from mappings file
 					savedMappingsArr[i] = true;
 					savedMappings++;
 				}
 			}
 		}
 		
-		boolean success = ocrHandler.saveMappings( dialect, newMappings );
+		boolean success = ocrHandler.saveMappings( newMappings );
 		
 		if(success) {
 			JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );

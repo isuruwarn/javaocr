@@ -1,11 +1,21 @@
 package com.ocr.core;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashMap;
 
 import com.ocr.api.OCREngine;
 import com.ocr.api.Scanner;
+import com.ocr.dto.OCREngineRequest;
+import com.ocr.dto.OCREngineResult;
+import com.ocr.dto.OCRRequest;
+import com.ocr.dto.OCRResult;
+import com.ocr.dto.ScanRequest;
+import com.ocr.dto.ScanResult;
 import com.ocr.engine.impl.OCREngineImplv2;
+import com.ocr.mappings.MappingsFile;
 import com.ocr.scanner.impl.ScannerImpl;
+import com.ocr.util.ImageUtils;
 
 
 
@@ -30,14 +40,14 @@ public final class OCRHandler {
 	
 	private Scanner scanner;
 	private OCREngine ocrEngine;
-	
+	private MappingsFile mappingsFile;
 	
 	
 	
 	public OCRHandler() {
 		
 		ocrEngine = new OCREngineImplv2();
-		scanner = new ScannerImpl( ocrEngine );
+		scanner = new ScannerImpl();
 		
 		/* TODO: Later on we could instantiate scanners and OCREngines based on UI input. Perhaps 
 		 * define all available Scanner and OCREngine implementations in an XML or Property file
@@ -48,8 +58,29 @@ public final class OCRHandler {
 	
 	
 	
-	public ScanResult scan( ScanRequest req ) {
-		return scanner.scan(req);
+	public OCRResult scan( OCRRequest req ) throws IOException {
+		
+		BufferedImage inputImage = ImageUtils.loadImage( req.getImagePath() );
+		
+		ScanRequest scanReq = new ScanRequest();
+		scanReq.setImage(inputImage);
+		scanReq.setMinBlanklineHeight( req.getMinBlanklineHeight() );
+		scanReq.setMinWhitespaceWidth( req.getMinWhitespaceWidth() );
+		ScanResult scanRes = scanner.scanImage( scanReq ); //reads image and prepares Line and Char objects
+		
+		OCREngineRequest ocrEngReq = new OCREngineRequest();
+		ocrEngReq.setDialect( req.getDialect() );
+		ocrEngReq.setBitmap( scanRes.getBitmap() );
+		ocrEngReq.setLines( scanRes.getLines() );
+		OCREngineResult ocrEngRes = ocrEngine.processLines(ocrEngReq);
+		
+		OCRResult res = new OCRResult( scanRes, ocrEngRes );
+		res.setInputImage(inputImage);
+		
+		// to be used later, if user wants to update mappings file
+		mappingsFile = new MappingsFile( req.getDialect(), ocrEngine.getVerticalBlocksPerChar(), ocrEngine.getName() );
+		
+		return res;
 	}
 	
 	
@@ -76,28 +107,27 @@ public final class OCRHandler {
 	
 	
 	public void relaodCharMap(String dialect) {
-		scanner.getMappingsFile().relaodCharMap(dialect);
+		mappingsFile.relaodCharMap();
 	}
 	
 	
-	public String lookupCharCode( String dialect, String charCode ) {
-		return scanner.getMappingsFile().lookupCharCode( charCode );
+	public String lookupCharCode( String charCode ) {
+		return mappingsFile.lookupCharCode( charCode );
 	}
 	
 	
-	public boolean saveMapping( String dialect, String newCharCode, String newCharValue ) {
-		return scanner.getMappingsFile().saveMapping( dialect, newCharCode, newCharValue );
+	public boolean saveMapping( String newCharCode, String newCharValue ) {
+		return mappingsFile.saveMapping( newCharCode, newCharValue );
 	}
 	
 	
-	public boolean saveMappings( String dialect, HashMap<String, String> newMappings ) {
-		return scanner.getMappingsFile().saveMappings( dialect, newMappings );
+	public boolean saveMappings( HashMap<String, String> newMappings ) {
+		return mappingsFile.saveMappings( newMappings );
 	}
 	
 	
-	public boolean deleteMapping(String dialect, String charCode) {
-		return scanner.getMappingsFile().deleteMapping( dialect, charCode );
+	public boolean deleteMapping(String charCode) {
+		return mappingsFile.deleteMapping(charCode );
 	}
-	
 	
 }

@@ -1,34 +1,24 @@
-package com.ocr.core;
+package com.ocr.dto;
 
 import java.awt.image.BufferedImage;
+
+
 
 public class ScanRequest {
 	
 	
 	private BufferedImage image;
-	
-	private String dialect;
-	
 	private int minBlanklineHeight;
 	private int minWhitespaceWidth;
-	private int verticalBlocksPerChar;
 	
 	
 	
 	public BufferedImage getImage() {
 		return image;
 	}
-	
+
 	public void setImage(BufferedImage image) {
 		this.image = image;
-	}
-	
-	public String getDialect() {
-		return dialect;
-	}
-	
-	public void setDialect(String dialect) {
-		this.dialect = dialect;
 	}
 	
 	public int getMinBlanklineHeight() {
@@ -47,13 +37,4 @@ public class ScanRequest {
 		this.minWhitespaceWidth = minWhitespaceWidth;
 	}
 	
-	public int getVerticalBlocksPerChar() {
-		return verticalBlocksPerChar;
-	}
-	
-	public void setVerticalBlocksPerChar(int verticalBlocksPerChar) {
-		this.verticalBlocksPerChar = verticalBlocksPerChar;
-	}
-	
-
 }

@@ -12,27 +12,15 @@ import com.ocr.util.GlobalConstants;
 
 public class MappingsFile {
 	
-	
-	private String dialect;
-	private int verticalBlocksPerChar;
-	private String ocrEngineName;
+	private String mappingsFileName;
 	private Properties charMappings;
 	
 	
 	
-	
 	public MappingsFile( String dialect, int verticalBlocksPerChar, String ocrEngineName ) {
-		this.dialect = dialect;
-		this.verticalBlocksPerChar = verticalBlocksPerChar;
-		this.ocrEngineName = ocrEngineName;
+		this.mappingsFileName = GlobalConstants.MAPPINGS_FILE_PATH + String.format( GlobalConstants.MAPPINGS_FILENAME, dialect, verticalBlocksPerChar, ocrEngineName );;
 	}
 	
-	
-	
-
-	public String getMappingFileName() {
-		return GlobalConstants.MAPPINGS_FILE_PATH + String.format( GlobalConstants.MAPPINGS_FILENAME, dialect, verticalBlocksPerChar, ocrEngineName );
-	}
 	
 	
 	
@@ -43,10 +31,9 @@ public class MappingsFile {
 	 * @return
 	 */
 	public String lookupCharCode( String charCode ) {
-		String mappingFile = getMappingFileName();
 		String c = null;
 		if( charMappings == null ) {
-			charMappings = FileUtils.loadPropertiesFile(mappingFile);
+			charMappings = FileUtils.loadPropertiesFile(mappingsFileName);
 		}
 		c = charMappings.getProperty(charCode);
 		return c;
@@ -54,29 +41,26 @@ public class MappingsFile {
 	
 	
 	
-	public void relaodCharMap( String dialect ) {
-		charMappings = FileUtils.loadPropertiesFile( getMappingFileName() );
+	public void relaodCharMap() {
+		charMappings = FileUtils.loadPropertiesFile(mappingsFileName);
 	}
 	
 		
 	
-	public boolean saveMapping( String dialect, String newCharCode, String newCharValue ) {
-		String mappingFile = getMappingFileName();
-		return FileUtils.setProperty( mappingFile, newCharCode, newCharValue );
+	public boolean saveMapping( String newCharCode, String newCharValue ) {
+		return FileUtils.setProperty( mappingsFileName, newCharCode, newCharValue );
 	}
 	
 	
 	
-	public boolean saveMappings( String dialect, HashMap<String,String> newMappings ) {
-		String mappingFile = getMappingFileName();
-		return FileUtils.setMultipleProperties( mappingFile, newMappings );
+	public boolean saveMappings( HashMap<String,String> newMappings ) {
+		return FileUtils.setMultipleProperties( mappingsFileName, newMappings );
 	}
 	
 	
 	
-	public boolean deleteMapping( String dialect, String charCode ) {
-		String mappingFile = getMappingFileName();
-		return FileUtils.deleteProperty( mappingFile, charCode );
+	public boolean deleteMapping( String charCode ) {
+		return FileUtils.deleteProperty( mappingsFileName, charCode );
 	}
 	
 	
