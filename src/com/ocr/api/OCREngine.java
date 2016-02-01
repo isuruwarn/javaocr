@@ -39,34 +39,7 @@ public interface OCREngine {
 	 * @return
 	 */
 	int saveMappings( ArrayList<CharMapping> mappings );
-	
-	
-//	
-//	/**
-//	 * 
-//	 * @param charCode
-//	 * @return
-//	 */
-//	String lookupCharCode( String charCode );
-//	
-//	
-//	
-//	
-//	/**
-//	 * 
-//	 */
-//	void relaodCharMap();
-//	
-//	
-//	
-//	
-//	/**
-//	 * The OCR algorithm name is important in identifying the mappings file name. 
-//	 * 
-//	 * @return
-//	 */
-//	String getName();
-	
+		
 	
 	
 	

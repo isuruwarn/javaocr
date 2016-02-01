@@ -33,7 +33,6 @@ public final class OCRHandler {
 	
 	private Scanner scanner;
 	private OCREngine ocrEngine;
-	//private MappingsFileImpl mappingsFile;
 	
 	
 	
@@ -69,10 +68,7 @@ public final class OCRHandler {
 		
 		OCRResult res = new OCRResult( scanRes, ocrEngRes );
 		res.setInputImage(inputImage);
-		
-		// to be used later, if user wants to update mappings file
-		//mappingsFile = new MappingsFileImpl( req.getDialect(), ocrEngine.getVerticalBlocksPerChar(), ocrEngine.getName() );
-		
+				
 		return res;
 	}
 	
@@ -92,16 +88,6 @@ public final class OCRHandler {
 	public String getCharCode( Char c ) {
 		return ocrEngine.getCharCode(c);
 	}
-	
-	
-//	public void relaodCharMap(String dialect) {
-//		ocrEngine.relaodCharMap();
-//	}
-//	
-//	
-//	public String lookupCharCode( String charCode ) {
-//		return ocrEngine.lookupCharCode( charCode );
-//	}
 
 	
 	public int getVerticalBlocksPerChar() {
@@ -109,21 +95,9 @@ public final class OCRHandler {
 	}
 	
 	
-
-		
-	
 	public int saveMappings( ArrayList<CharMapping> mappings ) {
 		return ocrEngine.saveMappings( mappings );
 	}
 	
-	
-//	public boolean saveMappings( HashMap<String, String> newMappings ) {
-//		return mappingsFile.saveMappings( newMappings );
-//	}
-//	
-//	
-//	public boolean deleteMapping(String charCode) {
-//		return mappingsFile.deleteMapping(charCode );
-//	}
 	
 }

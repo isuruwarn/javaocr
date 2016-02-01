@@ -292,8 +292,11 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 					String newCharCode = getCharCode(c);
 					String existingCharValue = lookupCharCode( newCharCode ); // check if char is already mapped
 					
-					// new or updated mapping
-					if ( existingCharValue == null || existingCharValue.isEmpty() || !newCharValue.equals(existingCharValue) ) {
+					if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
+						newMappings.put(newCharCode, newCharValue);
+						
+					} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
+						FileUtils.deleteProperty( mappingsFile.getName(), newCharCode ); // delete old value
 						newMappings.put(newCharCode, newCharValue);
 					}
 					
