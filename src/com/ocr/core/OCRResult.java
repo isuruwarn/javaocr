@@ -1,10 +1,7 @@
-package com.ocr.dto;
+package com.ocr.core;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-
-import com.ocr.core.Char;
-import com.ocr.core.Line;
 
 
 

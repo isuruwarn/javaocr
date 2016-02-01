@@ -2,18 +2,11 @@ package com.ocr.core;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import com.ocr.api.OCREngine;
 import com.ocr.api.Scanner;
-import com.ocr.dto.OCREngineRequest;
-import com.ocr.dto.OCREngineResult;
-import com.ocr.dto.OCRRequest;
-import com.ocr.dto.OCRResult;
-import com.ocr.dto.ScanRequest;
-import com.ocr.dto.ScanResult;
 import com.ocr.engine.impl.OCREngineImplv2;
-import com.ocr.mappings.MappingsFile;
 import com.ocr.scanner.impl.ScannerImpl;
 import com.ocr.util.ImageUtils;
 
@@ -40,7 +33,7 @@ public final class OCRHandler {
 	
 	private Scanner scanner;
 	private OCREngine ocrEngine;
-	private MappingsFile mappingsFile;
+	//private MappingsFileImpl mappingsFile;
 	
 	
 	
@@ -78,10 +71,21 @@ public final class OCRHandler {
 		res.setInputImage(inputImage);
 		
 		// to be used later, if user wants to update mappings file
-		mappingsFile = new MappingsFile( req.getDialect(), ocrEngine.getVerticalBlocksPerChar(), ocrEngine.getName() );
+		//mappingsFile = new MappingsFileImpl( req.getDialect(), ocrEngine.getVerticalBlocksPerChar(), ocrEngine.getName() );
 		
 		return res;
 	}
+	
+
+	public int getMinWhitespaceWidth() {
+		return scanner.getMinWhitespaceWidth();
+	}
+
+	
+	public int getMinBlanklineHeight() {
+		return scanner.getMinBlanklineHeight();
+	}
+
 	
 	
 	
@@ -90,44 +94,36 @@ public final class OCRHandler {
 	}
 	
 	
+//	public void relaodCharMap(String dialect) {
+//		ocrEngine.relaodCharMap();
+//	}
+//	
+//	
+//	public String lookupCharCode( String charCode ) {
+//		return ocrEngine.lookupCharCode( charCode );
+//	}
+
+	
 	public int getVerticalBlocksPerChar() {
 		return ocrEngine.getVerticalBlocksPerChar();
 	}
 	
+	
 
-
-	public int getMinWhitespaceWidth() {
-		return scanner.getMinWhitespaceWidth();
-	}
-
-	public int getMinBlanklineHeight() {
-		return scanner.getMinBlanklineHeight();
+		
+	
+	public int saveMappings( ArrayList<CharMapping> mappings ) {
+		return ocrEngine.saveMappings( mappings );
 	}
 	
 	
-	
-	public void relaodCharMap(String dialect) {
-		mappingsFile.relaodCharMap();
-	}
-	
-	
-	public String lookupCharCode( String charCode ) {
-		return mappingsFile.lookupCharCode( charCode );
-	}
-	
-	
-	public boolean saveMapping( String newCharCode, String newCharValue ) {
-		return mappingsFile.saveMapping( newCharCode, newCharValue );
-	}
-	
-	
-	public boolean saveMappings( HashMap<String, String> newMappings ) {
-		return mappingsFile.saveMappings( newMappings );
-	}
-	
-	
-	public boolean deleteMapping(String charCode) {
-		return mappingsFile.deleteMapping(charCode );
-	}
+//	public boolean saveMappings( HashMap<String, String> newMappings ) {
+//		return mappingsFile.saveMappings( newMappings );
+//	}
+//	
+//	
+//	public boolean deleteMapping(String charCode) {
+//		return mappingsFile.deleteMapping(charCode );
+//	}
 	
 }

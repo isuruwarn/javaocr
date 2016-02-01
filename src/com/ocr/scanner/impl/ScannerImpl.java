@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import com.ocr.core.Char;
 import com.ocr.core.Line;
-import com.ocr.dto.ScanRequest;
-import com.ocr.dto.ScanResult;
+import com.ocr.core.ScanRequest;
+import com.ocr.core.ScanResult;
 import com.ocr.scanner.AbstractScanner;
 import com.ocr.util.ScanUtils;
 

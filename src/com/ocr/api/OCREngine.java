@@ -1,8 +1,11 @@
 package com.ocr.api;
 
+import java.util.ArrayList;
+
 import com.ocr.core.Char;
-import com.ocr.dto.OCREngineRequest;
-import com.ocr.dto.OCREngineResult;
+import com.ocr.core.CharMapping;
+import com.ocr.core.OCREngineRequest;
+import com.ocr.core.OCREngineResult;
 
 
 public interface OCREngine {
@@ -29,12 +32,42 @@ public interface OCREngine {
 	String getCharCode( Char c );
 	
 	
+	
 	/**
-	 * The OCR algorithm name is important in identifying the mappings file name. 
 	 * 
+	 * @param mappings
 	 * @return
 	 */
-	String getName();
+	int saveMappings( ArrayList<CharMapping> mappings );
+	
+	
+//	
+//	/**
+//	 * 
+//	 * @param charCode
+//	 * @return
+//	 */
+//	String lookupCharCode( String charCode );
+//	
+//	
+//	
+//	
+//	/**
+//	 * 
+//	 */
+//	void relaodCharMap();
+//	
+//	
+//	
+//	
+//	/**
+//	 * The OCR algorithm name is important in identifying the mappings file name. 
+//	 * 
+//	 * @return
+//	 */
+//	String getName();
+	
+	
 	
 	
 	/**

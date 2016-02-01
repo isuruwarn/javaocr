@@ -13,4 +13,7 @@ import com.ocr.api.OCREngine;
 public abstract class AbstractOCREngine implements OCREngine {
 	
 	
+	
+	
+	
 }

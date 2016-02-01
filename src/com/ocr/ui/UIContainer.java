@@ -18,7 +18,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -42,10 +41,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.ocr.core.Char;
+import com.ocr.core.CharMapping;
 import com.ocr.core.Line;
 import com.ocr.core.OCRHandler;
-import com.ocr.dto.OCRRequest;
-import com.ocr.dto.OCRResult;
+import com.ocr.core.OCRRequest;
+import com.ocr.core.OCRResult;
 import com.ocr.text.Symbol;
 import com.ocr.text.TextHandler;
 import com.ocr.util.FileUtils;
@@ -898,16 +898,19 @@ public class UIContainer {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void saveMapping() {
 		
-		ocrHandler.relaodCharMap( dialect ); // first reload mappings file to get any new mappings
-		String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) );
+		//ocrHandler.relaodCharMap( dialect ); // first reload mappings file to get any new mappings
+		//String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) );
+		Char c = unrecognizedCharsArl.get(navIndex);
 		String newCharValue = charMappingsArr[navIndex];
+		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>) keyPointsArr[navIndex];
 		
 		// check if null or empty value
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
 			
-			String existingCharValue = ocrHandler.lookupCharCode( newCharCode ); // check if char is already mapped
+			/*String existingCharValue = ocrHandler.lookupCharCode( newCharCode ); // check if char is already mapped
 			
 			if ( existingCharValue != null && !existingCharValue.isEmpty() && newCharValue.equals(existingCharValue) ) { // mapping already exists
 				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.MAPPING_EXISTS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -926,6 +929,29 @@ public class UIContainer {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG1, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
 				}
 			}
+			*/
+			
+			try {
+				
+				// create new mapping or update existing mapping
+				CharMapping mapping = new CharMapping( c, newCharValue, keyPoints );
+				ArrayList<CharMapping> mappings = new ArrayList<CharMapping>();
+				mappings.add(mapping);
+				int statusCode = ocrHandler.saveMappings( mappings );
+				
+				if( statusCode == 1 ) {
+					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
+					savedMappingsArr[navIndex] = true;
+					charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
+					
+				} else {
+					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG1, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
+				}
+				
+			} catch( Exception e ) {
+				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG1, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
+			}
+			
 			
 		} else {
 			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_ERROR_MSG2, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.ERROR_MESSAGE );
@@ -933,44 +959,63 @@ public class UIContainer {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void saveAllMappings() {
 		
-		ocrHandler.relaodCharMap( dialect ); // first reload mappings file to get any new mappings
-		int savedMappings = 0;
-		HashMap<String,String> newMappings = new HashMap<String,String>(); // holds new or modified char mappings
-		
-		for( int i=0; i<charMappingsArr.length; i++ ) {
+		try {
 			
-			String newCharValue = charMappingsArr[i];
+			//ocrHandler.relaodCharMap( dialect ); // first reload mappings file to get any new mappings
+			int savedMappings = 0;
+			//HashMap<String,String> newMappings = new HashMap<String,String>(); // holds new or modified char mappings
+			ArrayList<CharMapping> mappings = new ArrayList<CharMapping>(); // holds new or modified char mappings
 			
-			if ( newCharValue != null && !newCharValue.isEmpty() ) {
+			for( int i=0; i<charMappingsArr.length; i++ ) {
 				
-				String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(i) );
-				String existingCharValue = ocrHandler.lookupCharCode( newCharCode ); // check if char is already mapped
+				String newCharValue = charMappingsArr[i];
 				
-				if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
+				if ( newCharValue != null && !newCharValue.isEmpty() ) {
 					
-					newMappings.put( newCharCode, newCharValue );
+					//String newCharCode = ocrHandler.getCharCode( unrecognizedCharsArl.get(i) );
+					Char c = unrecognizedCharsArl.get(navIndex);
+					ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>) keyPointsArr[navIndex];
+					CharMapping mapping = new CharMapping( c, newCharValue, keyPoints );
+					mappings.add(mapping);
 					savedMappingsArr[i] = true;
 					savedMappings++;
 					
-				} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
+					/*
+					String existingCharValue = ocrHandler.lookupCharCode( newCharCode ); // check if char is already mapped
 					
-					newMappings.put( newCharCode, newCharValue );
-					ocrHandler.deleteMapping( newCharCode ); // remove old mapping from mappings file
-					savedMappingsArr[i] = true;
-					savedMappings++;
+					if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new char mapping
+						
+						newMappings.put( newCharCode, newCharValue );
+						savedMappingsArr[i] = true;
+						savedMappings++;
+						
+					} else if( !newCharValue.equals(existingCharValue) ) { // char already mapped, but we should update with new value
+						
+						newMappings.put( newCharCode, newCharValue );
+						ocrHandler.deleteMapping( newCharCode ); // remove old mapping from mappings file
+						savedMappingsArr[i] = true;
+						savedMappings++;
+					}
+					*/
+					
 				}
 			}
-		}
-		
-		boolean success = ocrHandler.saveMappings( newMappings );
-		
-		if(success) {
-			JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
-		} else {
+			
+			int statusCode = ocrHandler.saveMappings( mappings );
+			
+			if( statusCode == 1 ) {
+				JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
+			} else {
+				JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.ERROR_MESSAGE );
+			}
+			
+		} catch( Exception e ) {
 			JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.ERROR_MESSAGE );
 		}
+		
 	}
 	
 	

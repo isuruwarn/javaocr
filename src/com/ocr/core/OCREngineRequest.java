@@ -1,8 +1,6 @@
-package com.ocr.dto;
+package com.ocr.core;
 
 import java.util.ArrayList;
-
-import com.ocr.core.Line;
 
 
 

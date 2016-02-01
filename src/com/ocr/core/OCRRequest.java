@@ -1,24 +1,34 @@
-package com.ocr.dto;
-
-import java.awt.image.BufferedImage;
+package com.ocr.core;
 
 
 
-public class ScanRequest {
+
+
+public class OCRRequest {
 	
 	
-	private BufferedImage image;
+	
+	private String dialect;
+	private String imagePath;
 	private int minBlanklineHeight;
 	private int minWhitespaceWidth;
+
 	
 	
-	
-	public BufferedImage getImage() {
-		return image;
+	public String getDialect() {
+		return dialect;
 	}
 
-	public void setImage(BufferedImage image) {
-		this.image = image;
+	public void setDialect(String dialect) {
+		this.dialect = dialect;
+	}
+
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
 	
 	public int getMinBlanklineHeight() {
@@ -36,5 +46,6 @@ public class ScanRequest {
 	public void setMinWhitespaceWidth(int minWhitespaceWidth) {
 		this.minWhitespaceWidth = minWhitespaceWidth;
 	}
+	
 	
 }

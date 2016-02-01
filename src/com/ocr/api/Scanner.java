@@ -2,8 +2,8 @@ package com.ocr.api;
 
 import java.io.IOException;
 
-import com.ocr.dto.ScanRequest;
-import com.ocr.dto.ScanResult;
+import com.ocr.core.ScanRequest;
+import com.ocr.core.ScanResult;
 
 
 

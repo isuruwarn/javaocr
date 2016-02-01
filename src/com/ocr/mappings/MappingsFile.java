@@ -1,19 +1,20 @@
 package com.ocr.mappings;
 
-import java.util.HashMap;
-import java.util.Properties;
-
-import com.ocr.util.FileUtils;
 import com.ocr.util.GlobalConstants;
 
 
 
 
-
-public class MappingsFile {
+/**
+ * 
+ * @author isuru
+ *
+ */
+public class MappingsFile { //implements MappingsFile {
+	
+	
 	
 	private String mappingsFileName;
-	private Properties charMappings;
 	
 	
 	
@@ -23,44 +24,27 @@ public class MappingsFile {
 	
 	
 	
-	
-	/**
-	 * Looks up char code in mappings file and returns the matching String, if found.
-	 * 
-	 * @param charCode
-	 * @return
-	 */
-	public String lookupCharCode( String charCode ) {
-		String c = null;
-		if( charMappings == null ) {
-			charMappings = FileUtils.loadPropertiesFile(mappingsFileName);
-		}
-		c = charMappings.getProperty(charCode);
-		return c;
-	}
-	
-	
-	
-	public void relaodCharMap() {
-		charMappings = FileUtils.loadPropertiesFile(mappingsFileName);
-	}
-	
-		
-	
-	public boolean saveMapping( String newCharCode, String newCharValue ) {
-		return FileUtils.setProperty( mappingsFileName, newCharCode, newCharValue );
-	}
-	
-	
-	
-	public boolean saveMappings( HashMap<String,String> newMappings ) {
-		return FileUtils.setMultipleProperties( mappingsFileName, newMappings );
-	}
-	
-	
-	
-	public boolean deleteMapping( String charCode ) {
-		return FileUtils.deleteProperty( mappingsFileName, charCode );
+//	public boolean saveMapping( String newCharCode, String newCharValue ) {
+//		return FileUtils.setProperty( mappingsFileName, newCharCode, newCharValue );
+//	}
+//	
+//	
+//	
+//	public boolean saveMappings( HashMap<String,String> newMappings ) {
+//		return FileUtils.setMultipleProperties( mappingsFileName, newMappings );
+//	}
+//	
+//	
+//	
+//	public boolean deleteMapping( String charCode ) {
+//		return FileUtils.deleteProperty( mappingsFileName, charCode );
+//	}
+
+
+
+	//@Override
+	public String getName() {
+		return mappingsFileName;
 	}
 	
 	

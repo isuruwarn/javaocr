@@ -1,14 +1,18 @@
 package com.ocr.engine.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
 
 import com.ocr.core.Char;
+import com.ocr.core.CharMapping;
 import com.ocr.core.Line;
-import com.ocr.dto.OCREngineRequest;
-import com.ocr.dto.OCREngineResult;
+import com.ocr.core.OCREngineRequest;
+import com.ocr.core.OCREngineResult;
 import com.ocr.engine.AbstractOCREngine;
 import com.ocr.mappings.MappingsFile;
 import com.ocr.text.Symbol;
+import com.ocr.util.FileUtils;
 
 
 
@@ -19,18 +23,18 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	
 	private static final String NAME = "v1";
 	private static final int VBLOCKS_PER_CHAR = 12;
+	private MappingsFile mappingsFile;
+	private Properties charMappings;
+
 	
 	
 	
-	/**
-	 * 
-	 */
 	public OCREngineResult processLines( OCREngineRequest req ) {
 		
 		byte [][] bitmap = req.getBitmap();
 		ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
 		ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
-		MappingsFile mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
+		mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
 		StringBuilder sb = new StringBuilder();
 		
 		
@@ -56,12 +60,12 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 					continue;
 				}
 				
-				// Step 4: map each character into a grid (block representation) of 1s and 0s
+				// map each character into a grid (block representation) of 1s and 0s
 				
 				String charCode = processChar( c, bitmap );
 				
-				// Step 5: lookup up the charcode in the saved in file for any matches
-				String s = mappingsFile.lookupCharCode( charCode );
+				// lookup up the charcode in the saved in file for any matches
+				String s = lookupCharCode( charCode );
 				
 				if( s == null ) { // unrecognized char
 					
@@ -130,7 +134,7 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	 * 
 	 * @param c
 	 */
-	public String processChar( Char c, byte [][] bitmap ) {
+	private String processChar( Char c, byte [][] bitmap ) {
 		
 		int blockNumber = 0;
 		int blockLength = c.getH() / VBLOCKS_PER_CHAR;
@@ -259,19 +263,83 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 		}
 		return charCode;
 	}
+	
+	
+	
+	
 
 
 
 	@Override
-	public String getName() {
-		return NAME;
+	public int saveMappings(ArrayList<CharMapping> mappings) {
+		
+		int statusCode = 0;
+		boolean validationOK = true;
+		HashMap<String,String> newMappings = new HashMap<String,String>();
+		
+		if( mappings != null ) {
+			
+			for( CharMapping mapping: mappings ) {
+				
+				Char c = mapping.getChar();
+				String newCharValue = mapping.getCharValue();
+				
+				if( c == null ) {
+					validationOK = false; // char not specified 
+				
+				} else if ( newCharValue != null && newCharValue.length() > 0 ) { // save mapping based on charCode
+					
+					String newCharCode = getCharCode(c);
+					String existingCharValue = lookupCharCode( newCharCode ); // check if char is already mapped
+					
+					// new or updated mapping
+					if ( existingCharValue == null || existingCharValue.isEmpty() || !newCharValue.equals(existingCharValue) ) {
+						newMappings.put(newCharCode, newCharValue);
+					}
+					
+				} else {
+					validationOK = false; // mapping info not specified
+				}
+				
+			}
+			
+			boolean savedSuccessfully = FileUtils.setMultipleProperties( mappingsFile.getName(), newMappings );
+			
+			if( validationOK && savedSuccessfully ) {
+				statusCode = 1;
+			}
+		
+		}
+		
+		return statusCode;
 	}
 	
+
+	
+	
+	
+
+	/**
+	 * Looks up char code in mappings file and returns the matching String, if found.
+	 * 
+	 * @param charCode
+	 * @return
+	 */
+	private String lookupCharCode( String charCode ) {
+		String c = null;
+		if( charMappings == null ) {
+			charMappings = FileUtils.loadPropertiesFile( mappingsFile.getName() );
+		}
+		c = charMappings.getProperty(charCode);
+		return c;
+	}
+	
+
 	
 	
 	public int getVerticalBlocksPerChar() {
 		return VBLOCKS_PER_CHAR;
 	}
-	
+
 
 }
