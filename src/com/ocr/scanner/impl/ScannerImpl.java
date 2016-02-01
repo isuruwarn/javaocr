@@ -28,7 +28,6 @@ public class ScannerImpl extends AbstractScanner {
 	
 	private int minBlanklineHeight = 30; // default value. this can be changed by user
 	private int minWhitespaceWidth = 8; // default value. this can be changed by user
-	
 	private int height = 0;
 	private int width = 0;
 	private int linesRead = 0;

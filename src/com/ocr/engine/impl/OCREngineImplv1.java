@@ -2,7 +2,6 @@ package com.ocr.engine.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 
 import com.ocr.core.Char;
 import com.ocr.core.CharMapping;
@@ -12,7 +11,6 @@ import com.ocr.core.OCREngineResult;
 import com.ocr.engine.AbstractOCREngine;
 import com.ocr.mappings.MappingsFile;
 import com.ocr.text.Symbol;
-import com.ocr.util.FileUtils;
 
 
 
@@ -24,7 +22,6 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	private static final String NAME = "v1";
 	private static final int VBLOCKS_PER_CHAR = 12;
 	private MappingsFile mappingsFile;
-	private Properties charMappings;
 
 	
 	
@@ -65,7 +62,7 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 				String charCode = processChar( c, bitmap );
 				
 				// lookup up the charcode in the saved in file for any matches
-				String s = lookupCharCode( charCode );
+				String s = mappingsFile.lookupCharCode( charCode );
 				
 				if( s == null ) { // unrecognized char
 					
@@ -273,7 +270,7 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	@Override
 	public int saveMappings(ArrayList<CharMapping> mappings) {
 		
-		int statusCode = 0;
+		int statusCode = 1;
 		boolean validationOK = true;
 		HashMap<String,String> newMappings = new HashMap<String,String>();
 		
@@ -283,20 +280,25 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 				
 				Char c = mapping.getChar();
 				String newCharValue = mapping.getCharValue();
+				ArrayList<Integer> keyPoints = mapping.getKeyPoints();
 				
 				if( c == null ) {
 					validationOK = false; // char not specified 
 				
-				} else if ( newCharValue != null && newCharValue.length() > 0 ) { // save mapping based on charCode
+				} else if( keyPoints != null && keyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
+					
+					
+					
+				} else if ( newCharValue != null && newCharValue.length() > 0 ) { // save mapping based on charCode (v1.0)
 					
 					String newCharCode = getCharCode(c);
-					String existingCharValue = lookupCharCode( newCharCode ); // check if char is already mapped
+					String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
 					
 					if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
 						newMappings.put(newCharCode, newCharValue);
 						
 					} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
-						FileUtils.deleteProperty( mappingsFile.getName(), newCharCode ); // delete old value
+						mappingsFile.deleteMapping(newCharCode); // delete old value
 						newMappings.put(newCharCode, newCharValue);
 					}
 					
@@ -306,10 +308,11 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 				
 			}
 			
-			boolean savedSuccessfully = FileUtils.setMultipleProperties( mappingsFile.getName(), newMappings );
+			boolean savedSuccessfully = mappingsFile.setMappings(newMappings);
+			mappingsFile.relaodCharMap(); // reload char mappings to include new mappings
 			
 			if( validationOK && savedSuccessfully ) {
-				statusCode = 1;
+				statusCode = 0;
 			}
 		
 		}
@@ -322,20 +325,6 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	
 	
 
-	/**
-	 * Looks up char code in mappings file and returns the matching String, if found.
-	 * 
-	 * @param charCode
-	 * @return
-	 */
-	private String lookupCharCode( String charCode ) {
-		String c = null;
-		if( charMappings == null ) {
-			charMappings = FileUtils.loadPropertiesFile( mappingsFile.getName() );
-		}
-		c = charMappings.getProperty(charCode);
-		return c;
-	}
 	
 
 	

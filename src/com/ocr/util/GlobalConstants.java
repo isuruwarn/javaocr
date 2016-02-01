@@ -26,7 +26,7 @@ public class GlobalConstants {
 	
 	// main application frame
 	public static final int MAIN_FRAME_W = 700;
-	public static final int MAIN_FRAME_H = 860;
+	public static final int MAIN_FRAME_H = 870;
 
 	
 	// panel dimensions
