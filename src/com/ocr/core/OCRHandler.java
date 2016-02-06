@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import com.ocr.api.OCREngine;
 import com.ocr.api.Scanner;
-import com.ocr.engine.impl.OCREngineImplv2;
+import com.ocr.engine.impl.OCREngineImplv1;
 import com.ocr.scanner.impl.ScannerImpl;
 import com.ocr.util.ImageUtils;
 
@@ -38,7 +38,7 @@ public final class OCRHandler {
 	
 	public OCRHandler() {
 		
-		ocrEngine = new OCREngineImplv2();
+		ocrEngine = new OCREngineImplv1();
 		scanner = new ScannerImpl();
 		
 		/* TODO: Later on we could instantiate scanners and OCREngines based on UI input. Perhaps 
@@ -68,7 +68,8 @@ public final class OCRHandler {
 		
 		OCRResult res = new OCRResult( scanRes, ocrEngRes );
 		res.setInputImage(inputImage);
-				
+		res.setVerticalBlocksPerChar( ocrEngine.getVerticalBlocksPerChar() );
+		
 		return res;
 	}
 	
@@ -85,17 +86,17 @@ public final class OCRHandler {
 	
 	
 	
-	public String getCharCode( Char c ) {
-		return ocrEngine.getCharCode(c);
-	}
+//	public String getCharCode( Char c ) {
+//		return ocrEngine.getCharCode(c);
+//	}
 
 	
-	public int getVerticalBlocksPerChar() {
-		return ocrEngine.getVerticalBlocksPerChar();
-	}
+//	public int getVerticalBlocksPerChar() {
+//		return ocrEngine.getVerticalBlocksPerChar();
+//	}
 	
 	
-	public int saveMappings( ArrayList<CharMapping> mappings ) {
+	public int saveMappings( ArrayList<Char> mappings ) {
 		return ocrEngine.saveMappings( mappings );
 	}
 	

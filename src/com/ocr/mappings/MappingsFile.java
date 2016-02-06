@@ -64,6 +64,11 @@ public class MappingsFile {
 		charMappings = FileUtils.loadPropertiesFile( mappingsFileName );
 	}
 	
+	
+	public Properties getCharMap() {
+		return charMappings;
+	}
+	
 		
 	
 	public boolean setMapping( String newCharCode, String newCharValue ) {

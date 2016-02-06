@@ -3,7 +3,6 @@ package com.ocr.api;
 import java.util.ArrayList;
 
 import com.ocr.core.Char;
-import com.ocr.core.CharMapping;
 import com.ocr.core.OCREngineRequest;
 import com.ocr.core.OCREngineResult;
 
@@ -29,7 +28,7 @@ public interface OCREngine {
 	 * @param verticalBlocksPerChar
 	 * @return
 	 */
-	String getCharCode( Char c );
+	//String getCharCode( Char c );
 	
 	
 	
@@ -38,7 +37,7 @@ public interface OCREngine {
 	 * @param mappings
 	 * @return
 	 */
-	int saveMappings( ArrayList<CharMapping> mappings );
+	int saveMappings( ArrayList<Char> mappings );
 		
 	
 	

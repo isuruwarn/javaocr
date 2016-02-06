@@ -41,7 +41,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.ocr.core.Char;
-import com.ocr.core.CharMapping;
 import com.ocr.core.Line;
 import com.ocr.core.OCRHandler;
 import com.ocr.core.OCRRequest;
@@ -88,7 +87,7 @@ public class UIContainer {
 	private JFileChooser outputFileChooser;
 	
 	private OCRHandler ocrHandler;
-	private OCRResult scanResult;
+	private OCRResult ocrResult;
 	
 	
 	
@@ -379,23 +378,25 @@ public class UIContainer {
 			req.setImagePath(imgFile);
 			req.setDialect(dialect);
 			
-			scanResult = ocrHandler.scan(req);
-			textPane.setText( scanResult.getDocument().toString() );
-			inputImage = scanResult.getInputImage();
+			ocrResult = ocrHandler.scan(req);
+			textPane.setText( ocrResult.getDocument().toString() );
+			inputImage = ocrResult.getInputImage();
 			
 			// output result to text file
-			//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
-			String outputFile = txtOutputFileName.getText();
-			FileUtils.writeToFile( scanResult.getDocument(), outputFile );
+			if( txtOutputFileName.getText() != null && txtOutputFileName.getText().length() > 0 ) {
+				//String outputFile = GlobalConstants.SAMPLE_OUTPUT_FILENAME;
+				String outputFile = txtOutputFileName.getText();
+				FileUtils.writeToFile( ocrResult.getDocument(), outputFile );
+			}
 			
 			// update status label
-			int linesRead = scanResult.getLinesRead();
-			int charsRead = scanResult.getCharsRead();
-			int noOfUnrecognizedChars = scanResult.getUnrecognizedChars().size();
-			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, scanResult.getWidth(), scanResult.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
+			int linesRead = ocrResult.getLinesRead();
+			int charsRead = ocrResult.getCharsRead();
+			int noOfUnrecognizedChars = ocrResult.getUnrecognizedChars().size();
+			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, ocrResult.getWidth(), ocrResult.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
 			// get any unrecognized chars and enable resolve button if needed
-			unrecognizedCharsArl = scanResult.getUnrecognizedChars();
+			unrecognizedCharsArl = ocrResult.getUnrecognizedChars();
 			if( unrecognizedCharsArl.size() > 0 ) {
 				resolveBtn.setEnabled(true);
 			}
@@ -703,7 +704,7 @@ public class UIContainer {
 			int x = e.getX();
 			int y = e.getY();
 			int hBlocksInChar = c.getNoOfHBlocks();
-			int vBlocksInChar = ocrHandler.getVerticalBlocksPerChar();
+			int vBlocksInChar = ocrResult.getVerticalBlocksPerChar();
 			int blockWidth = iconWidth / hBlocksInChar;
 			int blockHeight = iconHeight / vBlocksInChar;
 			//float blockWidth = (float) iconWidth / hBlocksInChar;
@@ -903,15 +904,16 @@ public class UIContainer {
 		
 		Char c = unrecognizedCharsArl.get(navIndex);
 		String newCharValue = charMappingsArr[navIndex];
+		ArrayList<Char> newMappings = new ArrayList<Char>();
 		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>) keyPointsArr[navIndex];
 		
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
 			
 			try {
-				CharMapping mapping = new CharMapping( c, newCharValue, keyPoints );
-				ArrayList<CharMapping> mappings = new ArrayList<CharMapping>();
-				mappings.add(mapping);
-				int statusCode = ocrHandler.saveMappings( mappings );
+				c.setCharValue(newCharValue);
+				c.setKeyPoints(keyPoints);
+				newMappings.add(c);
+				int statusCode = ocrHandler.saveMappings( newMappings );
 				
 				if( statusCode == 0 ) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -937,7 +939,7 @@ public class UIContainer {
 		
 		try {
 			int savedMappings = 0;
-			ArrayList<CharMapping> mappings = new ArrayList<CharMapping>(); // holds new or modified char mappings
+			ArrayList<Char> newMappings = new ArrayList<Char>(); // holds new or modified char mappings
 			
 			for( int i=0; i<charMappingsArr.length; i++ ) {
 				
@@ -945,18 +947,19 @@ public class UIContainer {
 				
 				if ( newCharValue != null && !newCharValue.isEmpty() ) {
 					
-					Char c = unrecognizedCharsArl.get(i);
 					ArrayList<Integer> keyPoints = keyPointsArr[i]==null? null : (ArrayList<Integer>) keyPointsArr[i];
-					CharMapping mapping = new CharMapping( c, newCharValue, keyPoints );
-					mappings.add(mapping);
+					Char c = unrecognizedCharsArl.get(i);
+					c.setCharValue(newCharValue);
+					c.setKeyPoints(keyPoints);
+					newMappings.add(c);
 					savedMappingsArr[i] = true;
 					savedMappings++;
 				}
 			}
 			
-			if( mappings.size() > 0 ) {
+			if( newMappings.size() > 0 ) {
 			
-				int statusCode = ocrHandler.saveMappings( mappings );
+				int statusCode = ocrHandler.saveMappings( newMappings );
 				
 				if( statusCode == 0 ) {
 					JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
@@ -1021,7 +1024,7 @@ public class UIContainer {
 			
 		} else if( compName.equals( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME ) ) {
 			ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-			charImg = ImageUtils.getBlockImage( c, ocrHandler.getVerticalBlocksPerChar(), keyPoints );
+			charImg = ImageUtils.getBlockImage( c, ocrResult.getVerticalBlocksPerChar(), keyPoints );
 			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		}
@@ -1049,7 +1052,7 @@ public class UIContainer {
 	
 	private void viewLineImage() {
 		Char c = unrecognizedCharsArl.get( navIndex );
-		Line l = scanResult.getLines().get( c.getLineNumber() );
+		Line l = ocrResult.getLines().get( c.getLineNumber() );
 		BufferedImage lineImg = inputImage.getSubimage( l.getX(), l.getY(), l.getW(), l.getH() );
 		viewImage( lineImg, GlobalConstants.VIEW_LINE_IMG_ACTION, GlobalConstants.VIEW_LINE_IMG_LBL_W, GlobalConstants.VIEW_LINE_IMG_LBL_H );
 	}
@@ -1091,8 +1094,8 @@ public class UIContainer {
 		charBlockImgLbl.setToolTipText( GlobalConstants.MAPPING_BLOCK_REP_TOOLTIP );
 		
 		charMappingTxt.setText( charMappingsArr[navIndex] );
-		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), ocrHandler.getCharCode( c ) ) );
-		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), ocrHandler.getCharCode( unrecognizedCharsArl.get(navIndex) ) ) );
+		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), c.getCharCode() ) );
+		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), c.getCharCode() ) );
 		
 		charMappingSavedLbl.setIcon(null);
 		if( savedMappingsArr[navIndex] ) {
@@ -1104,7 +1107,7 @@ public class UIContainer {
 	@SuppressWarnings("unchecked")
 	private void setMappingsBlockImageLbl( Char c ) {
 		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-		Image blockImg = ImageUtils.getBlockImage( c, ocrHandler.getVerticalBlocksPerChar(), keyPoints );
+		Image blockImg = ImageUtils.getBlockImage( c, ocrResult.getVerticalBlocksPerChar(), keyPoints );
 //		int w = -1;
 //		int h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
 //		if(  c.getW() > c.getH() ) {

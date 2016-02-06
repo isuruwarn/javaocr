@@ -12,12 +12,15 @@ public class OCRResult {
 	private int width = 0;
 	private int linesRead = 0;
 	private int charsRead = 0;
+	private int verticalBlocksPerChar = 12;
 	
 	private ArrayList<Line> lines;
 	private ArrayList<Char> recognizedChars;
 	private ArrayList<Char> unrecognizedChars;
-	private ArrayList<String> recognizedCharCodes;
-	private ArrayList<String> unrecognizedCharCodes;
+	//private ArrayList<String> recognizedCharCodes;
+	//private ArrayList<String> unrecognizedCharCodes;
+	//private ArrayList<CharMapping> recognizedChars;
+	//private ArrayList<CharMapping> unrecognizedChars;
 	
 	private StringBuilder document;	
 	private BufferedImage inputImage;
@@ -39,9 +42,9 @@ public class OCRResult {
 		
 		this.document = ocrEngRes.getDocument();	
 		this.unrecognizedChars =  ocrEngRes.getUnrecognizedChars();
-		this.unrecognizedCharCodes = ocrEngRes.getUnrecognizedCharCodes();
+		//this.unrecognizedCharCodes = ocrEngRes.getUnrecognizedCharCodes();
+		this.recognizedChars = ocrEngRes.getRecognizedChars();
 		//this.recognizedCharCodes = ocrEngRes.getRecognizedCharCodes();
-		//this.recognizedChars = ocrEngRes.getRecognizedChars();
 		
 		// TODO: is it OK to set these objects as references? Or should all objects be cloned? 
 		
@@ -83,6 +86,14 @@ public class OCRResult {
 		this.charsRead = charsRead;
 	}
 	
+	public int getVerticalBlocksPerChar() {
+		return verticalBlocksPerChar;
+	}
+
+	public void setVerticalBlocksPerChar(int vBlocksPerChar) {
+		this.verticalBlocksPerChar = vBlocksPerChar;
+	}
+
 	public ArrayList<Line> getLines() {
 		return lines;
 	}
@@ -107,21 +118,37 @@ public class OCRResult {
 		this.unrecognizedChars = unrecognizedChars;
 	}
 
-	public ArrayList<String> getRecognizedCharCodes() {
-		return recognizedCharCodes;
-	}
+//	public ArrayList<String> getRecognizedCharCodes() {
+//		return recognizedCharCodes;
+//	}
+//
+//	public void setRecognizedCharCodes(ArrayList<String> recognizedCharCodes) {
+//		this.recognizedCharCodes = recognizedCharCodes;
+//	}
 
-	public void setRecognizedCharCodes(ArrayList<String> recognizedCharCodes) {
-		this.recognizedCharCodes = recognizedCharCodes;
-	}
-
-	public ArrayList<String> getUnrecognizedCharCodes() {
-		return unrecognizedCharCodes;
-	}
-
-	public void setUnrecognizedCharCodes(ArrayList<String> unrecognizedCharCodes) {
-		this.unrecognizedCharCodes = unrecognizedCharCodes;
-	}
+//	public ArrayList<String> getUnrecognizedCharCodes() {
+//		return unrecognizedCharCodes;
+//	}
+//
+//	public void setUnrecognizedCharCodes(ArrayList<String> unrecognizedCharCodes) {
+//		this.unrecognizedCharCodes = unrecognizedCharCodes;
+//	}
+	
+//	public ArrayList<CharMapping> getRecognizedChars() {
+//		return recognizedChars;
+//	}
+//	
+//	public void setRecognizedChars(ArrayList<CharMapping> recognizedChars) {
+//		this.recognizedChars = recognizedChars;
+//	}
+//	
+//	public ArrayList<CharMapping> getUnrecognizedChars() {
+//		return unrecognizedChars;
+//	}
+//	
+//	public void setUnrecognizedChars(ArrayList<CharMapping> unrecognizedChars) {
+//		this.unrecognizedChars = unrecognizedChars;
+//	}
 
 	public StringBuilder getDocument() {
 		return document;

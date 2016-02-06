@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.ocr.core.Char;
-import com.ocr.core.CharMapping;
 import com.ocr.core.Line;
 import com.ocr.core.OCREngineRequest;
 import com.ocr.core.OCREngineResult;
@@ -26,10 +25,12 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	
 	
 	
-	public OCREngineResult processLines( OCREngineRequest req ) {
+public OCREngineResult processLines( OCREngineRequest req ) {
 		
 		byte [][] bitmap = req.getBitmap();
+		ArrayList<String> recognizedCharCodes = new ArrayList<String>();
 		ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
+		ArrayList<Char> recognizedChars = new ArrayList<Char>();
 		ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
 		mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
 		StringBuilder sb = new StringBuilder();
@@ -57,14 +58,12 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 					continue;
 				}
 				
-				// map each character into a grid (block representation) of 1s and 0s
+				processChar( c, bitmap ); // map each character into a grid (block representation) of 1s and 0s, 
+										// calculate charCode and lookup charMap for possible matches
+				String charValue = c.getCharValue();
+				String charCode = c.getCharCode();
 				
-				String charCode = processChar( c, bitmap );
-				
-				// lookup up the charcode in the saved in file for any matches
-				String s = mappingsFile.lookupCharCode( charCode );
-				
-				if( s == null ) { // unrecognized char
+				if( charValue == null ) { // unrecognized char
 					
 					sb.append("?");
 					
@@ -73,22 +72,27 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 						unrecognizedChars.add(c);
 					}
 					
-				} else {
+				} else { // known character
+					
+					if( recognizedCharCodes.indexOf( charCode ) == -1 ) { // eliminate duplicates
+						recognizedCharCodes.add(charCode);
+						recognizedChars.add(c);
+					}
 					
 					if( kombuwa.length() > 0 ) {
 						
-						if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
-							kombuwa += s;
+						if( charValue.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+							kombuwa += charValue;
 						} else {
-							sb.append( s + kombuwa );
+							sb.append( charValue + kombuwa );
 							kombuwa = "";
 						}
 						
-					} else if( s.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
-						kombuwa = s;
+					} else if( charValue.equals( Symbol.KOMBUVA.getUnicodeValue() ) ) {
+						kombuwa = charValue;
 						
 					} else {
-						sb.append(s);
+						sb.append(charValue);
 					}
 				}
 				
@@ -99,8 +103,9 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 		
 		OCREngineResult res = new OCREngineResult();
 		res.setDocument(sb);
+		res.setRecognizedChars(recognizedChars);
 		res.setUnrecognizedChars(unrecognizedChars);
-		res.setUnrecognizedCharCodes(unrecognizedCharCodes);
+		//res.setUnrecognizedCharCodes(unrecognizedCharCodes);
 		return res;
 	}
 	
@@ -131,7 +136,7 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	 * 
 	 * @param c
 	 */
-	private String processChar( Char c, byte [][] bitmap ) {
+	private void processChar( Char c, byte [][] bitmap ) {
 		
 		int blockNumber = 0;
 		int blockLength = c.getH() / VBLOCKS_PER_CHAR;
@@ -193,9 +198,10 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 				}
 				
 				if(whiteSpace) {
-					c.getBlockSequence().add( blockNumber, (byte) 0 );
+					c.getBlockSequence().add( blockNumber, 0 );
 				} else {
-					c.getBlockSequence().add( blockNumber, (byte) 1 );
+					c.getBlockSequence().add( blockNumber, 1 );
+					//c.getBlockSequence().add(blockNumber);
 				}
 				
 				// update vertical pointers
@@ -233,7 +239,12 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 			
 		}
 		
-		return getCharCode(c);
+		String charCode = getCharCode(c);
+		c.setCharCode(charCode);
+		
+		// lookup up the charcode in the saved in file for any matches
+		String charValue = mappingsFile.lookupCharCode( charCode );
+		c.setCharValue(charValue);
 	}
 	
 	
@@ -268,7 +279,7 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 
 
 	@Override
-	public int saveMappings(ArrayList<CharMapping> mappings) {
+	public int saveMappings(ArrayList<Char> mappings) {
 		
 		int statusCode = 1;
 		boolean validationOK = true;
@@ -276,30 +287,31 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 		
 		if( mappings != null ) {
 			
-			for( CharMapping mapping: mappings ) {
+			for( Char c: mappings ) {
 				
-				Char c = mapping.getChar();
-				String newCharValue = mapping.getCharValue();
-				ArrayList<Integer> keyPoints = mapping.getKeyPoints();
+				//Char c = mapping.getChar();
+				String newCharValue = c.getCharValue();
+				ArrayList<Integer> keyPoints = c.getKeyPoints();
 				
-				if( c == null ) {
-					validationOK = false; // char not specified 
-				
-				} else if( keyPoints != null && keyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
+				if( newCharValue != null && newCharValue.length() > 0 ) {
+											
+					if( keyPoints != null && keyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
 					
-					
-					
-				} else if ( newCharValue != null && newCharValue.length() > 0 ) { // save mapping based on charCode (v1.0)
-					
-					String newCharCode = getCharCode(c);
-					String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
-					
-					if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
-						newMappings.put(newCharCode, newCharValue);
 						
-					} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
-						mappingsFile.deleteMapping(newCharCode); // delete old value
-						newMappings.put(newCharCode, newCharValue);
+					
+					} else { // save mapping based on charCode (v1.0)
+					
+						String newCharCode = c.getCharCode();
+						String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
+						
+						if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
+							newMappings.put(newCharCode, newCharValue);
+							
+						} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
+							mappingsFile.deleteMapping(newCharCode); // delete old value
+							newMappings.put(newCharCode, newCharValue);
+						}
+						
 					}
 					
 				} else {
@@ -332,6 +344,8 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	public int getVerticalBlocksPerChar() {
 		return VBLOCKS_PER_CHAR;
 	}
+
+
 
 
 }

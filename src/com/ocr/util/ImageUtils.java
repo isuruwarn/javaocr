@@ -64,10 +64,11 @@ public class ImageUtils {
 					//int rgb = 0xDCDCDC; // gainsboro
 					int rgb = 0xE0E0E0; // light gray
 					if( c.getBlockSequence().get(blockIndex) == 1 ) {
+					//if( c.getBlockSequence().contains(blockIndex) ) {
 						rgb = 0; // black
 					}
 					
-					if( keyPoints!=null && keyPoints.contains( blockIndex ) ) {
+					if( keyPoints != null && keyPoints.contains( blockIndex ) ) {
 						rgb = 0xFF0000;
 					}
 					

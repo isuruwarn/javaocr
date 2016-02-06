@@ -17,8 +17,10 @@ public class Char extends ScannedItem {
 	private int blockLength;
 	private int noOfHBlocks;
 	private boolean whiteSpace;
-	private ArrayList<Byte> blockSequence = new ArrayList<Byte>();
-	
+	private String charCode;
+	private String charValue;
+	private ArrayList<Integer> blockSequence = new ArrayList<Integer>();
+	private ArrayList<Integer> keyPoints = new ArrayList<Integer>();
 	
 	
 	public Char() {
@@ -53,11 +55,11 @@ public class Char extends ScannedItem {
 		this.whiteSpace = whiteSpace;
 	}
 
-	public ArrayList<Byte> getBlockSequence() {
+	public ArrayList<Integer> getBlockSequence() {
 		return blockSequence;
 	}
 
-	public void setBlockSequence(ArrayList<Byte> blockSequence) {
+	public void setBlockSequence(ArrayList<Integer> blockSequence) {
 		this.blockSequence = blockSequence;
 	}
 	
@@ -77,5 +79,31 @@ public class Char extends ScannedItem {
 	public void setNoOfHBlocks(int noOfHBlocks) {
 		this.noOfHBlocks = noOfHBlocks;
 	}
+	
+	public String getCharCode() {
+		return charCode;
+	}
+	
+	public String getCharValue() {
+		return charValue;
+	}
+	
+	public void setCharValue(String charValue) {
+		this.charValue = charValue;
+	}
+	
+	public void setCharCode(String charCode) {
+		this.charCode = charCode;
+	}
+
+	public ArrayList<Integer> getKeyPoints() {
+		return keyPoints;
+	}
+
+	public void setKeyPoints(ArrayList<Integer> keyPoints) {
+		this.keyPoints = keyPoints;
+	}
+	
+	
 	
 }
