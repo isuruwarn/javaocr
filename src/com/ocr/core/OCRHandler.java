@@ -29,8 +29,6 @@ import com.ocr.util.ImageUtils;
 public final class OCRHandler {
 	
 	
-	// TODO: should this class implement an interface?
-	
 	private Scanner scanner;
 	private OCREngine ocrEngine;
 	
@@ -83,19 +81,7 @@ public final class OCRHandler {
 		return scanner.getMinBlanklineHeight();
 	}
 
-	
-	
-	
-//	public String getCharCode( Char c ) {
-//		return ocrEngine.getCharCode(c);
-//	}
-
-	
-//	public int getVerticalBlocksPerChar() {
-//		return ocrEngine.getVerticalBlocksPerChar();
-//	}
-	
-	
+		
 	public int saveMappings( ArrayList<Char> mappings ) {
 		return ocrEngine.saveMappings( mappings );
 	}

@@ -19,8 +19,6 @@ public class OCRResult {
 	private ArrayList<Char> unrecognizedChars;
 	//private ArrayList<String> recognizedCharCodes;
 	//private ArrayList<String> unrecognizedCharCodes;
-	//private ArrayList<CharMapping> recognizedChars;
-	//private ArrayList<CharMapping> unrecognizedChars;
 	
 	private StringBuilder document;	
 	private BufferedImage inputImage;
@@ -134,21 +132,6 @@ public class OCRResult {
 //		this.unrecognizedCharCodes = unrecognizedCharCodes;
 //	}
 	
-//	public ArrayList<CharMapping> getRecognizedChars() {
-//		return recognizedChars;
-//	}
-//	
-//	public void setRecognizedChars(ArrayList<CharMapping> recognizedChars) {
-//		this.recognizedChars = recognizedChars;
-//	}
-//	
-//	public ArrayList<CharMapping> getUnrecognizedChars() {
-//		return unrecognizedChars;
-//	}
-//	
-//	public void setUnrecognizedChars(ArrayList<CharMapping> unrecognizedChars) {
-//		this.unrecognizedChars = unrecognizedChars;
-//	}
 
 	public StringBuilder getDocument() {
 		return document;

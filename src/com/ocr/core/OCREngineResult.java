@@ -17,9 +17,11 @@ public class OCREngineResult {
 	public StringBuilder getDocument() {
 		return document;
 	}
+	
 	public void setDocument(StringBuilder document) {
 		this.document = document;
 	}
+	
 //	public ArrayList<String> getUnrecognizedCharCodes() {
 //		return unrecognizedCharCodes;
 //	}

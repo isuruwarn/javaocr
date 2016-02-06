@@ -252,8 +252,7 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 	
 	
 	/**
-	 * Takes in verticalBlocksPerChar used by current Scanner instance, and calculates
-	 * charCode
+	 * Returns char code for given char based on OCR algorithm
 	 * 
 	 * @param verticalBlocksPerChar
 	 * @return

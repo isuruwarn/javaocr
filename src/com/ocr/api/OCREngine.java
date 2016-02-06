@@ -21,15 +21,6 @@ public interface OCREngine {
 	OCREngineResult processLines( OCREngineRequest req );
 	
 	
-	/**
-	 * Returns char code for given char based on OCR algorithm
-	 * 
-	 * @param c
-	 * @param verticalBlocksPerChar
-	 * @return
-	 */
-	//String getCharCode( Char c );
-	
 	
 	
 	/**
