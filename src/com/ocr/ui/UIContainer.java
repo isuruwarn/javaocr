@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -89,6 +90,8 @@ public class UIContainer {
 	private OCRHandler ocrHandler;
 	private OCRResult ocrResult;
 	
+	private ArrayList<Char> recognizedChars;
+	private ArrayList<Char> unrecognizedChars;
 	
 	
 	
@@ -276,8 +279,6 @@ public class UIContainer {
 		mainFrame.setVisible(true);
 		
 		// set default values
-		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
-		txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
 		txtWhitespaceWidth.setText( String.valueOf( ocrHandler.getMinWhitespaceWidth() ) ); // default minWhitespaceWidth
 		txtBlanklineHeight.setText( String.valueOf( ocrHandler.getMinBlanklineHeight() ) ); // default minBlanklineHeight
 		selectDialect.setSelectedIndex(0);
@@ -286,6 +287,8 @@ public class UIContainer {
 		//outputFileChooser.setSelectedFile( new File( GlobalConstants.SAMPLE_OUTPUT_FILENAME ) );
 		
 		// for debugging
+		txtInputImagePath.setText( GlobalConstants.SAMPLE_IMG_FILENAME );
+		//txtOutputFileName.setText( GlobalConstants.SAMPLE_OUTPUT_FILENAME );
 		scan();
 		resolve();
 		/*
@@ -338,7 +341,7 @@ public class UIContainer {
 					break;
 				
 				case GlobalConstants.RESOLVE_ACTION:
-					resolve();
+					resolve(); 
 					break;
 				
 				case GlobalConstants.VIEW_DOC_IMG_ACTION:
@@ -395,9 +398,10 @@ public class UIContainer {
 			int noOfUnrecognizedChars = ocrResult.getUnrecognizedChars().size();
 			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, ocrResult.getWidth(), ocrResult.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
-			// get any unrecognized chars and enable resolve button if needed
-			unrecognizedCharsArl = ocrResult.getUnrecognizedChars();
-			if( unrecognizedCharsArl.size() > 0 ) {
+			recognizedChars = ocrResult.getRecognizedChars();
+			unrecognizedChars = ocrResult.getUnrecognizedChars();
+			
+			if( unrecognizedChars.size() > 0 ) {
 				resolveBtn.setEnabled(true);
 			}
 			
@@ -444,17 +448,24 @@ public class UIContainer {
 	private JPanel charBlockImgPanel;
 	
 	private int navIndex = 0;
-	private ArrayList<Char> unrecognizedCharsArl;
-	private String [] charMappingsArr;
-	private boolean [] savedMappingsArr;
-	private Object [] keyPointsArr;
+	//private String [] charMappingsArr;
+	//private boolean [] savedMappingsArr;
+	private ArrayList<Char> mappings;
+	private HashSet<Integer> updatedMappings; // to keep track of modified mappings
+	private HashSet<Integer> savedMappings; // to keep track of saved mappings
+	//private Object [] blackKeyPointsArr; // holds all black key points added by user
+	//private Object [] whiteKeyPointsArr; // holds all white key points added by user
 	
 	private void resolve() {
 		
 		navIndex = 0;
-		charMappingsArr = new String [ unrecognizedCharsArl.size() ];
-		savedMappingsArr = new boolean [ unrecognizedCharsArl.size() ];
-		keyPointsArr = new Object [unrecognizedCharsArl.size()];
+		//charMappingsArr = new String [ unrecognizedChars.size() ];
+		//savedMappingsArr = new boolean [ unrecognizedChars.size() ];
+		mappings = unrecognizedChars;
+		updatedMappings = new HashSet<Integer>();
+		savedMappings = new HashSet<Integer>();
+		//blackKeyPointsArr = new Object [mappings.size()];
+		//whiteKeyPointsArr = new Object [mappings.size()];
 		
 		// TODO: space to manually enter unicode value of symbol
 		
@@ -637,7 +648,7 @@ public class UIContainer {
 			resolveMappingsPanel.add( spSinCharsBtnPanel, spSinCharsBtnPanelGridCons );
 		}
 		
-		setUnrecognizedCharDetails();
+		setCharDetails();
 		
 		
 		// for debugging
@@ -672,32 +683,37 @@ public class UIContainer {
 	
 	
 	class MappingsTxtDocumentListener implements DocumentListener {
-
+		
 		@Override
 		public void insertUpdate(DocumentEvent e) {
-			charMappingsArr[navIndex] = charMappingTxt.getText();
+			//charMappingsArr[navIndex] = charMappingTxt.getText();
+			mappings.get(navIndex).setCharValue( charMappingTxt.getText() );
+			updatedMappings.add( navIndex );
 		}
 
 		@Override
 		public void removeUpdate(DocumentEvent e) {
-			charMappingsArr[navIndex] = charMappingTxt.getText();
+			//charMappingsArr[navIndex] = charMappingTxt.getText();
+			mappings.get(navIndex).setCharValue( charMappingTxt.getText() );
+			updatedMappings.add( navIndex );
 		}
 
 		@Override
 		public void changedUpdate(DocumentEvent e) {
-			charMappingsArr[navIndex] = charMappingTxt.getText();
+			//charMappingsArr[navIndex] = charMappingTxt.getText();
+			mappings.get(navIndex).setCharValue( charMappingTxt.getText() );
+			updatedMappings.add( navIndex );
 		}
 		
 	}
 	
 	
 	class MappingsMouseListener implements MouseListener {
-
-		@SuppressWarnings("unchecked")
+		
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			
-			Char c = unrecognizedCharsArl.get( navIndex );
+			Char c = unrecognizedChars.get( navIndex );
 			Icon icon = charBlockImgLbl.getIcon();
 			int iconWidth = icon.getIconWidth();
 			int iconHeight = icon.getIconHeight();
@@ -715,19 +731,36 @@ public class UIContainer {
 			//int rowNumber = Math.round( y / blockHeight );
 			int clickBlockNumber = ( colNumber * vBlocksInChar ) + rowNumber;
 
-			System.out.println("clickBlockNumber=" + clickBlockNumber );
+			ArrayList<Integer> keyPoints = null;
 			
-			ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-			if( keyPoints == null ) {
-				keyPoints = new ArrayList<Integer>();
-				keyPointsArr[navIndex] = keyPoints;
+			if( c.getBlockSequence().get(clickBlockNumber) == 1 ) { // black pixel
+				System.out.println("Black Pixel - clickBlockNumber=" + clickBlockNumber );
+				keyPoints = c.getBlackKeyPoints();
+				if( keyPoints == null ) {
+					keyPoints = new ArrayList<Integer>();
+					c.setBlackKeyPoints(keyPoints);
+				}
+				
+			} else { // white pixel
+				System.out.println("White Pixel - clickBlockNumber=" + clickBlockNumber );
+				keyPoints = c.getWhiteKeyPoints();
+				if( keyPoints == null ) {
+					keyPoints = new ArrayList<Integer>();
+					c.setWhiteKeyPoints(keyPoints);
+				}
 			}
+			
+//			ArrayList<Integer> keyPoints = blackKeyPointsArr[navIndex]==null? null : (ArrayList<Integer>)blackKeyPointsArr[navIndex];
+//			if( keyPoints == null ) {
+//				keyPoints = new ArrayList<Integer>();
+//				blackKeyPointsArr[navIndex] = keyPoints;
+//			}
 			if( keyPoints.contains(clickBlockNumber) ) {
 				keyPoints.remove( new Integer(clickBlockNumber) );
 			} else {
 				keyPoints.add(clickBlockNumber);
 			}
-			
+			updatedMappings.add(navIndex);
 			setMappingsBlockImageLbl(c);
 		}
 
@@ -889,35 +922,37 @@ public class UIContainer {
 	
 	private void prevMapping() {
 		if( navIndex > 0 ) navIndex--;
-		setUnrecognizedCharDetails();
+		setCharDetails();
 	}
 	
 	
 	private void nextMapping() {
-		if( navIndex < unrecognizedCharsArl.size() - 1 ) navIndex++;
-		setUnrecognizedCharDetails();
+		if( navIndex < unrecognizedChars.size() - 1 ) navIndex++;
+		setCharDetails();
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	
 	private void saveMapping() {
 		
-		Char c = unrecognizedCharsArl.get(navIndex);
-		String newCharValue = charMappingsArr[navIndex];
-		ArrayList<Char> newMappings = new ArrayList<Char>();
-		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>) keyPointsArr[navIndex];
+		Char c = mappings.get(navIndex);
+		//String newCharValue = charMappingsArr[navIndex];
+		String newCharValue = c.getCharValue();
 		
 		if ( newCharValue != null && !newCharValue.isEmpty() ) {
 			
 			try {
-				c.setCharValue(newCharValue);
-				c.setKeyPoints(keyPoints);
+				ArrayList<Char> newMappings = new ArrayList<Char>();
+				//ArrayList<Integer> keyPoints = blackKeyPointsArr[navIndex]==null? null : (ArrayList<Integer>) blackKeyPointsArr[navIndex];
+				//c.setCharValue(newCharValue);
+				//c.setKeyPoints(keyPoints);
 				newMappings.add(c);
 				int statusCode = ocrHandler.saveMappings( newMappings );
 				
 				if( statusCode == 0 ) {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MAPPPING_SUCCESS_MSG, GlobalConstants.SAVE_MAPPING_TITLE, JOptionPane.INFORMATION_MESSAGE );
-					savedMappingsArr[navIndex] = true;
+					//savedMappingsArr[navIndex] = true;
+					savedMappings.add(navIndex);
 					charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
 					
 				} else {
@@ -934,26 +969,30 @@ public class UIContainer {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	
 	private void saveAllMappings() {
 		
 		try {
-			int savedMappings = 0;
+			int savedMappingsCnt = 0;
 			ArrayList<Char> newMappings = new ArrayList<Char>(); // holds new or modified char mappings
 			
-			for( int i=0; i<charMappingsArr.length; i++ ) {
+			//for( int i=0; i<charMappingsArr.length; i++ ) {
+			for( int i: updatedMappings) {
 				
-				String newCharValue = charMappingsArr[i];
+				//String newCharValue = charMappingsArr[i];
+				Char c = mappings.get(i);
+				String newCharValue = c.getCharValue();
 				
-				if ( newCharValue != null && !newCharValue.isEmpty() ) {
+				if ( newCharValue != null && !newCharValue.isEmpty() ) { // TODO - for version 2.0 we should check key points as well
 					
-					ArrayList<Integer> keyPoints = keyPointsArr[i]==null? null : (ArrayList<Integer>) keyPointsArr[i];
-					Char c = unrecognizedCharsArl.get(i);
-					c.setCharValue(newCharValue);
-					c.setKeyPoints(keyPoints);
+					//ArrayList<Integer> keyPoints = blackKeyPointsArr[i]==null? null : (ArrayList<Integer>) blackKeyPointsArr[i];
+					//Char c = unrecognizedChars.get(i);
+					//c.setCharValue(newCharValue);
+					//c.setKeyPoints(keyPoints);
 					newMappings.add(c);
-					savedMappingsArr[i] = true;
-					savedMappings++;
+					//savedMappingsArr[i] = true;
+					savedMappings.add(i);
+					savedMappingsCnt++;
 				}
 			}
 			
@@ -962,7 +1001,7 @@ public class UIContainer {
 				int statusCode = ocrHandler.saveMappings( newMappings );
 				
 				if( statusCode == 0 ) {
-					JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappings), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
+					JOptionPane.showMessageDialog( mainFrame, String.format( GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_SUCCESS_MSG, savedMappingsCnt), GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.INFORMATION_MESSAGE );
 				} else {
 					JOptionPane.showMessageDialog( mainFrame, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_ERROR_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.ERROR_MESSAGE );
 				}
@@ -979,7 +1018,8 @@ public class UIContainer {
 	
 	
 	private void clearTextMapping() {
-		charMappingsArr[navIndex] = null;
+		//charMappingsArr[navIndex] = null;
+		mappings.get(navIndex).setCharValue("");
 		charMappingTxt.setText("");
 	}
 	
@@ -987,14 +1027,20 @@ public class UIContainer {
 	private void clearAllTextMappings() {
 		int resp = JOptionPane.showConfirmDialog( mainFrame, GlobalConstants.CLEAR_ALL_MAPPINGS_CONF_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.CANCEL_OPTION );
 		if( resp == 0 ) { // OK
-			charMappingsArr = new String[ unrecognizedCharsArl.size() ];
+			//charMappingsArr = new String[ unrecognizedChars.size() ];
+			for( int i: updatedMappings) {
+				Char c = mappings.get(i);
+				c.setCharValue("");
+			}
 			charMappingTxt.setText("");
 		}
 	}
 	
 	private void clearKeyPointMappings() {
-		keyPointsArr[navIndex] = null;
-		Char c = unrecognizedCharsArl.get( navIndex );
+		//blackKeyPointsArr[navIndex] = null;
+		Char c = mappings.get( navIndex );
+		c.setBlackKeyPoints(null);
+		c.setWhiteKeyPoints(null);
 		setMappingsBlockImageLbl(c);
 	}
 	
@@ -1002,19 +1048,24 @@ public class UIContainer {
 	private void clearAllKeyPointMappings() {
 		int resp = JOptionPane.showConfirmDialog( mainFrame, GlobalConstants.CLEAR_ALL_MAPPINGS_CONF_MSG, GlobalConstants.SAVE_MULTIPLE_MAPPPINGS_TITLE, JOptionPane.CANCEL_OPTION );
 		if( resp == 0 ) { // OK
-			keyPointsArr = new Object[ unrecognizedCharsArl.size() ];
-			Char c = unrecognizedCharsArl.get( navIndex );
+			//blackKeyPointsArr = new Object[ unrecognizedChars.size() ];
+			for( int i: updatedMappings) {
+				Char c = mappings.get(i);
+				c.setBlackKeyPoints(null);
+				c.setWhiteKeyPoints(null);
+			}
+			Char c = unrecognizedChars.get( navIndex );
 			setMappingsBlockImageLbl(c);
 		}
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	
 	private void saveImageDialog( Component comp ) {
 		
 		BufferedImage charImg = null;
 		String sampleFileName = null;
-		Char c = unrecognizedCharsArl.get( navIndex );
+		Char c = unrecognizedChars.get( navIndex );
 		JMenuItem jMenuItem = (JMenuItem) comp;
 		String compName = jMenuItem.getName();
 		
@@ -1023,8 +1074,8 @@ public class UIContainer {
 			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_CHAR_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		} else if( compName.equals( GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME ) ) {
-			ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-			charImg = ImageUtils.getBlockImage( c, ocrResult.getVerticalBlocksPerChar(), keyPoints );
+			//ArrayList<Integer> keyPoints = blackKeyPointsArr[navIndex]==null? null : (ArrayList<Integer>)blackKeyPointsArr[navIndex];
+			charImg = ImageUtils.getBlockImage( c, ocrResult.getVerticalBlocksPerChar() );
 			sampleFileName = GlobalConstants.SAVE_IMG_FILEPATH + GlobalConstants.MAPPING_BLOCK_REP_IMG_NAME + c.getLineNumber() + "-" + c.getCharNumber() + ".png";
 			
 		}
@@ -1044,14 +1095,14 @@ public class UIContainer {
 	
 	
 	private void viewCharImage() {
-		Char c = unrecognizedCharsArl.get( navIndex );
+		Char c = unrecognizedChars.get( navIndex );
 		BufferedImage charImg = inputImage.getSubimage( c.getX(), c.getY(), c.getW(), c.getH() );
 		viewImage( charImg, GlobalConstants.VIEW_CHAR_IMG_ACTION, GlobalConstants.VIEW_CHAR_IMG_LBL_W, GlobalConstants.VIEW_CHAR_IMG_LBL_H );
 	}
 	
 	
 	private void viewLineImage() {
-		Char c = unrecognizedCharsArl.get( navIndex );
+		Char c = unrecognizedChars.get( navIndex );
 		Line l = ocrResult.getLines().get( c.getLineNumber() );
 		BufferedImage lineImg = inputImage.getSubimage( l.getX(), l.getY(), l.getW(), l.getH() );
 		viewImage( lineImg, GlobalConstants.VIEW_LINE_IMG_ACTION, GlobalConstants.VIEW_LINE_IMG_LBL_W, GlobalConstants.VIEW_LINE_IMG_LBL_H );
@@ -1084,30 +1135,32 @@ public class UIContainer {
 	
 	
 	
-	private void setUnrecognizedCharDetails() {
+	private void setCharDetails() {
 		
-		Char c = unrecognizedCharsArl.get( navIndex );
+		Char c = unrecognizedChars.get( navIndex );
 		//c.printSequence();
 		
 		// set block image
 		setMappingsBlockImageLbl(c);
 		charBlockImgLbl.setToolTipText( GlobalConstants.MAPPING_BLOCK_REP_TOOLTIP );
 		
-		charMappingTxt.setText( charMappingsArr[navIndex] );
-		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedCharsArl.size(), c.getCharCode() ) );
+		//charMappingTxt.setText( charMappingsArr[navIndex] );
+		charMappingTxt.setText( c.getCharValue() );
+		charMappingIndexLbl.setText( String.format( GlobalConstants.MAPPING_IDX_LBL_TXT, (navIndex+1), unrecognizedChars.size(), c.getCharCode() ) );
 		charInfoTxt.setText( String.format( GlobalConstants.MAPPING_INFO_LBL_TXT, c.getLineNumber(), c.getCharNumber(), c.getW(), c.getH(), c.getNoOfHBlocks(), c.getBlockLength(), c.getCharCode() ) );
 		
 		charMappingSavedLbl.setIcon(null);
-		if( savedMappingsArr[navIndex] ) {
+		//if( savedMappingsArr[navIndex] ) {
+		if( savedMappings.contains(navIndex) ) {
 			charMappingSavedLbl.setIcon( new ImageIcon( GlobalConstants.CHAR_SAVED_ICO_FILE ) );
 		}
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+	
 	private void setMappingsBlockImageLbl( Char c ) {
-		ArrayList<Integer> keyPoints = keyPointsArr[navIndex]==null? null : (ArrayList<Integer>)keyPointsArr[navIndex];
-		Image blockImg = ImageUtils.getBlockImage( c, ocrResult.getVerticalBlocksPerChar(), keyPoints );
+		//ArrayList<Integer> keyPoints = blackKeyPointsArr[navIndex]==null? null : (ArrayList<Integer>)blackKeyPointsArr[navIndex];
+		Image blockImg = ImageUtils.getBlockImage( c, ocrResult.getVerticalBlocksPerChar() );
 //		int w = -1;
 //		int h = GlobalConstants.CHAR_BLOCK_IMG_LBL_H;
 //		if(  c.getW() > c.getH() ) {

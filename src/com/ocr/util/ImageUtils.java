@@ -3,7 +3,6 @@ package com.ocr.util;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -48,7 +47,7 @@ public class ImageUtils {
 	 * @param verticalBlocksPerChar
 	 * @return
 	 */
-	public static BufferedImage getBlockImage( Char c, int verticalBlocksPerChar, ArrayList<Integer> keyPoints ) {
+	public static BufferedImage getBlockImage( Char c, int verticalBlocksPerChar ) {
 		
 		int verticalBlocks = verticalBlocksPerChar;
 		int horizontalBlocks = c.getBlockSequence().size()/verticalBlocksPerChar;
@@ -64,11 +63,11 @@ public class ImageUtils {
 					//int rgb = 0xDCDCDC; // gainsboro
 					int rgb = 0xE0E0E0; // light gray
 					if( c.getBlockSequence().get(blockIndex) == 1 ) {
-					//if( c.getBlockSequence().contains(blockIndex) ) {
 						rgb = 0; // black
 					}
 					
-					if( keyPoints != null && keyPoints.contains( blockIndex ) ) {
+					if( ( c.getBlackKeyPoints() != null && c.getBlackKeyPoints().contains( blockIndex ) ) ||
+						( c.getWhiteKeyPoints() != null && c.getWhiteKeyPoints().contains( blockIndex ) ) ) {
 						rgb = 0xFF0000;
 					}
 					

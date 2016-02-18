@@ -105,7 +105,6 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 		res.setDocument(sb);
 		res.setRecognizedChars(recognizedChars);
 		res.setUnrecognizedChars(unrecognizedChars);
-		//res.setUnrecognizedCharCodes(unrecognizedCharCodes);
 		return res;
 	}
 	
@@ -257,7 +256,7 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 	 * @param verticalBlocksPerChar
 	 * @return
 	 */
-	public  String getCharCode( Char c ) {
+	private String getCharCode( Char c ) {
 		String s = "";
 		String charCode = "";
 		for( int i=0; i<c.getBlockSequence().size(); i++ ) {
@@ -288,29 +287,19 @@ public class OCREngineImplv1 extends AbstractOCREngine {
 			
 			for( Char c: mappings ) {
 				
-				//Char c = mapping.getChar();
 				String newCharValue = c.getCharValue();
-				ArrayList<Integer> keyPoints = c.getKeyPoints();
 				
 				if( newCharValue != null && newCharValue.length() > 0 ) {
-											
-					if( keyPoints != null && keyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
 					
-						
+					String newCharCode = c.getCharCode();
+					String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
 					
-					} else { // save mapping based on charCode (v1.0)
-					
-						String newCharCode = c.getCharCode();
-						String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
+					if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
+						newMappings.put(newCharCode, newCharValue);
 						
-						if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
-							newMappings.put(newCharCode, newCharValue);
-							
-						} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
-							mappingsFile.deleteMapping(newCharCode); // delete old value
-							newMappings.put(newCharCode, newCharValue);
-						}
-						
+					} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
+						mappingsFile.deleteMapping(newCharCode); // delete old value
+						newMappings.put(newCharCode, newCharValue);
 					}
 					
 				} else {

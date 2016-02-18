@@ -34,8 +34,9 @@ public class MappingsFile {
 	
 	
 	public MappingsFile( String dialect, int verticalBlocksPerChar, String ocrEngineName ) {
-		this.mappingsFileName = GlobalConstants.MAPPINGS_FILE_PATH + 
-				String.format( GlobalConstants.MAPPINGS_FILENAME, dialect, verticalBlocksPerChar, ocrEngineName );
+		this.mappingsFileName = GlobalConstants.MAPPINGS_FILE_PATH + String.format( 
+				GlobalConstants.MAPPINGS_FILENAME, dialect, verticalBlocksPerChar, ocrEngineName );
+		charMappings = FileUtils.loadPropertiesFile( mappingsFileName );
 	}
 	
 	
@@ -50,9 +51,6 @@ public class MappingsFile {
 	 */
 	public String lookupCharCode( String charCode ) {
 		String charValue = null;
-		if( charMappings == null ) {
-			charMappings = FileUtils.loadPropertiesFile( mappingsFileName );
-		}
 		charValue = charMappings.getProperty(charCode);
 		return charValue;
 	}

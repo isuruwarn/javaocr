@@ -20,7 +20,8 @@ public class Char extends ScannedItem {
 	private String charCode;
 	private String charValue;
 	private ArrayList<Integer> blockSequence = new ArrayList<Integer>();
-	private ArrayList<Integer> keyPoints = new ArrayList<Integer>();
+	private ArrayList<Integer> blackKeyPoints = new ArrayList<Integer>();
+	private ArrayList<Integer> whiteKeyPoints = new ArrayList<Integer>();
 	
 	
 	public Char() {
@@ -96,14 +97,21 @@ public class Char extends ScannedItem {
 		this.charCode = charCode;
 	}
 
-	public ArrayList<Integer> getKeyPoints() {
-		return keyPoints;
+	public ArrayList<Integer> getBlackKeyPoints() {
+		return blackKeyPoints;
 	}
 
-	public void setKeyPoints(ArrayList<Integer> keyPoints) {
-		this.keyPoints = keyPoints;
+	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
+		this.blackKeyPoints = blackKeyPoints;
 	}
 	
-	
+	public ArrayList<Integer> getWhiteKeyPoints() {
+		return whiteKeyPoints;
+	}
+
+	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
+		this.whiteKeyPoints = whiteKeyPoints;
+	}
+
 	
 }

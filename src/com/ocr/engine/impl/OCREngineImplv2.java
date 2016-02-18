@@ -1,6 +1,7 @@
 package com.ocr.engine.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import com.ocr.core.Char;
@@ -19,13 +20,17 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	
 
 	private static final String NAME = "v2";
+	private static final String SEP = "-";
 	private static final int VBLOCKS_PER_CHAR = 12;
+	
+	
 	private MappingsFile mappingsFile;
-
+	private HashMap<String, Integer[]> blackKeyPointsMap;
+	private HashMap<String, Integer[]> whiteKeyPointsMap;
 	
 	
 	
-public OCREngineResult processLines( OCREngineRequest req ) {
+	public OCREngineResult processLines( OCREngineRequest req ) {
 		
 		byte [][] bitmap = req.getBitmap();
 		ArrayList<String> recognizedCharCodes = new ArrayList<String>();
@@ -35,6 +40,7 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 		mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
 		StringBuilder sb = new StringBuilder();
 		
+		initializeMappings();
 		
 		for( Line l: req.getLines() ) {
 			
@@ -63,7 +69,7 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 				String charValue = c.getCharValue();
 				String charCode = c.getCharCode();
 				
-				if( charValue == null ) { // unrecognized char
+				if( charValue == null || charValue.length() < 1 ) { // unrecognized char
 					
 					sb.append("?");
 					
@@ -105,7 +111,6 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 		res.setDocument(sb);
 		res.setRecognizedChars(recognizedChars);
 		res.setUnrecognizedChars(unrecognizedChars);
-		//res.setUnrecognizedCharCodes(unrecognizedCharCodes);
 		return res;
 	}
 	
@@ -138,6 +143,7 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 	 */
 	private void processChar( Char c, byte [][] bitmap ) {
 		
+		ArrayList<Integer> blackPixelPositions = new ArrayList<Integer>(); // in this algorithm charCode is based on black pixels only
 		int blockNumber = 0;
 		int blockLength = c.getH() / VBLOCKS_PER_CHAR;
 		int noOfVBlocks = VBLOCKS_PER_CHAR;
@@ -201,7 +207,7 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 					c.getBlockSequence().add( blockNumber, 0 );
 				} else {
 					c.getBlockSequence().add( blockNumber, 1 );
-					//c.getBlockSequence().add(blockNumber);
+					blackPixelPositions.add(blockNumber);
 				}
 				
 				// update vertical pointers
@@ -239,12 +245,18 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 			
 		}
 		
-		String charCode = getCharCode(c);
-		c.setCharCode(charCode);
-		
 		// lookup up the charcode in the saved in file for any matches
-		String charValue = mappingsFile.lookupCharCode( charCode );
-		c.setCharValue(charValue);
+		String charCode = lookupChar( blackPixelPositions );
+		
+		if( charCode!=null && charCode.length() > 0 ) {
+			
+			String charValue = mappingsFile.lookupCharCode( charCode );
+			c.setCharCode(charCode);
+			c.setCharValue(charValue);
+			
+		} else { // set temp charCode
+			c.setCharCode( intListToString( blackPixelPositions ) );
+		}
 	}
 	
 	
@@ -252,29 +264,65 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 	
 	
 	/**
-	 * Returns char code for given char based on OCR algorithm
 	 * 
-	 * @param verticalBlocksPerChar
+	 * 
+	 * @param 
 	 * @return
 	 */
-	public  String getCharCode( Char c ) {
+	private String intListToString( ArrayList<Integer> intList ) {
 		String s = "";
-		String charCode = "";
-		for( int i=0; i<c.getBlockSequence().size(); i++ ) {
-			s += c.getBlockSequence().get(i);
-			if( (i+1) % VBLOCKS_PER_CHAR == 0 ) {
-				int n = Integer.parseInt( s, 2 );
-				charCode += n;
-				s = "";
-			}
+		for( int i: intList ) {
+			s += i + SEP;
 		}
-		return charCode;
+		return s;
 	}
 	
 	
 	
 	
-
+	private String lookupChar( ArrayList<Integer> blackPixelPositions ) {
+		
+		Integer [] blackPixelPositionsArr = new Integer [blackPixelPositions.size()]; 
+		blackPixelPositions.toArray(blackPixelPositionsArr);
+		
+		for( Object keyObject: blackKeyPointsMap.keySet() ) {
+			
+			String charCode = (String) keyObject;
+			Integer [] keyPointsArr = ( Integer [] ) blackKeyPointsMap.get(charCode);
+			boolean matchFound = Arrays.asList(blackPixelPositionsArr).containsAll( Arrays.asList(keyPointsArr) );
+			
+			if(matchFound) {
+				return charCode;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	
+	private void initializeMappings() {
+		
+		if( blackKeyPointsMap == null ) {
+			
+			blackKeyPointsMap = new HashMap<String, Integer[]>();
+			
+			for( Object charCodeObject: mappingsFile.getCharMap().keySet() ) {
+				
+				String charCode = (String) charCodeObject;
+				String [] strKeyPoints = charCode.split(SEP);
+				Integer [] keyPoints = new Integer [ strKeyPoints.length ];
+				
+				for( int i = 0; i<strKeyPoints.length; i++ ) {
+					keyPoints[i] = new Integer( strKeyPoints[i] );
+				}
+				
+				blackKeyPointsMap.put( charCode, keyPoints );
+			}
+			
+		}
+		
+	}
 
 
 	@Override
@@ -288,29 +336,28 @@ public OCREngineResult processLines( OCREngineRequest req ) {
 			
 			for( Char c: mappings ) {
 				
-				//Char c = mapping.getChar();
 				String newCharValue = c.getCharValue();
-				ArrayList<Integer> keyPoints = c.getKeyPoints();
+				ArrayList<Integer> blackKeyPoints = c.getBlackKeyPoints();
 				
 				if( newCharValue != null && newCharValue.length() > 0 ) {
-											
-					if( keyPoints != null && keyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
 					
+					String newCharCode = "";
+					
+					if( blackKeyPoints != null && blackKeyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
+						newCharCode = intListToString(blackKeyPoints);
 						
-					
 					} else { // save mapping based on charCode (v1.0)
+						newCharCode = c.getCharCode();
+					}
 					
-						String newCharCode = c.getCharCode();
-						String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
+					String existingCharValue = mappingsFile.lookupCharCode( newCharCode ); // check if char is already mapped
+					
+					if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
+						newMappings.put(newCharCode, newCharValue);
 						
-						if ( existingCharValue == null || existingCharValue.isEmpty() ) { // new mapping
-							newMappings.put(newCharCode, newCharValue);
-							
-						} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
-							mappingsFile.deleteMapping(newCharCode); // delete old value
-							newMappings.put(newCharCode, newCharValue);
-						}
-						
+					} else if ( !newCharValue.equals(existingCharValue) ) { // updated mapping
+						mappingsFile.deleteMapping(newCharCode); // delete old value
+						newMappings.put(newCharCode, newCharValue);
 					}
 					
 				} else {
