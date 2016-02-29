@@ -1,15 +1,15 @@
 package com.ocr.engine.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 import com.ocr.core.Char;
 import com.ocr.core.Line;
 import com.ocr.core.OCREngineRequest;
 import com.ocr.core.OCREngineResult;
 import com.ocr.engine.AbstractOCREngine;
-import com.ocr.mappings.MappingsFile;
+import com.ocr.mappings.AbstractMappingsFile;
+import com.ocr.mappings.Mapping;
+import com.ocr.mappings.XMLMappingsFile;
 import com.ocr.text.Symbol;
 
 
@@ -21,12 +21,12 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 
 	private static final String NAME = "v2";
 	private static final String SEP = "-";
-	private static final int VBLOCKS_PER_CHAR = 12;
+	private static final int VBLOCKS_PER_CHAR = 15;
 	
 	
-	private MappingsFile mappingsFile;
-	private HashMap<String, Integer[]> blackKeyPointsMap;
-	private HashMap<String, Integer[]> whiteKeyPointsMap;
+	private AbstractMappingsFile mappingsFile;
+	//private HashMap<String, ArrayList<Integer>> blackKeyPointsMap;
+	//private HashMap<String, ArrayList<Integer>> whiteKeyPointsMap;
 	
 	
 	
@@ -37,10 +37,10 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 		ArrayList<String> unrecognizedCharCodes = new ArrayList<String>();
 		ArrayList<Char> recognizedChars = new ArrayList<Char>();
 		ArrayList<Char> unrecognizedChars = new ArrayList<Char>();
-		mappingsFile = new MappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
+		mappingsFile = new XMLMappingsFile( req.getDialect(), VBLOCKS_PER_CHAR, NAME );
 		StringBuilder sb = new StringBuilder();
 		
-		initializeMappings();
+		//initializeMappings();
 		
 		for( Line l: req.getLines() ) {
 			
@@ -143,7 +143,8 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	 */
 	private void processChar( Char c, byte [][] bitmap ) {
 		
-		ArrayList<Integer> blackPixelPositions = new ArrayList<Integer>(); // in this algorithm charCode is based on black pixels only
+		ArrayList<Integer> blackPixelPositions = new ArrayList<Integer>();
+		ArrayList<Integer> whitePixelPositions = new ArrayList<Integer>();
 		int blockNumber = 0;
 		int blockLength = c.getH() / VBLOCKS_PER_CHAR;
 		int noOfVBlocks = VBLOCKS_PER_CHAR;
@@ -205,6 +206,7 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 				
 				if(whiteSpace) {
 					c.getBlockSequence().add( blockNumber, 0 );
+					whitePixelPositions.add(blockNumber);
 				} else {
 					c.getBlockSequence().add( blockNumber, 1 );
 					blackPixelPositions.add(blockNumber);
@@ -246,13 +248,19 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 		}
 		
 		// lookup up the charcode in the saved in file for any matches
-		String charCode = lookupChar( blackPixelPositions );
+		//String charCode = lookupChar( blackPixelPositions, whitePixelPositions );
+		Mapping m = lookupChar( blackPixelPositions, whitePixelPositions );
 		
-		if( charCode!=null && charCode.length() > 0 ) {
+		//if( charCode!=null && charCode.length() > 0 ) {
+		if( m != null ) {
 			
-			String charValue = mappingsFile.lookupCharCode( charCode );
-			c.setCharCode(charCode);
-			c.setCharValue(charValue);
+			//String charValue = mappingsFile.lookupCharCode( charCode );
+			//c.setCharCode(charCode);
+			//c.setCharValue(charValue);
+			c.setCharCode( m.getCharCode() );
+			c.setCharValue( m.getCharValue() );
+			c.setBlackKeyPoints( m.getBlackKeyPoints() );
+			c.setWhiteKeyPoints( m.getWhiteKeyPoints() );
 			
 		} else { // set temp charCode
 			c.setCharCode( intListToString( blackPixelPositions ) );
@@ -280,34 +288,54 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 	
 	
 	
-	private String lookupChar( ArrayList<Integer> blackPixelPositions ) {
+	private Mapping lookupChar( ArrayList<Integer> blackPixelPositions, ArrayList<Integer> whitePixelPositions ) {
 		
-		Integer [] blackPixelPositionsArr = new Integer [blackPixelPositions.size()]; 
-		blackPixelPositions.toArray(blackPixelPositionsArr);
+		//Integer [] blackPixelPositionsArr = new Integer [blackPixelPositions.size()]; 
+		//blackPixelPositions.toArray(blackPixelPositionsArr);
 		
-		for( Object keyObject: blackKeyPointsMap.keySet() ) {
+		//Integer [] whitePixelPositionsArr = new Integer [whitePixelPositions.size()]; 
+		//whitePixelPositions.toArray(whitePixelPositionsArr);
+		
+		//for( Object keyObject: blackKeyPointsMap.keySet() ) {
+		for( Mapping m: mappingsFile.getCharMap().values() ) {
 			
-			String charCode = (String) keyObject;
-			Integer [] keyPointsArr = ( Integer [] ) blackKeyPointsMap.get(charCode);
-			boolean matchFound = Arrays.asList(blackPixelPositionsArr).containsAll( Arrays.asList(keyPointsArr) );
+			//String charCode = (String) keyObject;
+			//Integer [] keyPointsArr = ( Integer [] ) blackKeyPointsMap.get(charCode);
+			//boolean matchFound = Arrays.asList(blackPixelPositionsArr).containsAll( Arrays.asList(keyPointsArr) );
+			//if(matchFound) {
+			//	return charCode;
+			//}
+			boolean containsAllBlackKPs = blackPixelPositions.containsAll( m.getBlackKeyPoints() );
 			
-			if(matchFound) {
-				return charCode;
+			if(containsAllBlackKPs) {
+				
+				if( m.getWhiteKeyPoints().size() > 0 ) { // has white KPs specified, so check if they match as well
+					
+					boolean containsAllWhiteKPs = whitePixelPositions.containsAll( m.getWhiteKeyPoints() );
+					
+					if( containsAllWhiteKPs ) {
+						return m;
+					}
+					
+				} else { // no white KPs specified, so matching black KPs is good enough
+					return m;
+				}
 			}
+			// TODO: What if there is more than one mapping? Perhaps return a list of possible mappings?
 		}
 		
 		return null;
 	}
 	
 	
-	
+	/*
 	private void initializeMappings() {
 		
 		if( blackKeyPointsMap == null ) {
 			
-			blackKeyPointsMap = new HashMap<String, Integer[]>();
+			blackKeyPointsMap = new HashMap<String, ArrayList<Integer>>();
 			
-			for( Object charCodeObject: mappingsFile.getCharMap().keySet() ) {
+			for( String charCode: mappingsFile.getCharMap().keySet() ) {
 				
 				String charCode = (String) charCodeObject;
 				String [] strKeyPoints = charCode.split(SEP);
@@ -323,14 +351,15 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 		}
 		
 	}
-
+	*/
 
 	@Override
 	public int saveMappings(ArrayList<Char> mappings) {
 		
 		int statusCode = 1;
 		boolean validationOK = true;
-		HashMap<String,String> newMappings = new HashMap<String,String>();
+		//HashMap<String,String> newMappings = new HashMap<String,String>();
+		ArrayList<Mapping> newMappings = new ArrayList<Mapping>();
 		
 		if( mappings != null ) {
 			
@@ -338,9 +367,12 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 				
 				String newCharValue = c.getCharValue();
 				ArrayList<Integer> blackKeyPoints = c.getBlackKeyPoints();
+				ArrayList<Integer> whiteKeyPoints = c.getWhiteKeyPoints();
 				
-				if( newCharValue != null && newCharValue.length() > 0 ) {
+				if( newCharValue != null && newCharValue.length() > 0 &&
+					blackKeyPoints != null && blackKeyPoints.size() > 0 ) {
 					
+					/*
 					String newCharCode = "";
 					
 					if( blackKeyPoints != null && blackKeyPoints.size() > 0 ) { // save mapping based on key points (v2.0)
@@ -359,6 +391,14 @@ public class OCREngineImplv2 extends AbstractOCREngine {
 						mappingsFile.deleteMapping(newCharCode); // delete old value
 						newMappings.put(newCharCode, newCharValue);
 					}
+					*/
+					
+					Mapping m = new Mapping();
+					m.setCharCode( intListToString(blackKeyPoints) );
+					m.setCharValue(newCharValue);
+					m.setBlackKeyPoints(blackKeyPoints);
+					m.setWhiteKeyPoints(whiteKeyPoints);
+					newMappings.add(m);
 					
 				} else {
 					validationOK = false; // mapping info not specified

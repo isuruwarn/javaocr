@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Mappings dialect="English" ocrEngine="v2" verticalBlocksPerChar="12">
+<Mapping id="48-52-56-59-111-151-208-264-267-270-274-">
+<CharCode>48-52-56-59-111-151-208-264-267-270-274-</CharCode>
+<CharValue>M</CharValue>
+<BlackKeyPoints>[48, 52, 56, 59, 111, 151, 208, 264, 267, 270, 274]</BlackKeyPoints>
+<WhiteKeyPoints>[169, 91, 223]</WhiteKeyPoints>
+</Mapping>
+
+
+<Mapping id="25-72-122-125-128-130-71-21-18-40-87-">
+<CharCode>25-72-122-125-128-130-71-21-18-40-87-</CharCode>
+<CharValue>a</CharValue>
+<BlackKeyPoints>[25, 72, 122, 125, 128, 130, 71, 21, 18, 40, 87]</BlackKeyPoints>
+<WhiteKeyPoints>[79]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="17-12-23-20-">
+<CharCode>17-12-23-20-</CharCode>
+<CharValue>i</CharValue>
+<BlackKeyPoints>[17, 12, 23, 20]</BlackKeyPoints>
+<WhiteKeyPoints>[14]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="40-37-43-46-96-145-149-152-154-">
+<CharCode>40-37-43-46-96-145-149-152-154-</CharCode>
+<CharValue>n</CharValue>
+<BlackKeyPoints>[40, 37, 43, 46, 96, 145, 149, 152, 154]</BlackKeyPoints>
+<WhiteKeyPoints>[98, 100, 103, 105]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="192-206-120-61-29-45-143-214-211-">
+<CharCode>192-206-120-61-29-45-143-214-211-</CharCode>
+<CharValue>G</CharValue>
+<BlackKeyPoints>[192, 206, 120, 61, 29, 45, 143, 214, 211]</BlackKeyPoints>
+<WhiteKeyPoints>[122, 220, 76, 116, 171, 165]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="36-40-57-107-166-162-158-">
+<CharCode>36-40-57-107-166-162-158-</CharCode>
+<CharValue>u</CharValue>
+<BlackKeyPoints>[36, 40, 57, 107, 166, 162, 158]</BlackKeyPoints>
+<WhiteKeyPoints>[85, 101, 104]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="48-52-55-58-115-173-170-144-">
+<CharCode>48-52-55-58-115-173-170-144-</CharCode>
+<CharValue>p</CharValue>
+<BlackKeyPoints>[48, 52, 55, 58, 115, 173, 170, 144]</BlackKeyPoints>
+<WhiteKeyPoints>[110, 113]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="49-53-57-107-98-14-">
+<CharCode>49-53-57-107-98-14-</CharCode>
+<CharValue>t</CharValue>
+<BlackKeyPoints>[49, 53, 57, 107, 98, 14]</BlackKeyPoints>
+<WhiteKeyPoints>[12, 96, 17, 21, 100, 103]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="109-48-2-52-114-107-59-9-">
+<CharCode>109-48-2-52-114-107-59-9-</CharCode>
+<CharValue>s</CharValue>
+<BlackKeyPoints>[109, 48, 2, 52, 114, 107, 59, 9]</BlackKeyPoints>
+<WhiteKeyPoints>[30, 68, 74]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="36-40-46-108-228-158-161-166-266-270-274-">
+<CharCode>36-40-46-108-228-158-161-166-266-270-274-</CharCode>
+<CharValue>m</CharValue>
+<BlackKeyPoints>[36, 40, 46, 108, 228, 158, 161, 166, 266, 270, 274]</BlackKeyPoints>
+<WhiteKeyPoints>[]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="60-121-135-87-15-19-46-95-141-">
+<CharCode>60-121-135-87-15-19-46-95-141-</CharCode>
+<CharValue>e</CharValue>
+<BlackKeyPoints>[60, 121, 135, 87, 15, 19, 46, 95, 141]</BlackKeyPoints>
+<WhiteKeyPoints>[50, 86, 53, 149, 92, 101]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="12-17-23-83-119-">
+<CharCode>12-17-23-83-119-</CharCode>
+<CharValue>L</CharValue>
+<BlackKeyPoints>[12, 17, 23, 83, 119]</BlackKeyPoints>
+<WhiteKeyPoints>[62, 110, 65, 114, 69]</WhiteKeyPoints>
+</Mapping>
+
+
+<Mapping id="36-47-40-120-">
+<CharCode>36-47-40-120-</CharCode>
+<CharValue>r</CharValue>
+<BlackKeyPoints>[36, 47, 40, 120]</BlackKeyPoints>
+<WhiteKeyPoints>[76, 79, 124, 128, 3, 7]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="72-83-78-6-11-40-">
+<CharCode>72-83-78-6-11-40-</CharCode>
+<CharValue>d</CharValue>
+<BlackKeyPoints>[72, 83, 78, 6, 11, 40]</BlackKeyPoints>
+<WhiteKeyPoints>[43, 14]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="12-17-22-52-79-83-">
+<CharCode>12-17-22-52-79-83-</CharCode>
+<CharValue>h</CharValue>
+<BlackKeyPoints>[12, 17, 22, 52, 79, 83]</BlackKeyPoints>
+<WhiteKeyPoints>[54, 57, 50, 86]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="120-143-17-245-">
+<CharCode>120-143-17-245-</CharCode>
+<CharValue>o</CharValue>
+<BlackKeyPoints>[120, 143, 17, 245]</BlackKeyPoints>
+<WhiteKeyPoints>[134, 140, 65, 185, 125]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="48-53-58-130-245-156-">
+<CharCode>48-53-58-130-245-156-</CharCode>
+<CharValue>D</CharValue>
+<BlackKeyPoints>[48, 53, 58, 130, 245, 156]</BlackKeyPoints>
+<WhiteKeyPoints>[98, 104, 175, 171, 137]</WhiteKeyPoints>
+</Mapping>
+<Mapping id="12-23-96-95-59-48-53-">
+<CharCode>12-23-96-95-59-48-53-</CharCode>
+<CharValue>I</CharValue>
+<BlackKeyPoints>[12, 23, 96, 95, 59, 48, 53]</BlackKeyPoints>
+<WhiteKeyPoints>[14, 18, 86, 91, 112]</WhiteKeyPoints>
+</Mapping>
+</Mappings>
