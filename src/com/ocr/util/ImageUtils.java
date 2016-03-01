@@ -83,5 +83,19 @@ public class ImageUtils {
 		
 		return blockImg;
 	}
+	
+	
+	
+	public static boolean saveImage( BufferedImage image, String imgFilePath ) {
+		try {
+			File output = new File( imgFilePath + ".png" );
+			ImageIO.write( image, "png", output );
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 
 }

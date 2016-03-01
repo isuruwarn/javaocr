@@ -16,6 +16,8 @@ import com.ocr.core.ScanResult;
  */
 public interface Scanner {
 	
+	int BW_THRESHOLD = -10800000; // average RGB values less than this will be saved as black pixels. 
+								// average RGB values greater than this will be saved as white pixels
 	
 	/**
 	 * This method should implement the main scanning algorithm which will identify the lines and

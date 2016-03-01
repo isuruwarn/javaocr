@@ -1,5 +1,6 @@
 package com.ocr.scanner.impl;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import com.ocr.core.Char;
@@ -21,11 +22,6 @@ import com.ocr.util.ScanUtils;
  */
 public class ScannerImpl extends AbstractScanner {
 	
-	
-
-	public static final int BW_THRESHOLD = -10800000; // average RGB values less than this will be saved as black pixels. 
-														// average RGB values greater than this will be saved as white pixels
-	
 	private int minBlanklineHeight = 30; // default value. this can be changed by user
 	private int minWhitespaceWidth = 8; // default value. this can be changed by user
 	private int height = 0;
@@ -35,7 +31,7 @@ public class ScannerImpl extends AbstractScanner {
 	private byte [][] bitmap; // holds black and white (1s and 0s) representation of entire image
 	
 	private ArrayList<Line> lines;
-	
+	private BufferedImage image;
 	
 	
 	
@@ -57,8 +53,9 @@ public class ScannerImpl extends AbstractScanner {
 		lines  = new ArrayList<Line>();
 		
 		try {
-			height = req.getImage().getHeight();
-			width = req.getImage().getWidth();
+			image = req.getImage();
+			height = image.getHeight();
+			width = image.getWidth();
 			bitmap = new byte [height] [width];
 			//System.out.format( "Image W: %d    H: %d \n", width, height );
 			
@@ -74,10 +71,10 @@ public class ScannerImpl extends AbstractScanner {
 				
 				for(int j=0; j<width; j++ ) {
 					
-					//convertPixelToBW( image, i, j ); // convert image to black and white
+					ScanUtils.convertPixelToBW( image, BW_THRESHOLD, i, j ); // convert image to black and white
 					
 			        // Step 1: represent each pixel as 0 or 1, where 0 is white space and 1 is black (or part of character)
-					byte b = ScanUtils.getBinaryPixelValue( BW_THRESHOLD, req.getImage().getRGB( j, i ) );
+					byte b = ScanUtils.getBinaryPixelValue( BW_THRESHOLD, image.getRGB( j, i ) );
 			        bitmap[i][j] = b;
 			        
 			        // if we find a black pixel, we have come across a line

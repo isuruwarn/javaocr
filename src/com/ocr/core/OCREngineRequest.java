@@ -1,5 +1,6 @@
 package com.ocr.core;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 
@@ -10,6 +11,7 @@ public class OCREngineRequest {
 	private String dialect;
 	private ArrayList<Line> lines;
 	private byte [][] bitmap;
+	private BufferedImage inputImage;
 	
 	
 	public String getDialect() {
@@ -29,6 +31,12 @@ public class OCREngineRequest {
 	}
 	public void setBitmap(byte[][] bitmap) {
 		this.bitmap = bitmap;
+	}
+	public BufferedImage getInputImage() {
+		return inputImage;
+	}
+	public void setInputImage(BufferedImage inputImage) {
+		this.inputImage = inputImage;
 	}
 	
 }

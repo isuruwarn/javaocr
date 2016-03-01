@@ -17,8 +17,6 @@ public class OCRResult {
 	private ArrayList<Line> lines;
 	private ArrayList<Char> recognizedChars;
 	private ArrayList<Char> unrecognizedChars;
-	//private ArrayList<String> recognizedCharCodes;
-	//private ArrayList<String> unrecognizedCharCodes;
 	
 	private StringBuilder document;	
 	private BufferedImage inputImage;
@@ -40,9 +38,7 @@ public class OCRResult {
 		
 		this.document = ocrEngRes.getDocument();	
 		this.unrecognizedChars =  ocrEngRes.getUnrecognizedChars();
-		//this.unrecognizedCharCodes = ocrEngRes.getUnrecognizedCharCodes();
 		this.recognizedChars = ocrEngRes.getRecognizedChars();
-		//this.recognizedCharCodes = ocrEngRes.getRecognizedCharCodes();
 		
 		// TODO: is it OK to set these objects as references? Or should all objects be cloned? 
 		
@@ -115,23 +111,6 @@ public class OCRResult {
 	public void setUnrecognizedChars(ArrayList<Char> unrecognizedChars) {
 		this.unrecognizedChars = unrecognizedChars;
 	}
-
-//	public ArrayList<String> getRecognizedCharCodes() {
-//		return recognizedCharCodes;
-//	}
-//
-//	public void setRecognizedCharCodes(ArrayList<String> recognizedCharCodes) {
-//		this.recognizedCharCodes = recognizedCharCodes;
-//	}
-
-//	public ArrayList<String> getUnrecognizedCharCodes() {
-//		return unrecognizedCharCodes;
-//	}
-//
-//	public void setUnrecognizedCharCodes(ArrayList<String> unrecognizedCharCodes) {
-//		this.unrecognizedCharCodes = unrecognizedCharCodes;
-//	}
-	
 
 	public StringBuilder getDocument() {
 		return document;

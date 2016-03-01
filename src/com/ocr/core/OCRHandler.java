@@ -62,6 +62,7 @@ public final class OCRHandler {
 		ocrEngReq.setDialect( req.getDialect() );
 		ocrEngReq.setBitmap( scanRes.getBitmap() );
 		ocrEngReq.setLines( scanRes.getLines() );
+		ocrEngReq.setInputImage(inputImage);
 		OCREngineResult ocrEngRes = ocrEngine.processLines(ocrEngReq);
 		
 		OCRResult res = new OCRResult( scanRes, ocrEngRes );
