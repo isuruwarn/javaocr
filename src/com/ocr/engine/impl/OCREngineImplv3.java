@@ -14,7 +14,6 @@ import com.ocr.mappings.AbstractMappingsFile;
 import com.ocr.mappings.Mapping;
 import com.ocr.mappings.XMLMappingsFile;
 import com.ocr.text.Symbol;
-import com.ocr.util.ImageUtils;
 import com.ocr.util.ScanUtils;
 
 
@@ -26,7 +25,7 @@ public class OCREngineImplv3 extends AbstractOCREngine {
 
 	private static final String NAME = "v3";
 	private static final String SEP = "-";
-	private static final int VBLOCKS_PER_CHAR = 25;
+	private static final int VBLOCKS_PER_CHAR = 15;
 	private AbstractMappingsFile mappingsFile;	
 	private BufferedImage inputImage;
 	
@@ -130,11 +129,6 @@ public class OCREngineImplv3 extends AbstractOCREngine {
 		Image resizedCharImg = charImg.getScaledInstance( w, h, Image.SCALE_DEFAULT );
 		BufferedImage bufferedCharImg = new BufferedImage( resizedCharImg.getWidth(null), resizedCharImg.getHeight(null), BufferedImage.TYPE_INT_ARGB );
 		bufferedCharImg.getGraphics().drawImage( resizedCharImg, 0, 0 , null );
-		
-		//ImageUtils.saveImage(bufferedCharImg, "test/" + c.getName() );
-		
-		//int blockLength = c.getH() / VBLOCKS_PER_CHAR;
-		//c.setBlockLength(blockLength);
 		w = bufferedCharImg.getWidth();
 		c.setNoOfHBlocks(w);
 		

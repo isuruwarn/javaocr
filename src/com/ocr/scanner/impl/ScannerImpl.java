@@ -71,7 +71,7 @@ public class ScannerImpl extends AbstractScanner {
 				
 				for(int j=0; j<width; j++ ) {
 					
-					ScanUtils.convertPixelToBW( image, BW_THRESHOLD, i, j ); // convert image to black and white
+					//ScanUtils.convertPixelToBW( image, BW_THRESHOLD, i, j ); // convert image to black and white
 					
 			        // Step 1: represent each pixel as 0 or 1, where 0 is white space and 1 is black (or part of character)
 					byte b = ScanUtils.getBinaryPixelValue( BW_THRESHOLD, image.getRGB( j, i ) );
