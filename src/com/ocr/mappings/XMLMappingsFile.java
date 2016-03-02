@@ -28,6 +28,7 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 	private static final String CHAR_VALUE_TAG = "CharValue";
 	private static final String BLACK_KEYPOINTS_TAG = "BlackKeyPoints";
 	private static final String WHITE_KEYPOINTS_TAG = "WhiteKeyPoints";
+	private static final String HBLOCKS_TAG = "HBlocks";
 	
 	//private String mappingsFileName;
 	private Document xmlMappingsDoc;
@@ -66,12 +67,15 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 			Node whiteKeyPointsNode = mappingElement.getElementsByTagName(WHITE_KEYPOINTS_TAG).item(0);
 			String strWhiteKeyPoints = whiteKeyPointsNode == null ? "" : whiteKeyPointsNode.getTextContent();
 			
+			Node hBlocksNode = mappingElement.getElementsByTagName(HBLOCKS_TAG).item(0);
+			int hBlocks = hBlocksNode == null ? -1 : Integer.parseInt( hBlocksNode.getTextContent() );
+			
 			Mapping mapping = new Mapping();
 			mapping.setCharCode(charCode);
 			mapping.setCharValue(charValue);
 			mapping.setBlackKeyPoints( getIntArrayList( strBlackKeyPoints ) );
 			mapping.setWhiteKeyPoints( getIntArrayList( strWhiteKeyPoints ) );
-			
+			mapping.sethBlocks(hBlocks);
 			charMappings.put(charCode, mapping);
 		}
 		
@@ -131,15 +135,17 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 			Node root = xmlMappingsDoc.getDocumentElement();
 			XMLUtils.deleteNode( charCode, root );
 			
-			Element charCodeNode = xmlMappingsDoc.createElement(CHAR_CODE_TAG); 
-			Element charValueNode = xmlMappingsDoc.createElement(CHAR_VALUE_TAG); 
-			Element BlackKeyPointsNode = xmlMappingsDoc.createElement(BLACK_KEYPOINTS_TAG); 
-			Element WhiteKeyPointsNode = xmlMappingsDoc.createElement(WHITE_KEYPOINTS_TAG); 
+			Element charCodeNode = xmlMappingsDoc.createElement(CHAR_CODE_TAG);
+			Element charValueNode = xmlMappingsDoc.createElement(CHAR_VALUE_TAG);
+			Element BlackKeyPointsNode = xmlMappingsDoc.createElement(BLACK_KEYPOINTS_TAG);
+			Element WhiteKeyPointsNode = xmlMappingsDoc.createElement(WHITE_KEYPOINTS_TAG);
+			Element HBlocksNode = xmlMappingsDoc.createElement(HBLOCKS_TAG);
 			
 			charCodeNode.setTextContent(charCode);
 			charValueNode.setTextContent( m.getCharValue() );
 			BlackKeyPointsNode.setTextContent( m.getBlackKeyPoints() == null ? null : m.getBlackKeyPoints().toString() );
 			WhiteKeyPointsNode.setTextContent( m.getWhiteKeyPoints() == null ? null : m.getWhiteKeyPoints().toString() );
+			HBlocksNode.setTextContent( String.valueOf( m.gethBlocks() ) );
 			
 			Element newChild = xmlMappingsDoc.createElement(MAPPING_TAG);
 			newChild.setAttribute("id", charCode);
@@ -147,6 +153,7 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 			newChild.appendChild(charValueNode);
 			newChild.appendChild(BlackKeyPointsNode);
 			newChild.appendChild(WhiteKeyPointsNode);
+			newChild.appendChild(HBlocksNode);
 			root.appendChild(newChild);
 			
 		}

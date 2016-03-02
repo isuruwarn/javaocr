@@ -12,20 +12,10 @@ public class Mapping {
 	private String charValue;
 	private ArrayList<Integer> blackKeyPoints;
 	private ArrayList<Integer> whiteKeyPoints;
-	
-	
+	private int hBlocks;
 	
 	public Mapping() {
 		
-	}
-	
-	
-	
-	public Mapping( String charCode, String charValue, ArrayList<Integer> blackKeyPoints, ArrayList<Integer> whiteKeyPoints ) {
-		this.charCode = charCode;
-		this.charValue = charValue;
-		this.blackKeyPoints = blackKeyPoints;
-		this.whiteKeyPoints = whiteKeyPoints;
 	}
 	
 	
@@ -53,6 +43,12 @@ public class Mapping {
 	}
 	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
 		this.whiteKeyPoints = whiteKeyPoints;
+	}
+	public int gethBlocks() {
+		return hBlocks;
+	}
+	public void sethBlocks(int hBlocks) {
+		this.hBlocks = hBlocks;
 	}
 	
 }
