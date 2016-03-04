@@ -3,6 +3,7 @@ package com.ocr.util;
 
 
 
+
 /**
  * 
  * @author isuru
@@ -138,6 +139,19 @@ public class GlobalConstants {
 	public static final String VIEW_CHAR_IMG_ACTION = "View Char Image";
 	public static final String VIEW_LINE_IMG_ACTION = "View Line Image";
 	public static final String VIEW_DOC_IMG_ACTION = "View Document";
+	public static final String OPEN_ACTION = "Open";
+	public static final String SAVE_ACTION = "Save";
+	public static final String HELP_ACTION = "Help";
+	public static final String ABOUT_ACTION = "About";
+	
+	
+	// menu
+	public static final String FILE_MENU = "File";
+	public static final String OPTIONS_MENU = "Options";
+	public static final String MAPPINGS_MENU = "Mappings";
+	public static final String HELP_MENU = "Help";
+
+	
 	
 	// fonts
 	public static final String SANSSERIF_FONT_TYPE = "SansSerif";
@@ -157,7 +171,8 @@ public class GlobalConstants {
 	
 	// text strings
 	public static final String TITLE = "Java OCR";
-	public static final String RESOLVE_TITLE = "Resolve unrecognized characters";
+	public static final String UNKNOWN_MAPPINGS_TITLE = "Unknown Mappings";
+	public static final String KNOWN_MAPPINGS_TITLE = "Known Mappings";
 	public static final String STAT_LBL_TXT_STR = "Image Width: %d \t Height: %d \n"
 												+ "Lines: %d \n"
 												+ "Characters (with spaces): %d \n"
@@ -188,11 +203,15 @@ public class GlobalConstants {
 	public static final String MAPPING_CHAR_IMG_NAME = "charImg";
 	public static final String MAPPING_BLOCK_REP_IMG_NAME = "blockImg";
 	public static final String SEL_DIALECT_COMBOBOX = "SelectDialectComboBox";
+	public static final String SEL_OCR_ENG_COMBOBOX = "SelectOCREngineComboBox";
+	public static final String SEL_OCR_ENG_LBL = "OCR Engine";
 	
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	public static final String SAVE_IMG_FILEPATH = "test/";
+	
+
 	
 	
 	

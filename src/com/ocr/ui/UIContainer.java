@@ -30,6 +30,8 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -84,6 +86,8 @@ public class UIContainer {
 	private JTextField txtBlanklineHeight;
 	private JTextField txtInputImagePath;
 	private JTextField txtOutputFileName;
+	private JLabel ocrEngineLbl;
+	private JComboBox<String> selectOCREngine;
 	private JComboBox<String> selectDialect;
 	private JFileChooser inputImgFileChooser;
 	private JFileChooser outputFileChooser;
@@ -115,6 +119,14 @@ public class UIContainer {
 		txtOutputFileName = new JTextField();
 		txtOutputFileName.setPreferredSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
 		txtOutputFileName.setMinimumSize( new Dimension( GlobalConstants.INPUT_IMG_PATH_TXT_W, GlobalConstants.INPUT_IMG_PATH_TXT_H ) );
+		
+		ocrEngineLbl = new JLabel( GlobalConstants.SEL_OCR_ENG_LBL);
+		
+		String [] ocrEngines = { "OCR engine V1", "OCR engine V2", "OCR engine V3", "OCR engine V4" };
+		selectOCREngine = new JComboBox<String>(ocrEngines);
+		selectOCREngine.setName( GlobalConstants.SEL_OCR_ENG_COMBOBOX );
+		selectOCREngine.addActionListener( mainActionListener );
+		
 		
 		// TODO: read from file
 		String [] dialects = { GlobalConstants.ENGLISH, GlobalConstants.SINHALA };
@@ -155,10 +167,13 @@ public class UIContainer {
 		JPanel txtBoxPanel = new JPanel();
 		//txtBoxPanel.add(lblVBlocksPerChar);
 		//txtBoxPanel.add(txtVBlocksPerChar);
+		txtBoxPanel.add(ocrEngineLbl);
+		txtBoxPanel.add(selectOCREngine);
 		txtBoxPanel.add(lblWhitespaceWidth);
 		txtBoxPanel.add(txtWhitespaceWidth);
 		txtBoxPanel.add(lblBlanklineHeight);
 		txtBoxPanel.add(txtBlanklineHeight);
+		
 		
 		
 		JButton scanBtn = new JButton( GlobalConstants.SCAN_ACTION );
@@ -195,19 +210,20 @@ public class UIContainer {
 		GridBagConstraints inputFileBtnGridCons = new GridBagConstraints();
 		inputFileBtnGridCons.gridx = 0;
 		inputFileBtnGridCons.gridy = 0;
-		inputFileBtnGridCons.insets = new Insets(10,10,10,10);
+		inputFileBtnGridCons.insets = new Insets(5,10,5,10);
 		inputFileBtnGridCons.anchor = GridBagConstraints.LINE_START;
 		
 		GridBagConstraints txtInputImgPathGridCons = new GridBagConstraints();
 		txtInputImgPathGridCons.gridx = 1;
 		txtInputImgPathGridCons.gridy = 0;
-		txtInputImgPathGridCons.insets = new Insets(10,0,10,10);
+		txtInputImgPathGridCons.insets = new Insets(5,0,5,10);
 		
 		GridBagConstraints selectDialectGridCons = new GridBagConstraints();
 		selectDialectGridCons.gridx = 2;
 		selectDialectGridCons.gridy = 0;
-		selectDialectGridCons.insets = new Insets(10,0,10,0);
+		selectDialectGridCons.insets = new Insets(5,0,5,0);
 		
+		/*
 		GridBagConstraints outputFileBtnGridCons = new GridBagConstraints();
 		outputFileBtnGridCons.gridx = 0;
 		outputFileBtnGridCons.gridy = 1;
@@ -217,19 +233,20 @@ public class UIContainer {
 		txtOutputFilePathGridCons.gridx = 1;
 		txtOutputFilePathGridCons.gridy = 1;
 		txtOutputFilePathGridCons.insets = new Insets(0,0,0,10);
-		
+		*/
+
 		GridBagConstraints txtBoxPanelGridCons = new GridBagConstraints();
 		txtBoxPanelGridCons.gridx = 0;
 		txtBoxPanelGridCons.gridy = 2;
 		txtBoxPanelGridCons.gridwidth = 3;
 		txtBoxPanelGridCons.anchor = GridBagConstraints.LINE_START;
-		txtBoxPanelGridCons.insets = new Insets(10,0,0,0);
+		txtBoxPanelGridCons.insets = new Insets(5,5,5,0);
 		
 		GridBagConstraints btnToolBarGridCons = new GridBagConstraints();
 		btnToolBarGridCons.gridx = 0;
 		btnToolBarGridCons.gridy = 3;
 		btnToolBarGridCons.gridwidth = 3;
-		btnToolBarGridCons.insets = new Insets(0,10,0,0);
+		btnToolBarGridCons.insets = new Insets(0,10,5,0);
 		btnToolBarGridCons.anchor = GridBagConstraints.CENTER;
 		
 		GridBagConstraints statusLblGridCons = new GridBagConstraints();
@@ -243,9 +260,9 @@ public class UIContainer {
 		buttonPanel.setLayout( new GridBagLayout() );
 		buttonPanel.add( inputFileBtn, inputFileBtnGridCons );
 		buttonPanel.add( txtInputImagePath, txtInputImgPathGridCons );
-		buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
 		buttonPanel.add( selectDialect, selectDialectGridCons );
-		buttonPanel.add( outputFileBtn, outputFileBtnGridCons );
+		//buttonPanel.add( outputFileBtn, outputFileBtnGridCons );
+		//buttonPanel.add( txtOutputFileName, txtOutputFilePathGridCons );
 		buttonPanel.add( txtBoxPanel, txtBoxPanelGridCons );
 		buttonPanel.add( btnToolBar, btnToolBarGridCons );
 		
@@ -273,11 +290,34 @@ public class UIContainer {
         mainPanel.add(mainScrollPane);
         mainPanel.add(statusLbl);
         
+        JMenu fileMenu = new JMenu( GlobalConstants.FILE_MENU );
+        JMenuItem open = new JMenuItem( GlobalConstants.OPEN_ACTION );
+        JMenuItem save = new JMenuItem( GlobalConstants.SAVE_ACTION );
+        fileMenu.add(open);
+        fileMenu.add(save);
+        
+        JMenu optionsMenu = new JMenu( GlobalConstants.OPTIONS_MENU );
+        
+        JMenu mappingsMenu = new JMenu( GlobalConstants.MAPPINGS_MENU );
+        
+        JMenu helpMenu = new JMenu( GlobalConstants.HELP_MENU );
+        JMenuItem help = new JMenuItem( GlobalConstants.HELP_ACTION );
+		JMenuItem about = new JMenuItem( GlobalConstants.ABOUT_ACTION );
+		helpMenu.add(help);
+		helpMenu.add(about);
+        
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.add(fileMenu);
+		menuBar.add(optionsMenu);
+		menuBar.add(mappingsMenu);
+		menuBar.add(helpMenu);
+        
 		mainFrame = new JFrame( GlobalConstants.TITLE );
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setPreferredSize( new Dimension( GlobalConstants.MAIN_FRAME_W, GlobalConstants.MAIN_FRAME_H ) );
 		mainFrame.setMinimumSize( new Dimension( GlobalConstants.MAIN_FRAME_W, GlobalConstants.MAIN_FRAME_H ) );
 		mainFrame.getContentPane().add(mainPanel);
+		mainFrame.setJMenuBar(menuBar);
 		mainFrame.pack();
 		mainFrame.setLocationRelativeTo(null); // position to center of screen 
 		mainFrame.setVisible(true);
@@ -462,7 +502,7 @@ public class UIContainer {
 	
 	private void viewMappedChars() {
 		mappings = ocrResult.getRecognizedChars();
-		showMappingsDialog();
+		showMappingsDialog( GlobalConstants.KNOWN_MAPPINGS_TITLE );
 	}
 	
 	
@@ -470,7 +510,7 @@ public class UIContainer {
 	
 	private void mapUnknownChars() {
 		mappings = ocrResult.getUnrecognizedChars();
-		showMappingsDialog();
+		showMappingsDialog( GlobalConstants.UNKNOWN_MAPPINGS_TITLE );
 	}
 	
 	
@@ -488,7 +528,7 @@ public class UIContainer {
 	private HashSet<Integer> updatedMappings; // to keep track of modified mappings
 	private HashSet<Integer> savedMappings; // to keep track of saved mappings
 	
-	private void showMappingsDialog() {
+	private void showMappingsDialog( String title ) {
 		
 		navIndex = 0;
 		updatedMappings = new HashSet<Integer>();
@@ -689,7 +729,7 @@ public class UIContainer {
 		resolveMappingsPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
 		*/
 		
-		JDialog mappingsDialog = new JDialog( mainFrame, GlobalConstants.RESOLVE_TITLE, true );
+		JDialog mappingsDialog = new JDialog( mainFrame, title, true );
 		mappingsDialog.getContentPane().add(resolveMappingsPanel);
 		mappingsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		mappingsDialog.pack();
