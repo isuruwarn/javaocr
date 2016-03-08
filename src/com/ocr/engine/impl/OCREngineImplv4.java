@@ -22,6 +22,7 @@ public class OCREngineImplv4 extends AbstractOCREngine {
 	private static final String NAME = "v4";
 	private static final String SEP = "-";
 	private static final int VBLOCKS_PER_CHAR = 15;
+	private static final int HBLOCKS_PER_CHAR = 15;
 	private AbstractMappingsFile mappingsFile;	
 	
 	
@@ -142,9 +143,10 @@ public class OCREngineImplv4 extends AbstractOCREngine {
 		int blockNumber = 0;
 		int blockLength = c.getH() / VBLOCKS_PER_CHAR;
 		int noOfVBlocks = VBLOCKS_PER_CHAR;
-		int noOfHBlocks = c.getW() / blockLength;
-		if( noOfHBlocks == 0 ) {
-			noOfHBlocks = 1;
+		//int noOfHBlocks = c.getW() / blockLength;
+		int noOfHBlocks = HBLOCKS_PER_CHAR;
+		if( c.getW() < HBLOCKS_PER_CHAR ) {
+			noOfHBlocks = c.getW();
 		}
 		
 		c.setBlockLength(blockLength);
@@ -161,7 +163,7 @@ public class OCREngineImplv4 extends AbstractOCREngine {
 		int vBlockRemainder = c.getH() % VBLOCKS_PER_CHAR;
 		int hBlockRemainder = c.getW() % noOfHBlocks;
 		int vBlockLength = blockLength;
-		int hBlockLength = blockLength;
+		int hBlockLength = c.getW() / noOfHBlocks;
 		
 		if( vBlockRemainder > 0 ) { vBlockLength++; vBlockRemainder--; }
 		if( hBlockRemainder > 0 ) { hBlockLength++; hBlockRemainder--; }
