@@ -1,5 +1,7 @@
 package com.ocr.util;
 
+import javax.swing.Icon;
+
 
 
 
@@ -139,6 +141,7 @@ public class GlobalConstants {
 	public static final String VIEW_CHAR_IMG_ACTION = "View Char Image";
 	public static final String VIEW_LINE_IMG_ACTION = "View Line Image";
 	public static final String VIEW_DOC_IMG_ACTION = "View Document";
+	public static final String TRAIN_ACTION = "Train..";
 	public static final String OPEN_ACTION = "Open";
 	public static final String SAVE_ACTION = "Save";
 	public static final String HELP_ACTION = "Help";
@@ -210,6 +213,7 @@ public class GlobalConstants {
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	public static final String SAVE_IMG_FILEPATH = "test/";
+	
 	
 
 	

@@ -299,19 +299,27 @@ public class UIContainer {
         JMenu optionsMenu = new JMenu( GlobalConstants.OPTIONS_MENU );
         
         JMenu mappingsMenu = new JMenu( GlobalConstants.MAPPINGS_MENU );
-        
+        JMenuItem unknownChars = new JMenuItem( GlobalConstants.RESOLVE_ACTION );
+        JMenuItem knownChars = new JMenuItem( GlobalConstants.VIEW_MAPPED_CHARS_ACTION );
+        JMenuItem train = new JMenuItem( GlobalConstants.TRAIN_ACTION );
+        mappingsMenu.add(unknownChars);
+        mappingsMenu.add(knownChars);
+        mappingsMenu.add(train);
+		
         JMenu helpMenu = new JMenu( GlobalConstants.HELP_MENU );
         JMenuItem help = new JMenuItem( GlobalConstants.HELP_ACTION );
 		JMenuItem about = new JMenuItem( GlobalConstants.ABOUT_ACTION );
 		helpMenu.add(help);
 		helpMenu.add(about);
-        
+		
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(fileMenu);
 		menuBar.add(optionsMenu);
 		menuBar.add(mappingsMenu);
 		menuBar.add(helpMenu);
         
+		UIHelper.addActionListener( mainActionListener, open, save, unknownChars, knownChars, train, help, about );
+		
 		mainFrame = new JFrame( GlobalConstants.TITLE );
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setPreferredSize( new Dimension( GlobalConstants.MAIN_FRAME_W, GlobalConstants.MAIN_FRAME_H ) );
