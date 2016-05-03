@@ -1,7 +1,6 @@
 package com.ocr.mappings;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,9 +30,8 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 	private static final String HBLOCKS_TAG = "HBlocks";
 	
 	//private String mappingsFileName;
+	//private HashMap<String, Mapping> charMappings;
 	private Document xmlMappingsDoc;
-	private HashMap<String, Mapping> charMappings;
-	
 	
 	
 	
@@ -47,7 +45,7 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 	private void init() {
 		
 		xmlMappingsDoc = XMLUtils.parse(mappingsFileName); // TODO exception handling
-		charMappings = new HashMap<String, Mapping>();
+		//charMappings = new HashMap<String, Mapping>();
 		
 		NodeList mappingsNodeList = xmlMappingsDoc.getElementsByTagName( MAPPING_TAG );
         
@@ -73,8 +71,8 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 			Mapping mapping = new Mapping();
 			mapping.setCharCode(charCode);
 			mapping.setCharValue(charValue);
-			mapping.setBlackKeyPoints( getIntArrayList( strBlackKeyPoints ) );
-			mapping.setWhiteKeyPoints( getIntArrayList( strWhiteKeyPoints ) );
+			//mapping.setBlackKeyPoints( getIntArrayList( strBlackKeyPoints ) );
+			//mapping.setWhiteKeyPoints( getIntArrayList( strWhiteKeyPoints ) );
 			mapping.sethBlocks(hBlocks);
 			charMappings.put(charCode, mapping);
 		}
@@ -99,30 +97,9 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 	}
 	
 	
-	
-	
-	
-
-	/**
-	 * Looks up char code in mappings file and returns the matching String, if found.
-	 * 
-	 * @param charCode
-	 * @return
-	 */
-	public Mapping lookupCharCode( String charCode ) {
-		return charMappings.get(charCode); 
-	}
-	
-	
-	
 
 	public void relaodCharMap() {
 		init();
-	}
-	
-	
-	public HashMap<String, Mapping> getCharMap() {
-		return charMappings;
 	}
 	
 	
@@ -143,8 +120,8 @@ public class XMLMappingsFile extends AbstractMappingsFile {
 			
 			charCodeNode.setTextContent(charCode);
 			charValueNode.setTextContent( m.getCharValue() );
-			BlackKeyPointsNode.setTextContent( m.getBlackKeyPoints() == null ? null : m.getBlackKeyPoints().toString() );
-			WhiteKeyPointsNode.setTextContent( m.getWhiteKeyPoints() == null ? null : m.getWhiteKeyPoints().toString() );
+			//BlackKeyPointsNode.setTextContent( m.getBlackKeyPoints() == null ? null : m.getBlackKeyPoints().toString() );
+			//WhiteKeyPointsNode.setTextContent( m.getWhiteKeyPoints() == null ? null : m.getWhiteKeyPoints().toString() );
 			HBlocksNode.setTextContent( String.valueOf( m.gethBlocks() ) );
 			
 			Element newChild = xmlMappingsDoc.createElement(MAPPING_TAG);

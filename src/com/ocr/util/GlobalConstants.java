@@ -1,6 +1,5 @@
 package com.ocr.util;
 
-import javax.swing.Icon;
 
 
 
@@ -22,6 +21,7 @@ public class GlobalConstants {
 	public static final String MAPPINGS_FILE_PATH = "files/";
 	public static final String MAPPINGS_FILENAME = "%s_%s_%s.map";
 	public static final String XML_MAPPINGS_FILENAME = "%s_%s_%s.xml";
+	public static final String JSON_MAPPINGS_FILENAME = "%s_%s_%s.json";
 	
 	
 	// icon image file
@@ -52,6 +52,14 @@ public class GlobalConstants {
 	public static final int SIN_CHAR_BTNS_PANEL_W = 600;
 	public static final int SIN_CHAR_BTNS_PANEL_H = 370;
 	
+	public static final int TRAINING_POPUP_W = 600;
+	public static final int TRAINING_POPUP_H = 500;
+	
+	public static final int TRAINING_FILE_BTN_PANEL_W = 600;
+	public static final int TRAINING_FILE_BTN_PANEL_H = 60;
+	
+	public static final int TRAINING_CMD_BTN_PANEL_W = 600;
+	public static final int TRAINING_CMD_BTN_PANEL_H = 40;
 	
 	// button dimensions
 	//public static final int REG_CHAR_BUTTON_W = 80;
@@ -115,10 +123,15 @@ public class GlobalConstants {
 	public static final int CHAR_INFO_TXT_W = 350;
 	public static final int CHAR_INFO_TXT_H = 70;
 	
+	public static final int TRAINING_STS_INFO_TXT_W = 550;
+	public static final int TRAINING_STS_INFO_TXT_H = 150;
+	
 	
 	// action commands
 	public static final String CHOOSE_INPUT_FILE_ACTION = "Choose Image File";
 	public static final String CHOOSE_OUTPUT_FILE_ACTION = "Choose Output File";
+	public static final String CHOOSE_TRAINING_IMG_ACTION = "Choose Training Image";
+	public static final String CHOOSE_TRAINING_TEXT_ACTION = "Choose Training Text";
 	public static final String COMBOBOX_CHANGED_ACTION = "comboBoxChanged";
 	public static final String SCAN_ACTION = "Scan";
 	public static final String COPY_ACTION = "Copy";
@@ -146,6 +159,7 @@ public class GlobalConstants {
 	public static final String SAVE_ACTION = "Save";
 	public static final String HELP_ACTION = "Help";
 	public static final String ABOUT_ACTION = "About";
+	public static final String START_TRAINING_ACTION = "Start";
 	
 	
 	// menu
@@ -212,6 +226,8 @@ public class GlobalConstants {
 	
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
+	public static final String SAMPLE_TRAINING_IMG_FILENAME = "sampleImgs/img13.png";
+	public static final String SAMPLE_TRAINING_TEXT_FILENAME = "text.txt";
 	public static final String SAVE_IMG_FILEPATH = "test/";
 	
 	
