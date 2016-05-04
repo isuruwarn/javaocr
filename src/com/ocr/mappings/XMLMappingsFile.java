@@ -22,12 +22,12 @@ import com.ocr.util.XMLUtils;
 public class XMLMappingsFile extends AbstractMappingsFile {
 	
 	
-	private static final String MAPPING_TAG = "Mapping";
-	private static final String CHAR_CODE_TAG = "CharCode";
-	private static final String CHAR_VALUE_TAG = "CharValue";
-	private static final String BLACK_KEYPOINTS_TAG = "BlackKeyPoints";
-	private static final String WHITE_KEYPOINTS_TAG = "WhiteKeyPoints";
-	private static final String HBLOCKS_TAG = "HBlocks";
+	public static final String MAPPING_TAG = "Mapping";
+	public static final String CHAR_CODE_TAG = "CharCode";
+	public static final String CHAR_VALUE_TAG = "CharValue";
+	public static final String BLACK_KEYPOINTS_TAG = "BlackKeyPoints";
+	public static final String WHITE_KEYPOINTS_TAG = "WhiteKeyPoints";
+	public static final String HBLOCKS_TAG = "HBlocks";
 	
 	//private String mappingsFileName;
 	//private HashMap<String, Mapping> charMappings;
