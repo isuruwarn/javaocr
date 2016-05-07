@@ -455,8 +455,8 @@ public class UIContainer {
 
 	
 	private void viewMappedChars() {
-		//mappings = ocrResult.getRecognizedChars();
 		//showMappingsDialog( GlobalConstants.KNOWN_MAPPINGS_TITLE );
+		new CharMappingPopup( GlobalConstants.KNOWN_MAPPINGS_TITLE, ocrResult, mainFrame );
 	}
 	
 	
@@ -465,6 +465,7 @@ public class UIContainer {
 	private void mapUnknownChars() {
 		//mappings = ocrResult.getUnrecognizedChars();
 		//showMappingsDialog( GlobalConstants.UNKNOWN_MAPPINGS_TITLE );
+		new CharMappingPopup( GlobalConstants.UNKNOWN_MAPPINGS_TITLE, ocrResult, mainFrame );
 	}
 	
 	
