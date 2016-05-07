@@ -2,7 +2,7 @@ package com.ocr.mappings;
 
 
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 
 
@@ -14,8 +14,8 @@ public class Mapping {
 	private String charValue;
 	//private ArrayList<Integer> blackKeyPoints;
 	//private ArrayList<Integer> whiteKeyPoints;
-	private ArrayList<Integer> blackCells;
-	private ArrayList<Integer> whiteCells;
+	private LinkedList<Integer> blackPixels;
+	private LinkedList<Integer> whitePixels;
 	private int hBlocks;
 	
 	
@@ -49,16 +49,20 @@ public class Mapping {
 //		this.whiteKeyPoints = whiteKeyPoints;
 //	}
 	
-	public void setBlackCells(ArrayList<Integer> blackCells) {
-		this.blackCells = blackCells;
+	public LinkedList<Integer> getBlackPixels() {
+		return blackPixels;
 	}
 	
-	public ArrayList<Integer> getWhiteCells() {
-		return whiteCells;
+	public void setBlackPixels( LinkedList<Integer> blackPixels ) {
+		this.blackPixels = blackPixels;
 	}
 	
-	public void setWhiteCells(ArrayList<Integer> whiteCells) {
-		this.whiteCells = whiteCells;
+	public LinkedList<Integer> getWhitePixels() {
+		return whitePixels;
+	}
+	
+	public void setWhitePixels( LinkedList<Integer> whitePixels ) {
+		this.whitePixels = whitePixels;
 	}
 	
 	public void sethBlocks(int hBlocks) {
@@ -67,10 +71,6 @@ public class Mapping {
 	
 	public int gethBlocks() {
 		return hBlocks;
-	}
-	
-	public ArrayList<Integer> getBlackCells() {
-		return blackCells;
 	}
 
 	

@@ -66,10 +66,10 @@ public class ImageUtils {
 						rgb = 0; // black
 					}
 					
-					if( ( c.getBlackKeyPoints() != null && c.getBlackKeyPoints().contains( blockIndex ) ) ||
-						( c.getWhiteKeyPoints() != null && c.getWhiteKeyPoints().contains( blockIndex ) ) ) {
-						rgb = 0xFF0000;
-					}
+					//if( ( c.getBlackKeyPoints() != null && c.getBlackKeyPoints().contains( blockIndex ) ) ||
+					//	( c.getWhiteKeyPoints() != null && c.getWhiteKeyPoints().contains( blockIndex ) ) ) {
+					//	rgb = 0xFF0000;
+					//}
 					
 					blockImg.setRGB( x, y, rgb );
 					blockIndex++;

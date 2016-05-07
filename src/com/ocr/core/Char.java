@@ -1,6 +1,7 @@
 package com.ocr.core;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 
 /**
@@ -20,13 +21,12 @@ public class Char extends ScannedItem {
 	private String charCode;
 	private String charValue;
 	private ArrayList<Integer> blockSequence = new ArrayList<Integer>();
-	private ArrayList<Integer> blackKeyPoints = new ArrayList<Integer>();
-	private ArrayList<Integer> whiteKeyPoints = new ArrayList<Integer>();
+	//private ArrayList<Integer> blackKeyPoints = new ArrayList<Integer>();
+	//private ArrayList<Integer> whiteKeyPoints = new ArrayList<Integer>();
+	private LinkedList<Integer> blackPixels = new LinkedList<Integer>();
+	private LinkedList<Integer> whitePixels = new LinkedList<Integer>();
 	
 	
-	public Char() {
-		
-	}
 	
 	public Char(String name) {
 		this.name = name;
@@ -97,21 +97,38 @@ public class Char extends ScannedItem {
 		this.charCode = charCode;
 	}
 
-	public ArrayList<Integer> getBlackKeyPoints() {
-		return blackKeyPoints;
+	public LinkedList<Integer> getBlackPixels() {
+		return blackPixels;
 	}
 
-	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
-		this.blackKeyPoints = blackKeyPoints;
+	public void setBlackPixels(LinkedList<Integer> blackPixels) {
+		this.blackPixels = blackPixels;
 	}
+
+	public LinkedList<Integer> getWhitePixels() {
+		return whitePixels;
+	}
+
+	public void setWhitePixels(LinkedList<Integer> whitePixels) {
+		this.whitePixels = whitePixels;
+	}
+
+//	public ArrayList<Integer> getBlackKeyPoints() {
+//		return blackKeyPoints;
+//	}
+//
+//	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
+//		this.blackKeyPoints = blackKeyPoints;
+//	}
+//	
+//	public ArrayList<Integer> getWhiteKeyPoints() {
+//		return whiteKeyPoints;
+//	}
+//
+//	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
+//		this.whiteKeyPoints = whiteKeyPoints;
+//	}
+
 	
-	public ArrayList<Integer> getWhiteKeyPoints() {
-		return whiteKeyPoints;
-	}
-
-	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
-		this.whiteKeyPoints = whiteKeyPoints;
-	}
-
 	
 }

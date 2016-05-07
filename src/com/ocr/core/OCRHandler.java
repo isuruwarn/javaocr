@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import com.ocr.api.OCREngine;
 import com.ocr.api.Scanner;
+import com.ocr.engine.impl.OCREngineImplv5;
 import com.ocr.scanner.impl.ScannerImpl;
 import com.ocr.util.ImageUtils;
 
@@ -35,7 +36,7 @@ public final class OCRHandler {
 	
 	public OCRHandler() {
 		
-		ocrEngine = new com.ocr.engine.impl.OCREngineImplv4();
+		ocrEngine = new OCREngineImplv5();
 		scanner = new ScannerImpl();
 		
 		/* TODO: Later on we could instantiate scanners and OCREngines based on UI input. Perhaps 
