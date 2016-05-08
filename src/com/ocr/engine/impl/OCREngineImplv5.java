@@ -289,8 +289,8 @@ public class OCREngineImplv5 extends AbstractOCREngine {
 		Mapping mappedChar = null;
 		double maxCombinedMatchPercent = 0;
 		//int noOfHBlocks = c.getNoOfHBlocks();
-		//int charBlkPxlCount = c.getBlackPixels().size();
-		//int charWhtPxlCount = c.getWhitePixels().size();
+		int charBlkPxlCount = c.getBlackPixels().size();
+		int charWhtPxlCount = c.getWhitePixels().size();
 		
 		for( Mapping m: mappingsFile.getCharMap().values() ) {
 			
@@ -308,7 +308,10 @@ public class OCREngineImplv5 extends AbstractOCREngine {
 			try {
 				for( int i=0; i<mappingBlkPxlCount; i++ ) {
 					
-					if( m.getBlackPixels().get(i) == c.getBlackPixels().get(i)  ) {
+					int mappingBlkPxlPos = m.getBlackPixels().get(i); 
+					int charBlkPxlPos = c.getBlackPixels().get(i);
+					
+					if( mappingBlkPxlPos == charBlkPxlPos ) {
 						matchingBlkPxlCount++;
 					} else {
 						mismatchBlkPxlCount++;
@@ -320,7 +323,7 @@ public class OCREngineImplv5 extends AbstractOCREngine {
 					
 				}
 			} catch( IndexOutOfBoundsException e ) {
-				e.printStackTrace();
+				//System.err.println(e.getMessage());
 			}
 			
 			double blkPxlResult = ( matchingBlkPxlCount / mappingBlkPxlCount ) * 100;
@@ -337,7 +340,10 @@ public class OCREngineImplv5 extends AbstractOCREngine {
 				try {
 					for( int i=0; i<mappingWhtPxlCount; i++ ) {
 						
-						if( m.getWhitePixels().get(i) == c.getWhitePixels().get(i)  ) {
+						int mappingWhtPxlPos = m.getWhitePixels().get(i);
+						int charWhtPxlPos = c.getWhitePixels().get(i);
+						
+						if( mappingWhtPxlPos == charWhtPxlPos ) {
 							matchingWhtPxlCount++;
 						} else {
 							mismatchWhtPxlCount++;
@@ -349,7 +355,7 @@ public class OCREngineImplv5 extends AbstractOCREngine {
 						
 					}
 				} catch( IndexOutOfBoundsException e ) {
-					e.printStackTrace();
+					//System.err.println(e.getMessage());
 				}
 				
 				double whtPxlResult = ( matchingWhtPxlCount / mappingWhtPxlCount ) * 100;

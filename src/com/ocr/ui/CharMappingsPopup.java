@@ -169,24 +169,25 @@ public class CharMappingsPopup {
 		JButton saveAllBtn = new JButton( GlobalConstants.SAVEALL_MAPPING_ACTION);
 		JButton clearTxtMapsBtn = new JButton( GlobalConstants.CLEAR_TXT_MAPPINGS_ACTION);
 		JButton clearAllTxtMapsBtn = new JButton( GlobalConstants.CLEARALL_TXT_MAPPINGS_ACTION);
-		JButton clearKeyPointsBtn = new JButton( GlobalConstants.CLEAR_KP_MAPPINGS_ACTION);
-		JButton clearAllKeyPointsBtn = new JButton( GlobalConstants.CLEARALL_KP_MAPPINGS_ACTION);
+		//JButton clearKeyPointsBtn = new JButton( GlobalConstants.CLEAR_KP_MAPPINGS_ACTION);
+		//JButton clearAllKeyPointsBtn = new JButton( GlobalConstants.CLEARALL_KP_MAPPINGS_ACTION);
 		JButton viewCharImgBtn = new JButton( GlobalConstants.VIEW_CHAR_IMG_ACTION);
 		JButton viewLineImgBtn = new JButton( GlobalConstants.VIEW_LINE_IMG_ACTION);
 		JButton viewDocImgBtn2 = new JButton( GlobalConstants.VIEW_DOC_IMG_ACTION);
 		
-		MappingsActionListener resolveListener = new MappingsActionListener();
-		prevBtn.addActionListener(resolveListener);
-		nextBtn.addActionListener(resolveListener);
-		saveBtn.addActionListener(resolveListener);
-		saveAllBtn.addActionListener(resolveListener);
-		clearTxtMapsBtn.addActionListener(resolveListener);
-		clearAllTxtMapsBtn.addActionListener(resolveListener);
-		clearKeyPointsBtn.addActionListener(resolveListener);
-		clearAllKeyPointsBtn.addActionListener(resolveListener);
-		viewCharImgBtn.addActionListener(resolveListener);
-		viewLineImgBtn.addActionListener(resolveListener);
-		viewDocImgBtn2.addActionListener(resolveListener);
+		MappingsActionListener mappingsListener = new MappingsActionListener();
+		prevBtn.addActionListener(mappingsListener);
+		nextBtn.addActionListener(mappingsListener);
+		saveBtn.addActionListener(mappingsListener);
+		saveAllBtn.addActionListener(mappingsListener);
+		clearTxtMapsBtn.addActionListener(mappingsListener);
+		clearAllTxtMapsBtn.addActionListener(mappingsListener);
+		//clearKeyPointsBtn.addActionListener(mappingsListener);
+		//clearAllKeyPointsBtn.addActionListener(mappingsListener);
+		blockImgMenuItem.addActionListener(mappingsListener);
+		viewCharImgBtn.addActionListener(mappingsListener);
+		viewLineImgBtn.addActionListener(mappingsListener);
+		viewDocImgBtn2.addActionListener(mappingsListener);
 		
 		prevBtn.setToolTipText( GlobalConstants.PREV_MAPPING_ACTION_TOOLTIP );
 		nextBtn.setToolTipText( GlobalConstants.NEXT_MAPPING_ACTION_TOOLTIP );
@@ -200,8 +201,8 @@ public class CharMappingsPopup {
 		JPanel mappingsClearPanel = new JPanel();
 		mappingsClearPanel.add(clearTxtMapsBtn);
 		mappingsClearPanel.add(clearAllTxtMapsBtn);
-		mappingsClearPanel.add(clearKeyPointsBtn);
-		mappingsClearPanel.add(clearAllKeyPointsBtn);
+		//mappingsClearPanel.add(clearKeyPointsBtn);
+		//mappingsClearPanel.add(clearAllKeyPointsBtn);
 		
 		JPanel viewImagesPanel = new JPanel();
 		viewImagesPanel.add(viewCharImgBtn);
@@ -271,6 +272,8 @@ public class CharMappingsPopup {
 		if( dialect.equals( GlobalConstants.SINHALA ) ) {
 			resolveMappingsPanel.add( spSinCharsBtnPanel, spSinCharsBtnPanelGridCons );
 		}
+
+		setCharDetails();
 		
 		JDialog mappingsDialog = new JDialog( mainFrame, title, true );
 		mappingsDialog.getContentPane().add(resolveMappingsPanel);

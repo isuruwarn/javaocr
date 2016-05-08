@@ -224,6 +224,7 @@ public class GlobalConstants {
 	public static final String SEL_OCR_ENG_LBL = "OCR Engine";
 	
 	
+	//public static final String SAMPLE_IMG_FILENAME = "sampleImgs/abcd.gif";
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	public static final String SAMPLE_TRAINING_IMG_FILENAME = "sampleImgs/img13.png";

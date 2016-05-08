@@ -165,7 +165,7 @@ public class JSONMappingsFile extends AbstractMappingsFile {
 			
 			JsonObject mappingObject = mappingObjectBuilder.build();
 			try ( 
-					OutputStream os = new FileOutputStream( mappingsFileName, true );
+					OutputStream os = new FileOutputStream( mappingsFileName, false );
 					JsonWriter jsonWriter = Json.createWriter(os) ) {
 					jsonWriter.writeObject(mappingObject);
 					return true;
