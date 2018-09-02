@@ -12,8 +12,8 @@ public class Mapping {
 	
 	private String charCode;
 	private String charValue;
-	//private ArrayList<Integer> blackKeyPoints;
-	//private ArrayList<Integer> whiteKeyPoints;
+	private ArrayList<Integer> blackKeyPoints;
+	private ArrayList<Integer> whiteKeyPoints;
 	private ArrayList<Integer> blackCells;
 	private ArrayList<Integer> whiteCells;
 	private int hBlocks;
@@ -36,18 +36,18 @@ public class Mapping {
 		this.charValue = charValue;
 	}
 	
-//	public ArrayList<Integer> getBlackKeyPoints() {
-//		return blackKeyPoints;
-//	}
-//	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
-//		this.blackKeyPoints = blackKeyPoints;
-//	}
-//	public ArrayList<Integer> getWhiteKeyPoints() {
-//		return whiteKeyPoints;
-//	}
-//	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
-//		this.whiteKeyPoints = whiteKeyPoints;
-//	}
+	public ArrayList<Integer> getBlackKeyPoints() {
+		return blackKeyPoints;
+	}
+	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
+		this.blackKeyPoints = blackKeyPoints;
+	}
+	public ArrayList<Integer> getWhiteKeyPoints() {
+		return whiteKeyPoints;
+	}
+	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
+		this.whiteKeyPoints = whiteKeyPoints;
+	}
 	
 	public void setBlackCells(ArrayList<Integer> blackCells) {
 		this.blackCells = blackCells;
