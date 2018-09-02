@@ -67,6 +67,13 @@ public class UIContainer {
 	private JComboBox<String> selectDialect;
 	private JFileChooser inputImgFileChooser;
 	private JFileChooser outputFileChooser;
+	private JMenuItem openMenuItem;
+	private JMenuItem saveMenuItem;
+	private JMenuItem unknownCharsMenuItem;
+	private JMenuItem knownCharsMenuItem;
+	private JMenuItem trainMenuItem;
+	private JMenuItem helpMenuItem;
+	private JMenuItem aboutMenuItem;
 	
 	private OCRHandler ocrHandler;
 	private OCRResult ocrResult;
@@ -256,26 +263,29 @@ public class UIContainer {
         mainPanel.add(statusLbl);
         
         JMenu fileMenu = new JMenu( GlobalConstants.FILE_MENU );
-        JMenuItem open = new JMenuItem( GlobalConstants.OPEN_ACTION );
-        JMenuItem save = new JMenuItem( GlobalConstants.SAVE_ACTION );
-        fileMenu.add(open);
-        fileMenu.add(save);
+        openMenuItem = new JMenuItem( GlobalConstants.OPEN_ACTION );
+        saveMenuItem = new JMenuItem( GlobalConstants.SAVE_ACTION );
+        fileMenu.add(openMenuItem);
+        fileMenu.add(saveMenuItem);
         
         JMenu optionsMenu = new JMenu( GlobalConstants.OPTIONS_MENU );
         
         JMenu mappingsMenu = new JMenu( GlobalConstants.MAPPINGS_MENU );
-        JMenuItem unknownChars = new JMenuItem( GlobalConstants.RESOLVE_ACTION );
-        JMenuItem knownChars = new JMenuItem( GlobalConstants.VIEW_MAPPED_CHARS_ACTION );
-        JMenuItem train = new JMenuItem( GlobalConstants.TRAIN_ACTION );
-        mappingsMenu.add(unknownChars);
-        mappingsMenu.add(knownChars);
-        mappingsMenu.add(train);
+        unknownCharsMenuItem = new JMenuItem( GlobalConstants.MAP_UNKNOWN_CHARS_ACTION );
+        knownCharsMenuItem = new JMenuItem( GlobalConstants.VIEW_MAPPED_CHARS_ACTION );
+        trainMenuItem = new JMenuItem( GlobalConstants.TRAIN_ACTION );
+        mappingsMenu.add(unknownCharsMenuItem);
+        mappingsMenu.add(knownCharsMenuItem);
+        mappingsMenu.add(trainMenuItem);
+        
+        unknownCharsMenuItem.setEnabled(false);
+        knownCharsMenuItem.setEnabled(false);
 		
         JMenu helpMenu = new JMenu( GlobalConstants.HELP_MENU );
-        JMenuItem help = new JMenuItem( GlobalConstants.HELP_ACTION );
-		JMenuItem about = new JMenuItem( GlobalConstants.ABOUT_ACTION );
-		helpMenu.add(help);
-		helpMenu.add(about);
+        helpMenuItem = new JMenuItem( GlobalConstants.HELP_ACTION );
+		aboutMenuItem = new JMenuItem( GlobalConstants.ABOUT_ACTION );
+		helpMenu.add(helpMenuItem);
+		helpMenu.add(aboutMenuItem);
 		
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(fileMenu);
@@ -283,7 +293,7 @@ public class UIContainer {
 		menuBar.add(mappingsMenu);
 		menuBar.add(helpMenu);
         
-		UIHelper.addActionListener( mainActionListener, open, save, unknownChars, knownChars, train, help, about );
+		UIHelper.addActionListener( mainActionListener, openMenuItem, saveMenuItem, unknownCharsMenuItem, knownCharsMenuItem, trainMenuItem, helpMenuItem, aboutMenuItem );
 		
 		mainFrame = new JFrame( GlobalConstants.TITLE );
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -357,7 +367,7 @@ public class UIContainer {
 					clear();
 					break;
 				
-				case GlobalConstants.RESOLVE_ACTION:
+				case GlobalConstants.MAP_UNKNOWN_CHARS_ACTION:
 					mapUnknownChars(); 
 					break;
 				
@@ -412,6 +422,14 @@ public class UIContainer {
 			int noOfUnrecognizedChars = ocrResult.getUnrecognizedChars().size();
 			statusLbl.setText( String.format( GlobalConstants.STAT_LBL_TXT_STR, ocrResult.getWidth(), ocrResult.getHeight(), linesRead, charsRead, noOfUnrecognizedChars ) );
 			
+			if( ocrResult.getUnrecognizedChars().size() > 0 ) {
+				unknownCharsMenuItem.setEnabled(true);
+			}
+			
+			if( ocrResult.getRecognizedChars().size() > 0 ) {
+				knownCharsMenuItem.setEnabled(true);
+			}
+			
 			viewDocImgBtn1.setEnabled(true);
 			
 		} catch( IOException ioe ) {
@@ -455,16 +473,18 @@ public class UIContainer {
 
 	
 	private void viewMappedChars() {
-		//mappings = ocrResult.getRecognizedChars();
-		//showMappingsDialog( GlobalConstants.KNOWN_MAPPINGS_TITLE );
+		new CharMappingsPopup( GlobalConstants.KNOWN_MAPPINGS_TITLE, selectDialect.getSelectedItem().toString(),
+				inputImage, ocrHandler, ocrResult, mainFrame );
+		scan();
 	}
 	
 	
 	
 	
 	private void mapUnknownChars() {
-		//mappings = ocrResult.getUnrecognizedChars();
-		//showMappingsDialog( GlobalConstants.UNKNOWN_MAPPINGS_TITLE );
+		new CharMappingsPopup( GlobalConstants.UNKNOWN_MAPPINGS_TITLE, selectDialect.getSelectedItem().toString(),
+				inputImage, ocrHandler, ocrResult, mainFrame );
+		scan();
 	}
 	
 	

@@ -136,8 +136,8 @@ public class GlobalConstants {
 	public static final String SCAN_ACTION = "Scan";
 	public static final String COPY_ACTION = "Copy";
 	public static final String CLEAR_ACTION = "Clear";
-	public static final String RESOLVE_ACTION = "Map Unknown Chars"; // TODO rename
-	public static final String VIEW_MAPPED_CHARS_ACTION = "Known Chars"; // TODO rename
+	public static final String MAP_UNKNOWN_CHARS_ACTION = "Map Unknown Chars";
+	public static final String VIEW_MAPPED_CHARS_ACTION = "Known Chars";
 	public static final String PREV_MAPPING_ACTION = "Prev";
 	public static final String NEXT_MAPPING_ACTION = "Next";
 	//public static final String PREV_MAPPING_ACTION = "\u25C0";
@@ -224,6 +224,7 @@ public class GlobalConstants {
 	public static final String SEL_OCR_ENG_LBL = "OCR Engine";
 	
 	
+	//public static final String SAMPLE_IMG_FILENAME = "sampleImgs/abcd.gif";
 	public static final String SAMPLE_IMG_FILENAME = "sampleImgs/img13.png";
 	public static final String SAMPLE_OUTPUT_FILENAME = "output/output1.txt";
 	public static final String SAMPLE_TRAINING_IMG_FILENAME = "sampleImgs/img13.png";

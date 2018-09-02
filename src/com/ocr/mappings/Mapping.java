@@ -2,7 +2,7 @@ package com.ocr.mappings;
 
 
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 
 
@@ -12,10 +12,10 @@ public class Mapping {
 	
 	private String charCode;
 	private String charValue;
-	private ArrayList<Integer> blackKeyPoints;
-	private ArrayList<Integer> whiteKeyPoints;
-	private ArrayList<Integer> blackCells;
-	private ArrayList<Integer> whiteCells;
+	//private ArrayList<Integer> blackKeyPoints;
+	//private ArrayList<Integer> whiteKeyPoints;
+	private LinkedList<Integer> blackPixels;
+	private LinkedList<Integer> whitePixels;
 	private int hBlocks;
 	
 	
@@ -36,29 +36,33 @@ public class Mapping {
 		this.charValue = charValue;
 	}
 	
-	public ArrayList<Integer> getBlackKeyPoints() {
-		return blackKeyPoints;
-	}
-	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
-		this.blackKeyPoints = blackKeyPoints;
-	}
-	public ArrayList<Integer> getWhiteKeyPoints() {
-		return whiteKeyPoints;
-	}
-	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
-		this.whiteKeyPoints = whiteKeyPoints;
+//	public ArrayList<Integer> getBlackKeyPoints() {
+//		return blackKeyPoints;
+//	}
+//	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
+//		this.blackKeyPoints = blackKeyPoints;
+//	}
+//	public ArrayList<Integer> getWhiteKeyPoints() {
+//		return whiteKeyPoints;
+//	}
+//	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
+//		this.whiteKeyPoints = whiteKeyPoints;
+//	}
+	
+	public LinkedList<Integer> getBlackPixels() {
+		return blackPixels;
 	}
 	
-	public void setBlackCells(ArrayList<Integer> blackCells) {
-		this.blackCells = blackCells;
+	public void setBlackPixels( LinkedList<Integer> blackPixels ) {
+		this.blackPixels = blackPixels;
 	}
 	
-	public ArrayList<Integer> getWhiteCells() {
-		return whiteCells;
+	public LinkedList<Integer> getWhitePixels() {
+		return whitePixels;
 	}
 	
-	public void setWhiteCells(ArrayList<Integer> whiteCells) {
-		this.whiteCells = whiteCells;
+	public void setWhitePixels( LinkedList<Integer> whitePixels ) {
+		this.whitePixels = whitePixels;
 	}
 	
 	public void sethBlocks(int hBlocks) {
@@ -67,10 +71,6 @@ public class Mapping {
 	
 	public int gethBlocks() {
 		return hBlocks;
-	}
-	
-	public ArrayList<Integer> getBlackCells() {
-		return blackCells;
 	}
 
 	
