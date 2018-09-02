@@ -21,8 +21,8 @@ public class Char extends ScannedItem {
 	private String charCode;
 	private String charValue;
 	private ArrayList<Integer> blockSequence = new ArrayList<Integer>();
-	//private ArrayList<Integer> blackKeyPoints = new ArrayList<Integer>();
-	//private ArrayList<Integer> whiteKeyPoints = new ArrayList<Integer>();
+	private ArrayList<Integer> blackKeyPoints = new ArrayList<Integer>();
+	private ArrayList<Integer> whiteKeyPoints = new ArrayList<Integer>();
 	private LinkedList<Integer> blackPixels = new LinkedList<Integer>();
 	private LinkedList<Integer> whitePixels = new LinkedList<Integer>();
 	
@@ -113,21 +113,21 @@ public class Char extends ScannedItem {
 		this.whitePixels = whitePixels;
 	}
 
-//	public ArrayList<Integer> getBlackKeyPoints() {
-//		return blackKeyPoints;
-//	}
-//
-//	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
-//		this.blackKeyPoints = blackKeyPoints;
-//	}
-//	
-//	public ArrayList<Integer> getWhiteKeyPoints() {
-//		return whiteKeyPoints;
-//	}
-//
-//	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
-//		this.whiteKeyPoints = whiteKeyPoints;
-//	}
+	public ArrayList<Integer> getBlackKeyPoints() {
+		return blackKeyPoints;
+	}
+
+	public void setBlackKeyPoints(ArrayList<Integer> blackKeyPoints) {
+		this.blackKeyPoints = blackKeyPoints;
+	}
+	
+	public ArrayList<Integer> getWhiteKeyPoints() {
+		return whiteKeyPoints;
+	}
+
+	public void setWhiteKeyPoints(ArrayList<Integer> whiteKeyPoints) {
+		this.whiteKeyPoints = whiteKeyPoints;
+	}
 
 	
 	
