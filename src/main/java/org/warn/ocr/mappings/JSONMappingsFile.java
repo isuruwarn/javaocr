@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.warn.ocr.util.GlobalConstants;
+import org.warn.utils.json.JsonUtil;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 
@@ -29,10 +29,9 @@ public class JSONMappingsFile extends AbstractMappingsFile {
 	private void init() {
 		
 		try {
-			ObjectMapper mapper = new ObjectMapper();
 			//Map<String, Object> rawMappings = mapper.readValue( new File(mappingsFileName), Map.class );
 			TypeReference<HashMap<String,Mapping>> typeRef = new TypeReference<HashMap<String,Mapping>>() {};
-			HashMap<String,Mapping> rawMappings = mapper.readValue( new File(mappingsFileName), typeRef);
+			HashMap<String,Mapping> rawMappings = JsonUtil.mapper.readValue( new File(mappingsFileName), typeRef);
 			for( Map.Entry<String,Mapping> entry: rawMappings.entrySet() ) {
 				String charCode = entry.getKey();
 				Mapping m = entry.getValue();
@@ -85,9 +84,8 @@ public class JSONMappingsFile extends AbstractMappingsFile {
 	private boolean persist() {
 		
 		try {
-			ObjectMapper mapper = new ObjectMapper();
 			//mapper.writeValue( new File(mappingsFileName), charMappings );
-			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+			ObjectWriter ow = JsonUtil.mapper.writer().withDefaultPrettyPrinter();
 			ow.writeValue( new File(mappingsFileName), charMappings );
 			return true;
 			
